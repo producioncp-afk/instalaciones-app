@@ -223,6 +223,22 @@ body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);height:100dvh;
 .spec-add-btn:active{opacity:0.8;}
 .spec-empty{padding:16px;color:var(--text2);font-size:13px;text-align:center;}
 .spec-hint{font-size:11px;color:var(--text3);padding:8px 16px;font-style:italic;}
+.seg-filter{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;scrollbar-width:none;}
+.seg-filter::-webkit-scrollbar{display:none;}
+.seg-pill{flex-shrink:0;padding:7px 14px;border-radius:20px;font-size:13px;font-weight:600;border:1.5px solid var(--border);background:var(--white);color:var(--text2);cursor:pointer;transition:all 0.15s;}
+.seg-pill.active{background:var(--black);color:white;border-color:var(--black);}
+.seg-date-card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;margin-bottom:12px;}
+.seg-date-header{padding:12px 16px;background:var(--black);color:white;display:flex;align-items:center;justify-content:space-between;}
+.seg-date-title{font-size:14px;font-weight:700;}
+.seg-date-total{font-size:13px;font-weight:600;background:rgba(255,255,255,0.15);padding:3px 10px;border-radius:20px;}
+.seg-el-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);}
+.seg-el-row:last-child{border-bottom:none;}
+.seg-el-name{font-size:14px;font-weight:500;}
+.seg-el-ed{font-size:11px;color:var(--text2);margin-top:2px;}
+.seg-el-cant{font-size:18px;font-weight:700;color:var(--green);}
+.seg-add-btn{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--black);color:white;border:none;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;}
+.seg-add-btn:active{opacity:0.8;}
+.seg-empty{text-align:center;padding:3rem;color:var(--text2);font-size:14px;}
 .dash-banner{background:var(--black);border-radius:var(--r);padding:20px;margin-bottom:16px;color:#fff;}
 .dash-blbl{font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;}
 .dash-bval{font-size:36px;font-weight:700;letter-spacing:-0.03em;}
@@ -396,6 +412,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);height:100dvh;
     <div style="background:var(--white)"><div id="hist-list"><div class="spin-wrap"><div class="spin"></div></div></div></div>
   </div>
 
+  <div class="screen" id="screen-seguimiento">
+    <div class="pad" id="seg-content"><div class="spin-wrap"><div class="spin"></div></div></div>
+  </div>
+
   <div class="screen" id="screen-resumen">
     <div class="pad" id="resumen-wrap"><div class="spin-wrap"><div class="spin"></div></div></div>
   </div>
@@ -404,6 +424,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);height:100dvh;
     <div class="nitem active" id="nav-home" onclick="switchTab('home')"><div class="nicon">⊞</div><div class="nlbl">Proyectos</div></div>
     <div class="nitem" id="nav-dashboard" onclick="switchTab('dashboard')"><div class="nicon">📊</div><div class="nlbl">Dashboard</div></div>
     <div class="nitem" id="nav-resumen" onclick="switchTab('resumen')"><div class="nicon">◎</div><div class="nlbl">Resumen</div></div>
+    <div class="nitem" id="nav-seguimiento" onclick="switchTab('seguimiento')"><div class="nicon">📅</div><div class="nlbl">Diario</div></div>
     <div class="nitem hidden" id="nav-usuarios" onclick="switchTab('usuarios')"><div class="nicon">👥</div><div class="nlbl">Usuarios</div></div>
     <div class="nitem hidden" id="nav-historial" onclick="switchTab('historial')"><div class="nicon">📋</div><div class="nlbl">Historial</div></div>
   </div>
@@ -539,6 +560,29 @@ body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);height:100dvh;
   </div>
 </div>
 
+<!-- MODAL SEGUIMIENTO DIARIO -->
+<div class="modal-overlay hidden" id="modal-seg" onclick="closeOv(event,'modal-seg')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">Registrar instalación del día</div>
+    <div class="modal-field"><label>Edificio</label>
+      <select class="modal-select" id="seg-ed"></select>
+    </div>
+    <div class="modal-field"><label>Elemento</label>
+      <input class="modal-input" type="text" id="seg-el" placeholder="Ej: PUERTA DE ENTRADA">
+    </div>
+    <div class="modal-field"><label>Fecha</label>
+      <input class="modal-input" type="date" id="seg-fecha">
+    </div>
+    <div class="modal-field"><label>Cantidad instalada ese día</label>
+      <input class="modal-input" type="number" id="seg-cant" placeholder="Ej: 14" min="1">
+    </div>
+    <div class="modal-row">
+      <button class="modal-btn secondary" onclick="closeModal('seg')">Cancelar</button>
+      <button class="modal-btn primary" onclick="saveSeguimiento()">✅ Registrar</button>
+    </div>
+  </div>
+</div>
+
 <div class="lightbox hidden" id="lightbox" onclick="closeLightbox()">
   <div class="lb-close">✕</div>
   <img id="lb-img" src="" alt="Foto evidencia">
@@ -553,7 +597,7 @@ var sb=supabase.createClient(SU,SK);
 var U=null,curProjId=null,curEdId=null,curPisoId=null;
 var navStack=[],pendingToggle=null;
 var selEmoji_='🏗️',selColor_='#2563eb';
-var D={proyectos:[],edificios:[],pisos:[],elementos:[],usuarios:[],historial:[],fotos:[],specs:[]};
+var D={proyectos:[],edificios:[],pisos:[],elementos:[],usuarios:[],historial:[],fotos:[],specs:[],seguimiento:[]};
 var curElId=null;
 var appCharts={};
 
@@ -628,6 +672,7 @@ function loadData(){
     sb.from('pisos').select('*').order('orden'),
     sb.from('elementos').select('*').order('id'),
     sb.from('fotos').select('*').order('subida_en'),
+    sb.from('seguimiento_diario').select('*').order('fecha'),
     sb.from('especificaciones').select('*').order('orden')
   ];
   if(isAdmin()){
@@ -642,8 +687,9 @@ function loadData(){
     }else{D.proyectos=allP;D.edificios=allE;}
     D.pisos=r[2].data||[];D.elementos=r[3].data||[];
     D.fotos=r[4].data||[];
-    D.specs=r[5].data||[];
-    if(isAdmin()){D.usuarios=r[6]?r[6].data||[]:[]; D.historial=r[7]?r[7].data||[]:[]; }
+    D.seguimiento=r[5].data||[];
+    D.specs=r[6].data||[];
+    if(isAdmin()){D.usuarios=r[7]?r[7].data||[]:[]; D.historial=r[8]?r[8].data||[]:[]; }
     setOnline(true);
   });
 }
@@ -700,6 +746,8 @@ function refreshCurrent(){
   else if(id==='screen-elementos')renderEls();
   else if(id==='screen-dashboard')buildDashboard();
   else if(id==='screen-detalle')renderDetalleContent(curElId);
+  else if(id==='screen-seguimiento')buildSeguimiento();
+  else if(id==='screen-resumen')buildResumen();
   else if(id==='screen-usuarios')buildUsuarios();
   else if(id==='screen-historial')buildHistorial();
 }
@@ -724,6 +772,7 @@ function switchTab(tab){
   navStack=[];document.getElementById('back-btn').classList.add('hidden');
   if(tab==='home'){setTopbar(true);showScreen('home');buildHome();}
   else if(tab==='dashboard'){setTopbar(false,'Dashboard');showScreen('dashboard');buildDashboard();}
+  else if(tab==='seguimiento'){setTopbar(false,'Seguimiento Diario');showScreen('seguimiento');buildSeguimiento();}
   else if(tab==='resumen'){setTopbar(false,'Resumen global');showScreen('resumen');buildResumen();}
   else if(tab==='usuarios'){setTopbar(false,'Usuarios');showScreen('usuarios');buildUsuarios();}
   else if(tab==='historial'){setTopbar(false,'Historial');showScreen('historial');buildHistorial();}
@@ -1594,6 +1643,104 @@ function generatePDF(jsPDF){
   showToast('📄 PDF generado con fotos','success');
 }
 
+function buildSeguimiento(){
+  var seg=D.seguimiento;
+  var filterEd=window._segFilter||'all';
+
+  // Get unique edificio ids from seguimiento
+  var edIds=[];
+  seg.forEach(function(s){if(edIds.indexOf(s.edificio_id)===-1)edIds.push(s.edificio_id);});
+
+  // Filter
+  var filtered=filterEd==='all'?seg:seg.filter(function(s){return s.edificio_id===filterEd;});
+
+  // Group by date
+  var byDate={};
+  filtered.forEach(function(s){
+    if(!byDate[s.fecha])byDate[s.fecha]=[];
+    byDate[s.fecha].push(s);
+  });
+
+  // Sort dates descending
+  var dates=Object.keys(byDate).sort(function(a,b){return b.localeCompare(a);});
+
+  // Build filters
+  var filterHtml='<div class="seg-filter">';
+  filterHtml+='<div class="seg-pill '+(filterEd==='all'?'active':'')+'" onclick="setSegFilter(\'all\')">Todos</div>';
+  edIds.forEach(function(edId){
+    var ed=D.edificios.find(function(e){return e.id===edId;});
+    var name=ed?ed.nombre:'Ed '+edId;
+    filterHtml+='<div class="seg-pill '+(filterEd===edId?'active':'')+'" onclick="setSegFilter(\''+edId+'\')">'+name+'</div>';
+  });
+  filterHtml+='</div>';
+
+  // Build content
+  var html=filterHtml;
+
+  // Total summary
+  var totalUnits=filtered.reduce(function(a,s){return a+s.cantidad;},0);
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">';
+  html+='<div style="font-size:13px;color:var(--text2)">'+filtered.length+' registros · '+totalUnits+' unidades instaladas</div>';
+  if(canEdit()){
+    html+='<button class="seg-add-btn" onclick="openSegModal()">＋ Registrar</button>';
+  }
+  html+='</div>';
+
+  if(dates.length===0){
+    html+='<div class="seg-empty">No hay registros todavía.<br>Toca ＋ Registrar para agregar.</div>';
+  }else{
+    dates.forEach(function(fecha){
+      var rows=byDate[fecha];
+      var dayTotal=rows.reduce(function(a,r){return a+r.cantidad;},0);
+      var fechaStr=new Date(fecha+'T12:00:00').toLocaleDateString('es-DO',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+      html+='<div class="seg-date-card">';
+      html+='<div class="seg-date-header"><div class="seg-date-title">'+fechaStr+'</div>';
+      html+='<div class="seg-date-total">'+dayTotal+' unidades</div></div>';
+      rows.forEach(function(r){
+        var ed=D.edificios.find(function(e){return e.id===r.edificio_id;});
+        html+='<div class="seg-el-row">';
+        html+='<div><div class="seg-el-name">'+r.elemento_nombre+'</div>';
+        html+='<div class="seg-el-ed">'+(ed?ed.nombre:'Edificio '+r.edificio_id)+'</div></div>';
+        html+='<div class="seg-el-cant">+'+r.cantidad+'</div></div>';
+      });
+      html+='</div>';
+    });
+  }
+
+  document.getElementById('seg-content').innerHTML=html;
+}
+
+function setSegFilter(edId){
+  window._segFilter=edId;
+  buildSeguimiento();
+}
+
+function openSegModal(){
+  var edSel=document.getElementById('seg-ed');
+  edSel.innerHTML=D.edificios.map(function(ed){
+    return '<option value="'+ed.id+'">'+ed.icon+' '+ed.nombre+'</option>';
+  }).join('');
+  document.getElementById('seg-fecha').value=new Date().toISOString().slice(0,10);
+  document.getElementById('seg-el').value='';
+  document.getElementById('seg-cant').value='';
+  openModal('seg');
+}
+
+function saveSeguimiento(){
+  var edId=document.getElementById('seg-ed').value;
+  var elNom=document.getElementById('seg-el').value.trim().toUpperCase();
+  var fecha=document.getElementById('seg-fecha').value;
+  var cant=parseInt(document.getElementById('seg-cant').value);
+  if(!edId||!elNom||!fecha||!cant||cant<1){showToast('Completa todos los campos','error');return;}
+  sb.from('seguimiento_diario').insert([{edificio_id:edId,elemento_nombre:elNom,fecha:fecha,cantidad:cant}]).select().then(function(r){
+    if(r.error){showToast('Error al guardar','error');return;}
+    if(r.data&&r.data.length>0)D.seguimiento.push(r.data[0]);
+    closeModal('seg');
+    buildSeguimiento();
+    showToast('✅ Registrado','success');
+  });
+}
+
 function buildResumen(){
   var html='';
   D.proyectos.forEach(function(proj){
@@ -1686,6 +1833,9 @@ function openModal(id){
     document.getElementById('m-unom').value='';
     document.getElementById('m-uem').value='';
     document.getElementById('m-upass').value='';
+  }
+  if(id==='seg'){
+    // populated by openSegModal
   }
   if(id==='excel'){
     // Populate edificio selector

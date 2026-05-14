@@ -673,11 +673,11 @@ function loadData(){
     sb.from('elementos').select('*').order('id'),
     sb.from('fotos').select('*').order('subida_en'),
     sb.from('seguimiento_diario').select('*').order('fecha'),
-    sb.from('especificaciones').select('*').order('orden')
+    sb.from('especificaciones').select('*').order('orden'),
+    sb.from('historial').select('*').order('creado_en',{ascending:false}).limit(200)
   ];
   if(isAdmin()){
     qs.push(sb.from('usuarios').select('*').order('creado_en'));
-    qs.push(sb.from('historial').select('*').order('creado_en',{ascending:false}).limit(150));
   }
   return Promise.all(qs).then(function(r){
     var allP=r[0].data||[],allE=r[1].data||[];
@@ -689,7 +689,8 @@ function loadData(){
     D.fotos=r[4].data||[];
     D.seguimiento=r[5].data||[];
     D.specs=r[6].data||[];
-    if(isAdmin()){D.usuarios=r[7]?r[7].data||[]:[]; D.historial=r[8]?r[8].data||[]:[]; }
+    D.historial=r[7].data||[];
+    if(isAdmin()){D.usuarios=r[8]?r[8].data||[]:[]; }
     setOnline(true);
   });
 }
@@ -706,6 +707,11 @@ function setupRealtime(){
       refreshCurrent();
       if(pl.new.actualizado_por&&pl.new.actualizado_por!==U.nombre)
         showToast((pl.new.instalado?'✅':'❌')+' '+pl.new.actualizado_por+': '+pl.new.nombre,'success');
+    })
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'seguimiento_diario'},function(pl){
+      var exists=D.seguimiento.find(function(s){return s.id===pl.new.id;});
+      if(!exists)D.seguimiento.push(pl.new);
+      if(document.getElementById('screen-seguimiento').classList.contains('active'))buildSeguimiento();
     })
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'especificaciones'},function(pl){
       var exists=D.specs.find(function(s){return s.id===pl.new.id;});
@@ -1336,8 +1342,47 @@ function confirmToggle(){
       var idx=D.elementos.findIndex(function(e){return e.id===pt.id;});
       var oldVal=null;
       if(idx!==-1){oldVal=D.elementos[idx].instalado;Object.assign(D.elementos[idx],update);}
-      sb.from('historial').insert({elemento_id:pt.id,usuario_nombre:U.nombre,accion:newVal?'instalado':'pendiente',valor_anterior:oldVal,valor_nuevo:newVal,nota:nota||null});
+      // Guardar en historial
+      // Guardar en historial
+      sb.from('historial').insert({elemento_id:pt.id,usuario_nombre:U.nombre,accion:newVal?'instalado':'pendiente',valor_anterior:oldVal,valor_nuevo:newVal,nota:nota||null}).select().then(function(hr){
+        if(hr.data&&hr.data.length>0){
+          if(!D.historial)D.historial=[];
+          D.historial.unshift(hr.data[0]);
+        }
+      });
+      // Si se marca como instalado → agregar al seguimiento diario
+      if(newVal===true){
+        var el=D.elementos[idx];
+        var piso=el?D.pisos.find(function(p){return p.id===el.piso_id;}):null;
+        var ed=piso?D.edificios.find(function(e){return e.id===piso.edificio_id;}):null;
+        if(ed){
+          var hoy=new Date().toISOString().slice(0,10);
+          var segData={edificio_id:ed.id,elemento_nombre:el.nombre,fecha:hoy,cantidad:el.cantidad};
+          sb.from('seguimiento_diario').insert([segData]).select().then(function(r){
+            if(r.data&&r.data.length>0){D.seguimiento.push(r.data[0]);}
+          });
+        }
+      }
+      // Si se desmarca → eliminar el registro del seguimiento diario de hoy
+      if(newVal===false&&oldVal===true){
+        var el2=D.elementos[idx];
+        var piso2=el2?D.pisos.find(function(p){return p.id===el2.piso_id;}):null;
+        var ed2=piso2?D.edificios.find(function(e){return e.id===piso2.edificio_id;}):null;
+        if(ed2){
+          var hoy2=new Date().toISOString().slice(0,10);
+          // Buscar y eliminar el registro de hoy para este elemento
+          var segToDelete=D.seguimiento.filter(function(s){
+            return s.edificio_id===ed2.id && s.elemento_nombre===el2.nombre && s.fecha===hoy2;
+          });
+          segToDelete.forEach(function(s){
+            sb.from('seguimiento_diario').delete().eq('id',s.id).then(function(){
+              D.seguimiento=D.seguimiento.filter(function(x){return x.id!==s.id;});
+            });
+          });
+        }
+      }
       renderEls();
+      if(document.getElementById('screen-detalle').classList.contains('active'))renderDetalleContent(pt.id);
       showToast(newVal?'✅ Instalado':'❌ Pendiente','success');
     });
   }
@@ -1640,7 +1685,7 @@ function generatePDF(jsPDF){
   }
 
   doc.save('Reporte_Ibero_'+new Date().toISOString().slice(0,10)+'.pdf');
-  showToast('📄 PDF generado con fotos','success');
+  setTimeout(function(){showToast('📄 PDF generado','success');},100);
 }
 
 function buildSeguimiento(){
@@ -1998,7 +2043,7 @@ function exportExcel(edIds){
 
   var fecha=new Date().toISOString().slice(0,10);
   XLSX.writeFile(wb,'Ibero_Muebles_'+fecha+'.xlsx');
-  showToast('📊 Excel descargado','success');
+  setTimeout(function(){showToast('📊 Excel descargado','success');},100);
 }
 
 function updateExcelScope(){

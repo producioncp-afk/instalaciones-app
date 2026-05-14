@@ -1510,7 +1510,7 @@ function saveUser(){
   if(pass.length<6){showToast('Contraseña mínimo 6 caracteres','error');return;}
   if(!/^[a-z0-9._]+$/.test(username)){showToast('Usuario solo puede tener letras, números, puntos','error');return;}
   sb.from('usuarios').insert({nombre:nombre,username:username,password_hash:pass,rol:rol,proyecto_id:projId?parseInt(projId):null,activo:true}).then(function(res){
-    if(res.error){showToast('Error: ese usuario ya existe','error');return;}
+    if(res.error){showToast('Error: '+res.error.message,'error');console.error('Supabase error:',res.error);return;}
     closeModal('user');showToast('✅ Usuario creado','success');
     loadData().then(buildUsuarios);
   });

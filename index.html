@@ -210,6 +210,18 @@ body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);height:100dvh;
 .det-hist-nota{font-size:12px;color:var(--blue);margin-top:2px;font-style:italic;}
 .estado-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;}
 .estado-lbl{font-size:14px;font-weight:500;color:var(--text2);}
+.spec-row{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);gap:10px;}
+.spec-row:last-child{border-bottom:none;}
+.spec-campo{font-size:13px;font-weight:600;color:var(--text2);min-width:110px;flex-shrink:0;}
+.spec-valor{font-size:14px;font-weight:500;color:var(--text);flex:1;}
+.spec-del{width:28px;height:28px;border-radius:50%;background:var(--red-light);border:none;color:var(--red);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.spec-add-row{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--border);background:var(--bg);}
+.spec-add-campo{flex:1;padding:10px 12px;background:var(--white);border:1.5px solid var(--border);border-radius:10px;font-size:13px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;outline:none;}
+.spec-add-campo:focus{border-color:var(--blue);}
+.spec-add-btn{padding:10px 14px;background:var(--black);color:white;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.spec-add-btn:active{opacity:0.8;}
+.spec-empty{padding:16px;color:var(--text2);font-size:13px;text-align:center;}
+.spec-hint{font-size:11px;color:var(--text3);padding:8px 16px;font-style:italic;}
 .dash-banner{background:var(--black);border-radius:var(--r);padding:20px;margin-bottom:16px;color:#fff;}
 .dash-blbl{font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;}
 .dash-bval{font-size:36px;font-weight:700;letter-spacing:-0.03em;}
@@ -514,7 +526,7 @@ var sb=supabase.createClient(SU,SK);
 var U=null,curProjId=null,curEdId=null,curPisoId=null;
 var navStack=[],pendingToggle=null;
 var selEmoji_='🏗️',selColor_='#2563eb';
-var D={proyectos:[],edificios:[],pisos:[],elementos:[],usuarios:[],historial:[],fotos:[]};
+var D={proyectos:[],edificios:[],pisos:[],elementos:[],usuarios:[],historial:[],fotos:[],specs:[]};
 var curElId=null;
 var appCharts={};
 
@@ -588,7 +600,8 @@ function loadData(){
     sb.from('edificios').select('*').order('id'),
     sb.from('pisos').select('*').order('orden'),
     sb.from('elementos').select('*').order('id'),
-    sb.from('fotos').select('*').order('subida_en')
+    sb.from('fotos').select('*').order('subida_en'),
+    sb.from('especificaciones').select('*').order('orden')
   ];
   if(isAdmin()){
     qs.push(sb.from('usuarios').select('*').order('creado_en'));
@@ -602,7 +615,8 @@ function loadData(){
     }else{D.proyectos=allP;D.edificios=allE;}
     D.pisos=r[2].data||[];D.elementos=r[3].data||[];
     D.fotos=r[4].data||[];
-    if(isAdmin()){D.usuarios=r[5]?r[5].data||[]:[]; D.historial=r[6]?r[6].data||[]:[]; }
+    D.specs=r[5].data||[];
+    if(isAdmin()){D.usuarios=r[6]?r[6].data||[]:[]; D.historial=r[7]?r[7].data||[]:[]; }
     setOnline(true);
   });
 }
@@ -619,6 +633,20 @@ function setupRealtime(){
       refreshCurrent();
       if(pl.new.actualizado_por&&pl.new.actualizado_por!==U.nombre)
         showToast((pl.new.instalado?'✅':'❌')+' '+pl.new.actualizado_por+': '+pl.new.nombre,'success');
+    })
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'especificaciones'},function(pl){
+      var exists=D.specs.find(function(s){return s.id===pl.new.id;});
+      if(!exists)D.specs.push(pl.new);
+      if(document.getElementById('screen-detalle').classList.contains('active'))renderDetalleContent(curElId);
+    })
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'especificaciones'},function(pl){
+      var i=D.specs.findIndex(function(s){return s.id===pl.new.id;});
+      if(i!==-1)D.specs[i]=pl.new;
+      if(document.getElementById('screen-detalle').classList.contains('active'))renderDetalleContent(curElId);
+    })
+    .on('postgres_changes',{event:'DELETE',schema:'public',table:'especificaciones'},function(pl){
+      D.specs=D.specs.filter(function(s){return s.id!==pl.old.id;});
+      if(document.getElementById('screen-detalle').classList.contains('active'))renderDetalleContent(curElId);
     })
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'fotos'},function(pl){
       var exists=D.fotos.find(function(f){return f.id===pl.new.id;});
@@ -885,6 +913,43 @@ function renderDetalleContent(elId){
   var elHist=D.historial?D.historial.filter(function(h){return h.elemento_id===elId;}):[];
   var fotoCount=elFotos.length;
 
+  // Get proyecto_id for this element
+  var piso=D.pisos.find(function(p){return p.id===el.piso_id;});
+  var ed=piso?D.edificios.find(function(e){return e.id===piso.edificio_id;}):null;
+  var projId=ed?ed.proyecto_id:null;
+
+  // Get specs for this element in this project
+  var elSpecs=D.specs.filter(function(s){return s.elemento_id===elId&&s.proyecto_id===projId;});
+  elSpecs.sort(function(a,b){return a.orden-b.orden;});
+
+  // Build specs HTML
+  var specsHtml='';
+  if(elSpecs.length===0){
+    specsHtml='<div class="spec-empty">Sin especificaciones todavía.</div>';
+  }else{
+    elSpecs.forEach(function(s){
+      specsHtml+='<div class="spec-row">';
+      specsHtml+='<div class="spec-campo">'+s.campo+'</div>';
+      specsHtml+='<div class="spec-valor">'+s.valor+'</div>';
+      if(isAdmin()){
+        specsHtml+='<button class="spec-del" onclick="deleteSpec('+s.id+')">✕</button>';
+      }
+      specsHtml+='</div>';
+    });
+  }
+
+  // Add spec form for admin
+  var specAddHtml='';
+  if(isAdmin()){
+    specAddHtml=
+      '<div class="spec-hint">Ejemplos: Dimensión, Material, Color, Acabado, Marca, Proveedor...</div>'+
+      '<div class="spec-add-row">'+
+        '<input class="spec-add-campo" id="spec-campo" placeholder="Campo (ej: Color)" maxlength="40">'+
+        '<input class="spec-add-campo" id="spec-valor" placeholder="Valor (ej: Nogal)">'+
+        '<button class="spec-add-btn" onclick="addSpec('+elId+','+projId+')">＋</button>'+
+      '</div>';
+  }
+
   var fotosHtml='';
   elFotos.forEach(function(f){
     fotosHtml+='<div class="det-foto-wrap">';
@@ -968,12 +1033,59 @@ function renderDetalleContent(elId){
       '<input type="file" id="det-foto-input" accept="image/*" capture="environment" onchange="uploadDetalleFoto(event)" style="display:none">'+
     '</div>'+
 
+    // Especificaciones técnicas
+    '<div class="det-section">'+
+      '<div class="det-section-title">Especificaciones técnicas</div>'+
+      specsHtml+
+      specAddHtml+
+    '</div>'+
+
     // Historial del elemento
     '<div class="det-section" style="margin-bottom:16px">'+
       '<div class="det-section-title">Historial</div>'+
       histHtml+
     '</div>'+
     '</div>';
+}
+
+function addSpec(elId,projId){
+  if(!isAdmin())return;
+  var campo=document.getElementById('spec-campo');
+  var valor=document.getElementById('spec-valor');
+  if(!campo||!valor)return;
+  var campoVal=campo.value.trim();
+  var valorVal=valor.value.trim();
+  if(!campoVal||!valorVal){showToast('Escribe el campo y el valor','error');return;}
+  var elSpecs=D.specs.filter(function(s){return s.elemento_id===elId&&s.proyecto_id===projId;});
+  var orden=elSpecs.length;
+  sb.from('especificaciones').insert([{
+    elemento_id:elId,
+    proyecto_id:projId,
+    campo:campoVal,
+    valor:valorVal,
+    orden:orden,
+    creado_por:U.nombre
+  }]).select().then(function(r){
+    if(r.error){showToast('Error al guardar','error');return;}
+    if(r.data&&r.data.length>0){
+      var exists=D.specs.find(function(s){return s.id===r.data[0].id;});
+      if(!exists)D.specs.push(r.data[0]);
+    }
+    campo.value='';valor.value='';
+    renderDetalleContent(elId);
+    showToast('✅ Especificación agregada','success');
+  });
+}
+
+function deleteSpec(specId){
+  if(!isAdmin())return;
+  if(!confirm('¿Eliminar esta especificación?'))return;
+  sb.from('especificaciones').delete().eq('id',specId).then(function(r){
+    if(r.error){showToast('Error al eliminar','error');return;}
+    D.specs=D.specs.filter(function(s){return s.id!==specId;});
+    renderDetalleContent(curElId);
+    showToast('Especificación eliminada','success');
+  });
 }
 
 function changeQty(elId,delta){

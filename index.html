@@ -25,7 +25,6 @@
   --red: #dc2626;
   --red-light: #fef2f2;
   --yellow: #d97706;
-  --yellow-light: #fffbeb;
   --text: #0f172a;
   --text2: #64748b;
   --text3: #94a3b8;
@@ -35,249 +34,250 @@
   --nb: 68px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html,body { height:100%; background:var(--bg); }
+html, body { height: 100%; background: var(--bg); }
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  color: var(--text); height:100dvh;
-  display:flex; flex-direction:column;
-  overflow:hidden; position:fixed; width:100%;
+  color: var(--text); height: 100dvh;
+  display: flex; flex-direction: column;
+  overflow: hidden; position: fixed; width: 100%;
 }
 
 /* LOGIN */
 #login-screen {
-  display:flex; flex-direction:column;
-  align-items:center; justify-content:center;
-  flex:1; padding:2rem 1.5rem;
-  background:var(--white);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  flex: 1; padding: 2rem 1.5rem; background: var(--white);
 }
 .login-logo {
-  width:76px; height:76px; border-radius:22px;
-  background:var(--blue); display:flex;
-  align-items:center; justify-content:center;
-  font-size:36px; margin-bottom:1.5rem;
+  width: 76px; height: 76px; border-radius: 22px;
+  background: var(--blue); display: flex;
+  align-items: center; justify-content: center;
+  font-size: 36px; margin-bottom: 1.5rem;
 }
-.login-title { font-size:26px; font-weight:700; margin-bottom:4px; }
-.login-sub { font-size:14px; color:var(--text2); margin-bottom:2.5rem; }
-.login-form { width:100%; max-width:360px; display:flex; flex-direction:column; gap:14px; }
-.flbl { font-size:13px; font-weight:600; margin-bottom:6px; display:block; }
+.login-title { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+.login-sub { font-size: 14px; color: var(--text2); margin-bottom: 2.5rem; }
+.login-form { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 14px; }
+.flbl { font-size: 13px; font-weight: 600; margin-bottom: 6px; display: block; }
 .linput {
-  width:100%; padding:14px 16px;
-  background:var(--bg); border:1.5px solid var(--border);
-  border-radius:12px; font-size:15px; color:var(--text);
-  font-family:'Plus Jakarta Sans',sans-serif;
-  outline:none; transition:border-color 0.2s; -webkit-appearance:none;
+  width: 100%; padding: 14px 16px;
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: 12px; font-size: 15px; color: var(--text);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  outline: none; transition: border-color 0.2s; -webkit-appearance: none;
 }
-.linput:focus { border-color:var(--blue); background:var(--white); }
+.linput:focus { border-color: var(--blue); background: var(--white); }
 .lbtn {
-  background:var(--blue); color:white; border:none;
-  border-radius:12px; padding:15px; font-size:15px;
-  font-weight:700; font-family:'Plus Jakarta Sans',sans-serif;
-  cursor:pointer; margin-top:4px; transition:opacity 0.2s;
+  background: var(--blue); color: white; border: none;
+  border-radius: 12px; padding: 15px; font-size: 15px;
+  font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif;
+  cursor: pointer; margin-top: 4px; transition: opacity 0.2s;
 }
-.lbtn:active { opacity:0.85; }
-.lbtn:disabled { opacity:0.5; }
-.lerr { font-size:13px; color:var(--red); text-align:center; min-height:18px; font-weight:500; }
+.lbtn:active { opacity: 0.85; }
+.lbtn:disabled { opacity: 0.5; }
+.lerr { font-size: 13px; color: var(--red); text-align: center; min-height: 18px; font-weight: 500; }
 
 /* APP */
-#app { display:none; flex-direction:column; flex:1; overflow:hidden; }
-#app.v { display:flex; }
+#app { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+#app.visible { display: flex; }
 
 /* TOPBAR */
 .topbar {
-  display:flex; align-items:center; gap:10px;
-  padding:14px 16px 12px;
-  padding-top:calc(14px + var(--sat));
-  background:var(--white); border-bottom:1px solid var(--border);
-  flex-shrink:0;
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 16px 12px;
+  padding-top: calc(14px + var(--sat));
+  background: var(--white); border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
 }
 .back-btn {
-  width:36px; height:36px; border-radius:10px;
-  background:var(--bg); border:1px solid var(--border);
-  display:flex; align-items:center; justify-content:center;
-  cursor:pointer; font-size:22px; color:var(--text); flex-shrink:0;
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--bg); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 22px; color: var(--text); flex-shrink: 0;
 }
-.back-btn.h { opacity:0; pointer-events:none; }
-.tb-info { flex:1; min-width:0; }
-.tb-title { font-size:17px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.tb-sub { font-size:12px; color:var(--text2); margin-top:1px; }
-.tb-right { display:flex; align-items:center; gap:8px; }
+.back-btn.hidden { opacity: 0; pointer-events: none; }
+.tb-info { flex: 1; min-width: 0; }
+.tb-title { font-size: 17px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tb-sub { font-size: 12px; color: var(--text2); margin-top: 1px; }
+.tb-right { display: flex; align-items: center; gap: 8px; }
 .avatar {
-  width:36px; height:36px; border-radius:50%;
-  background:var(--blue); color:white;
-  display:flex; align-items:center; justify-content:center;
-  font-size:13px; font-weight:700; cursor:pointer; flex-shrink:0;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--blue); color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; cursor: pointer; flex-shrink: 0;
 }
 .opill {
-  display:flex; align-items:center; gap:4px;
-  background:var(--green-light); border-radius:20px;
-  padding:4px 10px; font-size:11px; font-weight:600; color:var(--green);
+  display: flex; align-items: center; gap: 4px;
+  background: var(--green-light); border-radius: 20px;
+  padding: 4px 10px; font-size: 11px; font-weight: 600; color: var(--green);
 }
-.opill .d { width:6px; height:6px; border-radius:50%; background:var(--green); }
-.opill.off { background:var(--red-light); color:var(--red); }
-.opill.off .d { background:var(--red); }
+.opill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+.opill.offline { background: var(--red-light); color: var(--red); }
+.opill.offline .dot { background: var(--red); }
 
 /* SCREENS */
 .screen {
-  display:none; flex:1; overflow-y:auto;
-  -webkit-overflow-scrolling:touch; overscroll-behavior:contain;
-  padding-bottom:calc(var(--nb) + var(--sab));
+  display: none; flex: 1; overflow-y: auto;
+  -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+  padding-bottom: calc(var(--nb) + var(--sab));
 }
-.screen.active { display:block; }
+.screen.active { display: block; }
 
 /* BOTTOM NAV */
 .bnav {
-  display:flex; background:var(--white);
-  border-top:1px solid var(--border);
-  padding-bottom:var(--sab); flex-shrink:0; z-index:100;
+  display: flex; background: var(--white);
+  border-top: 1px solid var(--border);
+  padding-bottom: var(--sab); flex-shrink: 0; z-index: 100;
 }
 .nitem {
-  flex:1; display:flex; flex-direction:column;
-  align-items:center; justify-content:center;
-  padding:10px 4px; cursor:pointer; gap:3px;
-  color:var(--text3); transition:color 0.15s;
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 10px 4px; cursor: pointer; gap: 3px;
+  color: var(--text3); transition: color 0.15s;
 }
-.nitem.active { color:var(--blue); }
-.nicon { font-size:22px; line-height:1; }
-.nlbl { font-size:10px; font-weight:700; letter-spacing:0.02em; }
+.nitem.active { color: var(--blue); }
+.nicon { font-size: 22px; line-height: 1; }
+.nlbl { font-size: 10px; font-weight: 700; letter-spacing: 0.02em; }
 
 /* HOME */
-.pad { padding:20px 16px; }
-.hello { font-size:22px; font-weight:700; margin-bottom:2px; }
-.hello-sub { font-size:13px; color:var(--text2); margin-bottom:20px; }
+.pad { padding: 20px 16px; }
+.hello { font-size: 22px; font-weight: 700; margin-bottom: 2px; }
+.hello-sub { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
 
 .banner {
-  background:var(--blue); border-radius:var(--r);
-  padding:20px; margin-bottom:20px;
-  display:flex; align-items:center; gap:14px;
+  background: var(--blue); border-radius: var(--r);
+  padding: 20px; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 14px;
 }
-.b-icon { font-size:38px; }
-.b-info { flex:1; }
-.b-lbl { font-size:12px; font-weight:600; color:rgba(255,255,255,0.7); margin-bottom:4px; letter-spacing:0.05em; text-transform:uppercase; }
-.b-val { font-size:26px; font-weight:700; color:white; }
-.b-sub { font-size:12px; color:rgba(255,255,255,0.65); margin-top:2px; }
-.b-pct { font-size:24px; font-weight:700; color:white; background:rgba(255,255,255,0.18); border-radius:12px; padding:8px 14px; flex-shrink:0; }
+.b-icon { font-size: 38px; }
+.b-info { flex: 1; }
+.b-lbl { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.7); margin-bottom: 4px; letter-spacing: 0.06em; text-transform: uppercase; }
+.b-val { font-size: 24px; font-weight: 700; color: white; }
+.b-sub { font-size: 12px; color: rgba(255,255,255,0.65); margin-top: 2px; }
+.b-pct { font-size: 22px; font-weight: 700; color: white; background: rgba(255,255,255,0.18); border-radius: 12px; padding: 8px 14px; flex-shrink: 0; }
 
-.sec-title { font-size:16px; font-weight:700; margin-bottom:12px; }
+.sec-title { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
 
 .ed-card {
-  background:var(--white); border-radius:var(--r);
-  border:1px solid var(--border); padding:16px;
-  margin-bottom:12px; cursor:pointer;
-  transition:transform 0.1s;
+  background: var(--white); border-radius: var(--r);
+  border: 1px solid var(--border); padding: 16px;
+  margin-bottom: 12px; cursor: pointer; transition: transform 0.1s;
 }
-.ed-card:active { transform:scale(0.98); }
-.ed-top { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
-.ed-ico { width:48px; height:48px; border-radius:14px; background:var(--blue-light); display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0; }
-.ed-nm { font-size:16px; font-weight:700; }
-.ed-sb { font-size:12px; color:var(--text2); margin-top:2px; }
-.ed-arr { margin-left:auto; font-size:20px; color:var(--text3); }
-.prog { display:flex; align-items:center; gap:10px; }
-.pb { flex:1; height:6px; background:var(--bg); border-radius:3px; overflow:hidden; }
-.pbf { height:100%; border-radius:3px; transition:width 0.6s; }
-.pct { font-size:13px; font-weight:700; min-width:36px; text-align:right; }
+.ed-card:active { transform: scale(0.98); }
+.ed-top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.ed-ico { width: 48px; height: 48px; border-radius: 14px; background: var(--blue-light); display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+.ed-nm { font-size: 16px; font-weight: 700; }
+.ed-sb { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.ed-arr { margin-left: auto; font-size: 20px; color: var(--text3); }
+.prog { display: flex; align-items: center; gap: 10px; }
+.pb { flex: 1; height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; }
+.pbf { height: 100%; border-radius: 3px; transition: width 0.6s; }
+.pct-lbl { font-size: 13px; font-weight: 700; min-width: 36px; text-align: right; }
 
 /* PISOS */
-.sg { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
-.sc { background:var(--white); border-radius:var(--r); border:1px solid var(--border); padding:14px 16px; }
-.sl { font-size:11px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px; }
-.sv { font-size:28px; font-weight:700; }
-.sv.g { color:var(--green); }
-.sv.r { color:var(--red); }
-.sv.b { color:var(--blue); }
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.stat-card { background: var(--white); border-radius: var(--r); border: 1px solid var(--border); padding: 14px 16px; }
+.stat-lbl { font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+.stat-num { font-size: 28px; font-weight: 700; }
+.stat-num.g { color: var(--green); }
+.stat-num.r { color: var(--red); }
+.stat-num.b { color: var(--blue); }
 
-.pc {
-  background:var(--white); border-radius:var(--r);
-  border:1px solid var(--border); padding:16px;
-  margin-bottom:10px; cursor:pointer;
-  display:flex; align-items:center; gap:12px;
-  transition:transform 0.1s;
+.piso-card {
+  background: var(--white); border-radius: var(--r);
+  border: 1px solid var(--border); padding: 16px;
+  margin-bottom: 10px; cursor: pointer;
+  display: flex; align-items: center; gap: 12px; transition: transform 0.1s;
 }
-.pc:active { transform:scale(0.98); }
-.pnum { width:44px; height:44px; border-radius:12px; background:var(--blue-light); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:var(--blue); flex-shrink:0; }
-.pi { flex:1; min-width:0; }
-.pn { font-size:15px; font-weight:600; }
-.pd { font-size:12px; color:var(--text2); margin-top:2px; }
-.pr { text-align:right; flex-shrink:0; }
-.pp { font-size:16px; font-weight:700; }
-.pa { font-size:16px; color:var(--text3); }
+.piso-card:active { transform: scale(0.98); }
+.piso-badge { width: 44px; height: 44px; border-radius: 12px; background: var(--blue-light); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--blue); flex-shrink: 0; }
+.piso-info { flex: 1; min-width: 0; }
+.piso-name { font-size: 15px; font-weight: 600; }
+.piso-detail { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.piso-right { text-align: right; flex-shrink: 0; }
+.piso-pct { font-size: 16px; font-weight: 700; }
+.piso-arr { font-size: 16px; color: var(--text3); }
 
 /* ELEMENTOS */
-.esm { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; padding:16px; }
-.esc { background:var(--white); border-radius:12px; border:1px solid var(--border); padding:12px 8px; text-align:center; }
-.esl { font-size:10px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px; }
-.esv { font-size:22px; font-weight:700; }
-.esv.g { color:var(--green); }
-.esv.r { color:var(--red); }
-.epw { padding:0 16px 16px; }
-.epl { font-size:12px; font-weight:600; color:var(--text2); margin-bottom:8px; }
-.epr { display:flex; align-items:center; gap:10px; }
+.el-sum { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; padding: 16px; }
+.el-sum-card { background: var(--white); border-radius: 12px; border: 1px solid var(--border); padding: 12px 8px; text-align: center; }
+.el-sum-lbl { font-size: 10px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.el-sum-val { font-size: 22px; font-weight: 700; }
+.el-sum-val.g { color: var(--green); }
+.el-sum-val.r { color: var(--red); }
 
-.elw { background:var(--white); overflow:hidden; }
-.elt { padding:14px 16px 10px; font-size:15px; font-weight:700; border-bottom:1px solid var(--border); }
-.elr {
-  display:flex; align-items:center; gap:12px;
-  padding:14px 16px; border-bottom:1px solid var(--border);
-  animation:fu 0.2s ease both;
-}
-.elr:last-child { border-bottom:none; }
-@keyframes fu { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
-.sd { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
-.sd.si { background:var(--green); }
-.sd.no { background:var(--red); }
-.sd.nd { background:#cbd5e1; }
-.en { flex:1; }
-.en-nm { font-size:14px; font-weight:500; line-height:1.3; }
-.en-mt { font-size:11px; color:var(--text3); margin-top:2px; }
-.er { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
-.eq { font-size:16px; font-weight:700; }
-.sbg { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; white-space:nowrap; }
-.sbg.si { background:var(--green-light); color:var(--green); }
-.sbg.no { background:var(--red-light); color:var(--red); }
-.sbg.nd { background:var(--bg); color:var(--text3); }
+.el-prog { padding: 0 16px 16px; }
+.el-prog-lbl { font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 8px; }
+.el-prog-row { display: flex; align-items: center; gap: 10px; }
 
-.tgl {
-  width:46px; height:26px; border-radius:13px;
-  background:#e2e8f0; position:relative;
-  cursor:pointer; border:none; outline:none;
-  transition:background 0.25s; flex-shrink:0;
+.el-wrap { background: var(--white); overflow: hidden; }
+.el-header { padding: 14px 16px 10px; font-size: 15px; font-weight: 700; border-bottom: 1px solid var(--border); }
+
+.el-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; border-bottom: 1px solid var(--border);
+  animation: fadeUp 0.2s ease both;
 }
-.tgl.on { background:var(--green); }
-.tgl::after {
-  content:''; position:absolute;
-  width:20px; height:20px; border-radius:50%;
-  background:white; top:3px; left:3px;
-  transition:transform 0.25s;
-  box-shadow:0 1px 4px rgba(0,0,0,0.15);
+.el-row:last-child { border-bottom: none; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+.status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.status-dot.si { background: var(--green); }
+.status-dot.no { background: var(--red); }
+.status-dot.nd { background: #cbd5e1; }
+
+.el-info { flex: 1; min-width: 0; }
+.el-name { font-size: 14px; font-weight: 500; line-height: 1.3; }
+.el-meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.el-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+.el-qty { font-size: 16px; font-weight: 700; }
+
+.sbadge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+.sbadge.si { background: var(--green-light); color: var(--green); }
+.sbadge.no { background: var(--red-light); color: var(--red); }
+.sbadge.nd { background: var(--bg); color: var(--text3); }
+
+.toggle {
+  width: 46px; height: 26px; border-radius: 13px;
+  background: #e2e8f0; position: relative;
+  cursor: pointer; border: none; outline: none;
+  transition: background 0.25s; flex-shrink: 0;
 }
-.tgl.on::after { transform:translateX(20px); }
-.tgl:disabled { opacity:0.4; }
+.toggle.on { background: var(--green); }
+.toggle::after {
+  content: ''; position: absolute;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: white; top: 3px; left: 3px;
+  transition: transform 0.25s; box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+.toggle.on::after { transform: translateX(20px); }
+.toggle:disabled { opacity: 0.4; }
 
 /* RESUMEN */
-.rc { background:var(--white); border-radius:var(--r); border:1px solid var(--border); overflow:hidden; margin-bottom:16px; }
-.rch { padding:14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
-.rct { font-size:15px; font-weight:700; flex:1; }
-.rr { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--border); }
-.rr:last-child { border-bottom:none; }
-.rn { font-size:14px; font-weight:500; }
-.rrr { display:flex; align-items:center; gap:8px; }
-.mpb { width:60px; height:5px; background:var(--bg); border-radius:3px; overflow:hidden; }
-.mpbf { height:100%; border-radius:3px; }
+.res-card { background: var(--white); border-radius: var(--r); border: 1px solid var(--border); overflow: hidden; margin-bottom: 16px; }
+.res-head { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+.res-title { font-size: 15px; font-weight: 700; flex: 1; }
+.res-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.res-row:last-child { border-bottom: none; }
+.res-name { font-size: 14px; font-weight: 500; }
+.res-right { display: flex; align-items: center; gap: 8px; }
+.mini-bar { width: 60px; height: 5px; background: var(--bg); border-radius: 3px; overflow: hidden; }
+.mini-bar-fill { height: 100%; border-radius: 3px; }
 
 /* TOAST */
 .toast {
-  position:fixed; bottom:calc(var(--nb) + var(--sab) + 12px);
-  left:50%; transform:translateX(-50%) translateY(80px);
-  background:var(--text); color:white; border-radius:12px;
-  padding:10px 20px; font-size:13px; font-weight:600;
-  z-index:999; transition:transform 0.3s; white-space:nowrap;
+  position: fixed; bottom: calc(var(--nb) + var(--sab) + 12px);
+  left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--text); color: white; border-radius: 12px;
+  padding: 10px 20px; font-size: 13px; font-weight: 600;
+  z-index: 999; transition: transform 0.3s; white-space: nowrap;
 }
-.toast.show { transform:translateX(-50%) translateY(0); }
-.toast.s { background:var(--green); }
-.toast.e { background:var(--red); }
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.success { background: var(--green); }
+.toast.error { background: var(--red); }
 
-.spin-wrap { display:flex; align-items:center; justify-content:center; padding:4rem; }
-.spin { width:30px; height:30px; border-radius:50%; border:3px solid var(--border); border-top-color:var(--blue); animation:sp 0.7s linear infinite; }
-@keyframes sp { to{transform:rotate(360deg)} }
+.spin-wrap { display: flex; align-items: center; justify-content: center; padding: 4rem; }
+.spin { width: 30px; height: 30px; border-radius: 50%; border: 3px solid var(--border); border-top-color: var(--blue); animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -288,309 +288,424 @@ body {
   <div class="login-title">Instalaciones</div>
   <div class="login-sub">Seguimiento en tiempo real</div>
   <div class="login-form">
-    <div><label class="flbl">Correo electrónico</label><input class="linput" type="email" id="le" placeholder="usuario@empresa.com" autocomplete="email"></div>
-    <div><label class="flbl">Contraseña</label><input class="linput" type="password" id="lp" placeholder="••••••••" autocomplete="current-password"></div>
-    <div class="lerr" id="lerr"></div>
-    <button class="lbtn" id="lbtn" onclick="doLogin()">Entrar</button>
+    <div><label class="flbl">Correo electrónico</label><input class="linput" type="email" id="inp-email" placeholder="usuario@empresa.com" autocomplete="email"></div>
+    <div><label class="flbl">Contraseña</label><input class="linput" type="password" id="inp-pass" placeholder="••••••••" autocomplete="current-password"></div>
+    <div class="lerr" id="login-err"></div>
+    <button class="lbtn" id="login-btn" onclick="doLogin()">Entrar</button>
   </div>
 </div>
 
 <!-- APP -->
 <div id="app">
   <div class="topbar">
-    <div class="back-btn h" id="back-btn" onclick="goBack()">‹</div>
-    <div class="tb-info"><div class="tb-title" id="tt">Instalaciones</div><div class="tb-sub" id="ts">Seguimiento del proyecto</div></div>
+    <div class="back-btn hidden" id="back-btn" onclick="goBack()">‹</div>
+    <div class="tb-info">
+      <div class="tb-title" id="top-title">Instalaciones</div>
+      <div class="tb-sub" id="top-sub">Seguimiento del proyecto</div>
+    </div>
     <div class="tb-right">
-      <div class="opill" id="opill"><div class="d"></div><span>En línea</span></div>
-      <div class="avatar" id="av" onclick="doLogout()">AD</div>
+      <div class="opill" id="online-pill"><div class="dot"></div><span>En línea</span></div>
+      <div class="avatar" id="user-av" onclick="doLogout()">AD</div>
     </div>
   </div>
 
+  <!-- HOME -->
   <div class="screen active" id="screen-home">
     <div class="pad">
-      <div class="hello" id="hello">Bienvenido</div>
+      <div class="hello" id="hello-txt">Bienvenido</div>
       <div class="hello-sub">Resumen general del proyecto</div>
       <div class="banner">
         <div class="b-icon">🏗️</div>
         <div class="b-info">
           <div class="b-lbl">Progreso total</div>
-          <div class="b-val" id="bv">—</div>
-          <div class="b-sub" id="bs">Cargando...</div>
+          <div class="b-val" id="ban-val">—</div>
+          <div class="b-sub" id="ban-sub">Cargando...</div>
         </div>
-        <div class="b-pct" id="bp">—%</div>
+        <div class="b-pct" id="ban-pct">—%</div>
       </div>
       <div class="sec-title">Edificios</div>
       <div id="ed-list"><div class="spin-wrap"><div class="spin"></div></div></div>
     </div>
   </div>
 
+  <!-- PISOS -->
   <div class="screen" id="screen-pisos">
     <div class="pad">
-      <div class="sg" id="ps"></div>
+      <div class="stats-grid" id="piso-stats"></div>
       <div class="sec-title">Pisos</div>
-      <div id="pl"></div>
+      <div id="piso-list"></div>
     </div>
   </div>
 
+  <!-- ELEMENTOS -->
   <div class="screen" id="screen-elementos">
-    <div class="esm" id="esm"></div>
-    <div class="epw">
-      <div class="epl">Progreso de instalación</div>
-      <div class="epr"><div class="pb" style="height:8px"><div class="pbf" id="epf"></div></div><div class="pct" id="epp">0%</div></div>
+    <div class="el-sum" id="el-sum"></div>
+    <div class="el-prog">
+      <div class="el-prog-lbl">Progreso de instalación</div>
+      <div class="el-prog-row">
+        <div class="pb" style="height:8px"><div class="pbf" id="el-prog-fill"></div></div>
+        <div class="pct-lbl" id="el-prog-pct">0%</div>
+      </div>
     </div>
-    <div class="elw"><div class="elt" id="elt">Elementos</div><div id="el"></div></div>
+    <div class="el-wrap">
+      <div class="el-header" id="el-header">Elementos</div>
+      <div id="el-list"></div>
+    </div>
   </div>
 
+  <!-- RESUMEN -->
   <div class="screen" id="screen-resumen">
-    <div class="pad" id="rc"><div class="spin-wrap"><div class="spin"></div></div></div>
+    <div class="pad" id="resumen-wrap"><div class="spin-wrap"><div class="spin"></div></div></div>
   </div>
 
+  <!-- BOTTOM NAV -->
   <div class="bnav">
-    <div class="nitem active" id="n-home" onclick="tab('home')"><div class="nicon">⊞</div><div class="nlbl">Inicio</div></div>
-    <div class="nitem" id="n-resumen" onclick="tab('resumen')"><div class="nicon">◎</div><div class="nlbl">Resumen</div></div>
+    <div class="nitem active" id="nav-home" onclick="switchTab('home')"><div class="nicon">⊞</div><div class="nlbl">Inicio</div></div>
+    <div class="nitem" id="nav-resumen" onclick="switchTab('resumen')"><div class="nicon">◎</div><div class="nlbl">Resumen</div></div>
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast-msg"></div>
 
 <script>
-const SU='https://zlkmthwmcikcnvxtcmql.supabase.co';
-const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpsa210aHdtY2lrY252eHRjbXFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MjU2MDgsImV4cCI6MjA5NDMwMTYwOH0.IKiEqXCvtVXUrXkkuihSghH08Ebach31MQ7u5e2TBaI';
-const sb=supabase.createClient(SU,SK);
-let U=null,admin=false,curEd=null,curPiso=null;
-const stk=[];
-let D={ed:[],pisos:[],els:[]};
+var SUPA_URL = 'https://zlkmthwmcikcnvxtcmql.supabase.co';
+var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpsa210aHdtY2lrY252eHRjbXFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MjU2MDgsImV4cCI6MjA5NDMwMTYwOH0.IKiEqXCvtVXUrXkkuihSghH08Ebach31MQ7u5e2TBaI';
+var sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 
-document.getElementById('le').onkeydown=e=>{if(e.key==='Enter')document.getElementById('lp').focus()};
-document.getElementById('lp').onkeydown=e=>{if(e.key==='Enter')doLogin()};
+var currentUser = null;
+var isAdmin = false;
+var curEdId = null;
+var curPisoId = null;
+var navStack = [];
+var D = { edificios: [], pisos: [], elementos: [] };
 
-async function doLogin(){
-  const e=document.getElementById('le').value.trim(),p=document.getElementById('lp').value;
-  const b=document.getElementById('lbtn'),err=document.getElementById('lerr');
-  err.textContent='';b.disabled=true;b.textContent='Verificando...';
-  const{data,error}=await sb.from('usuarios').select('*').eq('email',e).eq('password_hash',p).single();
-  if(error||!data){err.textContent='Correo o contraseña incorrectos';b.disabled=false;b.textContent='Entrar';return;}
-  U=data;admin=data.rol==='admin';
-  localStorage.setItem('iu',JSON.stringify(data));
-  start();
+document.getElementById('inp-email').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('inp-pass').focus(); });
+document.getElementById('inp-pass').addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
+
+function doLogin() {
+  var email = document.getElementById('inp-email').value.trim();
+  var pass = document.getElementById('inp-pass').value;
+  var btn = document.getElementById('login-btn');
+  var err = document.getElementById('login-err');
+  err.textContent = '';
+  btn.disabled = true;
+  btn.textContent = 'Verificando...';
+  sb.from('usuarios').select('*').eq('email', email).eq('password_hash', pass).single().then(function(res) {
+    if (res.error || !res.data) {
+      err.textContent = 'Correo o contraseña incorrectos';
+      btn.disabled = false;
+      btn.textContent = 'Entrar';
+      return;
+    }
+    currentUser = res.data;
+    isAdmin = res.data.rol === 'admin';
+    localStorage.setItem('inst_u', JSON.stringify(res.data));
+    startApp();
+  });
 }
 
-function doLogout(){
-  if(!confirm('¿Cerrar sesión?'))return;
-  localStorage.removeItem('iu');U=null;admin=false;
-  document.getElementById('login-screen').style.display='flex';
-  document.getElementById('app').classList.remove('v');
+function doLogout() {
+  if (!confirm('¿Cerrar sesión?')) return;
+  localStorage.removeItem('inst_u');
+  currentUser = null;
+  isAdmin = false;
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').classList.remove('visible');
 }
 
-const sv=localStorage.getItem('iu');
-if(sv){try{U=JSON.parse(sv);admin=U.rol==='admin';start();}catch(e){localStorage.removeItem('iu');}}
-
-async function start(){
-  document.getElementById('login-screen').style.display='none';
-  document.getElementById('app').classList.add('v');
-  const ini=U.nombre.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-  document.getElementById('av').textContent=ini;
-  const h=new Date().getHours();
-  const g=h<12?'Buenos días':h<18?'Buenas tardes':'Buenas noches';
-  document.getElementById('hello').textContent=g+', '+U.nombre.split(' ')[0];
-  await load();
-  buildHome();
-  setupRT();
+var saved = localStorage.getItem('inst_u');
+if (saved) {
+  try {
+    currentUser = JSON.parse(saved);
+    isAdmin = currentUser.rol === 'admin';
+    startApp();
+  } catch(e) {
+    localStorage.removeItem('inst_u');
+  }
 }
 
-async function load(){
-  const[a,b,c]=await Promise.all([
+function startApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+  var parts = currentUser.nombre.split(' ');
+  var initials = parts.map(function(w) { return w[0]; }).join('').slice(0, 2).toUpperCase();
+  document.getElementById('user-av').textContent = initials;
+  var h = new Date().getHours();
+  var greet = h < 12 ? 'Buenos días' : h < 18 ? 'Buenas tardes' : 'Buenas noches';
+  document.getElementById('hello-txt').textContent = greet + ', ' + parts[0];
+  loadData().then(function() {
+    buildHome();
+    setupRealtime();
+  });
+}
+
+function loadData() {
+  return Promise.all([
     sb.from('edificios').select('*').order('id'),
     sb.from('pisos').select('*').order('orden'),
     sb.from('elementos').select('*').order('id')
-  ]);
-  D.ed=a.data||[];D.pisos=b.data||[];D.els=c.data||[];
-  setOnline(true);
+  ]).then(function(results) {
+    D.edificios = results[0].data || [];
+    D.pisos = results[1].data || [];
+    D.elementos = results[2].data || [];
+    setOnline(true);
+  });
 }
 
-const gp=id=>D.pisos.filter(p=>p.edificio_id===id);
-const ge=id=>D.els.filter(e=>e.piso_id===id);
-function cs(els){
-  let i=0,p=0;
-  els.forEach(e=>{if(e.instalado===true)i++;if(e.instalado===false)p++;});
-  return{i,p,t:els.length,pct:(i+p)>0?Math.round(i/(i+p)*100):0};
-}
-const col=pct=>pct>=70?'var(--blue)':pct<30?'var(--red)':'var(--yellow)';
-const cls=pct=>pct>=70?'':'pct<30?'lo':'mid'';
+function getPisos(edId) { return D.pisos.filter(function(p) { return p.edificio_id === edId; }); }
+function getEls(pisoId) { return D.elementos.filter(function(e) { return e.piso_id === pisoId; }); }
 
-function setupRT(){
-  sb.channel('e').on('postgres_changes',{event:'UPDATE',schema:'public',table:'elementos'},pl=>{
-    const i=D.els.findIndex(e=>e.id===pl.new.id);
-    if(i!==-1)D.els[i]=pl.new;
-    refresh();
-    if(pl.new.actualizado_por&&pl.new.actualizado_por!==U?.nombre)
-      toast(`${pl.new.instalado?'✅':'❌'} ${pl.new.actualizado_por}: ${pl.new.nombre}`,'s');
-  }).subscribe();
+function calcStats(els) {
+  var inst = 0, pend = 0;
+  els.forEach(function(e) {
+    if (e.instalado === true) inst++;
+    if (e.instalado === false) pend++;
+  });
+  var total = inst + pend;
+  var pct = total > 0 ? Math.round(inst / total * 100) : 0;
+  return { inst: inst, pend: pend, total: els.length, pct: pct };
 }
 
-function refresh(){
-  const a=document.querySelector('.screen.active')?.id;
-  if(a==='screen-home')buildHome();
-  else if(a==='screen-pisos')buildPisos(curEd,false);
-  else if(a==='screen-elementos')renderEls();
-  else if(a==='screen-resumen')buildResumen();
+function getColor(pct) {
+  if (pct >= 70) return 'var(--blue)';
+  if (pct < 30) return 'var(--red)';
+  return 'var(--yellow)';
 }
 
-function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));const e=document.getElementById('screen-'+id);e.classList.add('active');e.scrollTop=0;}
-
-function tab(t){
-  document.querySelectorAll('.nitem').forEach(n=>n.classList.remove('active'));
-  document.getElementById('n-'+t).classList.add('active');
-  stk.length=0;
-  document.getElementById('back-btn').classList.add('h');
-  document.getElementById('tt').textContent=t==='home'?'Instalaciones':'Resumen';
-  document.getElementById('ts').textContent=t==='home'?'Seguimiento del proyecto':'Estado por edificio';
-  if(t==='home'){show('home');buildHome();}
-  else{show('resumen');buildResumen();}
+function setupRealtime() {
+  sb.channel('elementos-rt')
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'elementos' }, function(payload) {
+      var idx = D.elementos.findIndex(function(e) { return e.id === payload.new.id; });
+      if (idx !== -1) D.elementos[idx] = payload.new;
+      refreshCurrent();
+      if (payload.new.actualizado_por && payload.new.actualizado_por !== currentUser.nombre) {
+        var st = payload.new.instalado ? '✅' : '❌';
+        showToast(st + ' ' + payload.new.actualizado_por + ': ' + payload.new.nombre, 'success');
+      }
+    }).subscribe();
 }
 
-function goBack(){
-  if(!stk.length)return;
-  const prev=stk.pop();
-  if(prev==='home'){
-    show('home');buildHome();
-    document.getElementById('tt').textContent='Instalaciones';
-    document.getElementById('ts').textContent='Seguimiento del proyecto';
-    document.getElementById('back-btn').classList.add('h');
-  }else if(prev==='pisos'){buildPisos(curEd,false);stk.pop();}
+function refreshCurrent() {
+  var active = document.querySelector('.screen.active');
+  if (!active) return;
+  var id = active.id;
+  if (id === 'screen-home') buildHome();
+  else if (id === 'screen-pisos') buildPisos(curEdId, false);
+  else if (id === 'screen-elementos') renderEls();
+  else if (id === 'screen-resumen') buildResumen();
 }
 
-function buildHome(){
-  const all=D.els;const s=cs(all);
-  document.getElementById('bv').textContent=s.i+' instalados';
-  document.getElementById('bs').textContent=s.p+' pendientes · '+s.t+' total';
-  document.getElementById('bp').textContent=s.pct+'%';
-  document.getElementById('ed-list').innerHTML=D.ed.map(ed=>{
-    const p=gp(ed.id);const ee=p.flatMap(x=>ge(x.id));const s=cs(ee);
-    const c=col(s.pct);
-    return`<div class="ed-card" onclick="buildPisos('${ed.id}')">
-      <div class="ed-top">
-        <div class="ed-ico">${ed.icon}</div>
-        <div><div class="ed-nm">${ed.nombre}</div><div class="ed-sb">${p.length} pisos · ${ee.length} elementos</div></div>
-        <div class="ed-arr">›</div>
-      </div>
-      <div class="prog">
-        <div class="pb"><div class="pbf" style="width:${s.pct}%;background:${c}"></div></div>
-        <div class="pct" style="color:${c}">${s.pct}%</div>
-      </div>
-    </div>`;
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  var el = document.getElementById('screen-' + id);
+  el.classList.add('active');
+  el.scrollTop = 0;
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.nitem').forEach(function(n) { n.classList.remove('active'); });
+  document.getElementById('nav-' + tab).classList.add('active');
+  navStack = [];
+  document.getElementById('back-btn').classList.add('hidden');
+  if (tab === 'home') {
+    document.getElementById('top-title').textContent = 'Instalaciones';
+    document.getElementById('top-sub').textContent = 'Seguimiento del proyecto';
+    showScreen('home');
+    buildHome();
+  } else {
+    document.getElementById('top-title').textContent = 'Resumen';
+    document.getElementById('top-sub').textContent = 'Estado por edificio';
+    showScreen('resumen');
+    buildResumen();
+  }
+}
+
+function goBack() {
+  if (!navStack.length) return;
+  var prev = navStack.pop();
+  if (prev === 'home') {
+    showScreen('home');
+    buildHome();
+    document.getElementById('top-title').textContent = 'Instalaciones';
+    document.getElementById('top-sub').textContent = 'Seguimiento del proyecto';
+    document.getElementById('back-btn').classList.add('hidden');
+  } else if (prev === 'pisos') {
+    buildPisos(curEdId, false);
+    navStack.pop();
+  }
+}
+
+function buildHome() {
+  var s = calcStats(D.elementos);
+  document.getElementById('ban-val').textContent = s.inst + ' instalados';
+  document.getElementById('ban-sub').textContent = s.pend + ' pendientes · ' + s.total + ' total';
+  document.getElementById('ban-pct').textContent = s.pct + '%';
+
+  document.getElementById('ed-list').innerHTML = D.edificios.map(function(ed) {
+    var pisos = getPisos(ed.id);
+    var edEls = [];
+    pisos.forEach(function(p) { edEls = edEls.concat(getEls(p.id)); });
+    var s = calcStats(edEls);
+    var c = getColor(s.pct);
+    return '<div class="ed-card" onclick="buildPisos(\'' + ed.id + '\')">' +
+      '<div class="ed-top">' +
+      '<div class="ed-ico">' + ed.icon + '</div>' +
+      '<div><div class="ed-nm">' + ed.nombre + '</div><div class="ed-sb">' + pisos.length + ' pisos · ' + edEls.length + ' elementos</div></div>' +
+      '<div class="ed-arr">›</div></div>' +
+      '<div class="prog">' +
+      '<div class="pb"><div class="pbf" style="width:' + s.pct + '%;background:' + c + '"></div></div>' +
+      '<div class="pct-lbl" style="color:' + c + '">' + s.pct + '%</div>' +
+      '</div></div>';
   }).join('');
 }
 
-function buildPisos(edId,push=true){
-  curEd=edId;if(push)stk.push('home');
-  const ed=D.ed.find(e=>e.id===edId);
-  const pisos=gp(edId);const ee=pisos.flatMap(p=>ge(p.id));const s=cs(ee);
-  document.getElementById('tt').textContent=ed.nombre;
-  document.getElementById('ts').textContent=pisos.length+' pisos';
-  document.getElementById('back-btn').classList.remove('h');
-  document.getElementById('ps').innerHTML=`
-    <div class="sc"><div class="sl">Instalados</div><div class="sv g">${s.i}</div></div>
-    <div class="sc"><div class="sl">Pendientes</div><div class="sv r">${s.p}</div></div>
-    <div class="sc"><div class="sl">Total</div><div class="sv b">${s.t}</div></div>
-    <div class="sc"><div class="sl">Progreso</div><div class="sv b">${s.pct}%</div></div>`;
-  document.getElementById('pl').innerHTML=pisos.map((p,i)=>{
-    const ps=cs(ge(p.id));const c=col(ps.pct);
-    return`<div class="pc" onclick="buildEls(${p.id})">
-      <div class="pnum">P${i+1}</div>
-      <div class="pi"><div class="pn">${p.nombre}</div><div class="pd">${ps.i} inst · ${ps.p} pend · ${ps.t} total</div></div>
-      <div class="pr"><div class="pp" style="color:${c}">${ps.pct}%</div><div class="pa">›</div></div>
-    </div>`;
+function buildPisos(edId, push) {
+  if (push === undefined) push = true;
+  curEdId = edId;
+  if (push) navStack.push('home');
+  var ed = D.edificios.find(function(e) { return e.id === edId; });
+  var pisos = getPisos(edId);
+  var allEls = [];
+  pisos.forEach(function(p) { allEls = allEls.concat(getEls(p.id)); });
+  var s = calcStats(allEls);
+
+  document.getElementById('top-title').textContent = ed.nombre;
+  document.getElementById('top-sub').textContent = pisos.length + ' pisos';
+  document.getElementById('back-btn').classList.remove('hidden');
+
+  document.getElementById('piso-stats').innerHTML =
+    '<div class="stat-card"><div class="stat-lbl">Instalados</div><div class="stat-num g">' + s.inst + '</div></div>' +
+    '<div class="stat-card"><div class="stat-lbl">Pendientes</div><div class="stat-num r">' + s.pend + '</div></div>' +
+    '<div class="stat-card"><div class="stat-lbl">Total</div><div class="stat-num b">' + s.total + '</div></div>' +
+    '<div class="stat-card"><div class="stat-lbl">Progreso</div><div class="stat-num b">' + s.pct + '%</div></div>';
+
+  document.getElementById('piso-list').innerHTML = pisos.map(function(p, i) {
+    var ps = calcStats(getEls(p.id));
+    var c = getColor(ps.pct);
+    return '<div class="piso-card" onclick="buildEls(' + p.id + ')">' +
+      '<div class="piso-badge">P' + (i+1) + '</div>' +
+      '<div class="piso-info"><div class="piso-name">' + p.nombre + '</div>' +
+      '<div class="piso-detail">' + ps.inst + ' inst · ' + ps.pend + ' pend · ' + ps.total + ' total</div></div>' +
+      '<div class="piso-right"><div class="piso-pct" style="color:' + c + '">' + ps.pct + '%</div><div class="piso-arr">›</div></div>' +
+      '</div>';
   }).join('');
-  show('pisos');
+
+  showScreen('pisos');
 }
 
-function buildEls(pisoId,push=true){
-  curPiso=pisoId;if(push)stk.push('pisos');
-  const p=D.pisos.find(x=>x.id===pisoId);
-  const ed=D.ed.find(e=>e.id===p.edificio_id);
-  document.getElementById('tt').textContent=p.nombre;
-  document.getElementById('ts').textContent=ed.nombre;
-  document.getElementById('back-btn').classList.remove('h');
-  document.getElementById('elt').textContent=p.nombre+' · Elementos';
-  show('elementos');renderEls();
-}
-
-function renderEls(){
-  if(!curPiso)return;
-  const items=ge(curPiso);const s=cs(items);
-  document.getElementById('esm').innerHTML=`
-    <div class="esc"><div class="esl">Total</div><div class="esv">${items.length}</div></div>
-    <div class="esc"><div class="esl">Instalados</div><div class="esv g">${s.i}</div></div>
-    <div class="esc"><div class="esl">Pendientes</div><div class="esv r">${s.p}</div></div>`;
-  const f=document.getElementById('epf');
-  f.style.width=s.pct+'%';f.style.background=col(s.pct);
-  document.getElementById('epp').textContent=s.pct+'%';
-  document.getElementById('epp').style.color=col(s.pct);
-  document.getElementById('el').innerHTML=items.map((el,i)=>{
-    const c=el.instalado===true?'si':el.instalado===false?'no':'nd';
-    const mt=el.actualizado_por?el.actualizado_por+' · '+fd(el.actualizado_en):'Sin actualizar';
-    const right=admin
-      ?`<button class="tgl ${el.instalado===true?'on':''}" id="t${el.id}" onclick="toggleEl(${el.id},${el.instalado})"></button>`
-      :`<div class="sbg ${c}">${el.instalado===true?'Instalado':el.instalado===false?'Pendiente':'—'}</div>`;
-    return`<div class="elr" style="animation-delay:${i*0.02}s">
-      <div class="sd ${c}"></div>
-      <div class="en"><div class="en-nm">${el.nombre}</div><div class="en-mt">${mt}</div></div>
-      <div class="er"><div class="eq">${el.cantidad}</div>${right}</div>
-    </div>`;
-  }).join('');
-}
-
-function buildResumen(){
-  document.getElementById('rc').innerHTML=D.ed.map(ed=>{
-    const pisos=gp(ed.id);const ee=pisos.flatMap(p=>ge(p.id));const s=cs(ee);
-    return`<div class="rc">
-      <div class="rch">
-        <span style="font-size:20px">${ed.icon}</span>
-        <div class="rct" style="flex:1">${ed.nombre}</div>
-        <div style="font-size:18px;font-weight:700;color:${col(s.pct)}">${s.pct}%</div>
-      </div>
-      ${pisos.map((p,i)=>{const ps=cs(ge(p.id));return`<div class="rr">
-        <div class="rn">P${i+1} · ${p.nombre}</div>
-        <div class="rrr">
-          <div class="mpb"><div class="mpbf" style="width:${ps.pct}%;background:${col(ps.pct)}"></div></div>
-          <div style="font-size:13px;font-weight:700;color:${col(ps.pct)};min-width:36px;text-align:right">${ps.pct}%</div>
-        </div>
-      </div>`;}).join('')}
-    </div>`;
-  }).join('');
-}
-
-async function toggleEl(elId,cur){
-  if(!admin)return;
-  const nv=cur===true?false:true;
-  const b=document.getElementById('t'+elId);if(b)b.disabled=true;
-  const{error}=await sb.from('elementos').update({instalado:nv,actualizado_por:U.nombre,actualizado_en:new Date().toISOString()}).eq('id',elId);
-  if(error){toast('Error al guardar','e');if(b)b.disabled=false;return;}
-  const i=D.els.findIndex(e=>e.id===elId);
-  if(i!==-1){D.els[i].instalado=nv;D.els[i].actualizado_por=U.nombre;D.els[i].actualizado_en=new Date().toISOString();}
+function buildEls(pisoId, push) {
+  if (push === undefined) push = true;
+  curPisoId = pisoId;
+  if (push) navStack.push('pisos');
+  var piso = D.pisos.find(function(p) { return p.id === pisoId; });
+  var ed = D.edificios.find(function(e) { return e.id === piso.edificio_id; });
+  document.getElementById('top-title').textContent = piso.nombre;
+  document.getElementById('top-sub').textContent = ed.nombre;
+  document.getElementById('back-btn').classList.remove('hidden');
+  document.getElementById('el-header').textContent = piso.nombre + ' · Elementos';
+  showScreen('elementos');
   renderEls();
-  toast(nv?'✅ Instalado':'❌ Pendiente','s');
 }
 
-function fd(iso){if(!iso)return'';return new Date(iso).toLocaleDateString('es-DO',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});}
+function renderEls() {
+  if (!curPisoId) return;
+  var items = getEls(curPisoId);
+  var s = calcStats(items);
 
-let tt;
-function toast(msg,type=''){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.className='toast show '+type;
-  clearTimeout(tt);tt=setTimeout(()=>{t.className='toast';},3000);
+  document.getElementById('el-sum').innerHTML =
+    '<div class="el-sum-card"><div class="el-sum-lbl">Total</div><div class="el-sum-val">' + items.length + '</div></div>' +
+    '<div class="el-sum-card"><div class="el-sum-lbl">Instalados</div><div class="el-sum-val g">' + s.inst + '</div></div>' +
+    '<div class="el-sum-card"><div class="el-sum-lbl">Pendientes</div><div class="el-sum-val r">' + s.pend + '</div></div>';
+
+  var fill = document.getElementById('el-prog-fill');
+  fill.style.width = s.pct + '%';
+  fill.style.background = getColor(s.pct);
+  var pctEl = document.getElementById('el-prog-pct');
+  pctEl.textContent = s.pct + '%';
+  pctEl.style.color = getColor(s.pct);
+
+  document.getElementById('el-list').innerHTML = items.map(function(el, i) {
+    var cls = el.instalado === true ? 'si' : el.instalado === false ? 'no' : 'nd';
+    var meta = el.actualizado_por ? el.actualizado_por + ' · ' + formatDate(el.actualizado_en) : 'Sin actualizar';
+    var rightHtml = isAdmin
+      ? '<button class="toggle ' + (el.instalado === true ? 'on' : '') + '" id="tog-' + el.id + '" onclick="toggleEl(' + el.id + ',' + el.instalado + ')"></button>'
+      : '<div class="sbadge ' + cls + '">' + (el.instalado === true ? 'Instalado' : el.instalado === false ? 'Pendiente' : '—') + '</div>';
+    return '<div class="el-row" style="animation-delay:' + (i * 0.02) + 's">' +
+      '<div class="status-dot ' + cls + '"></div>' +
+      '<div class="el-info"><div class="el-name">' + el.nombre + '</div><div class="el-meta">' + meta + '</div></div>' +
+      '<div class="el-right"><div class="el-qty">' + el.cantidad + '</div>' + rightHtml + '</div>' +
+      '</div>';
+  }).join('');
 }
 
-function setOnline(on){
-  const p=document.getElementById('opill');
-  p.className='opill'+(on?'':' off');
-  p.innerHTML=`<div class="d"></div><span>${on?'En línea':'Sin conexión'}</span>`;
+function buildResumen() {
+  document.getElementById('resumen-wrap').innerHTML = D.edificios.map(function(ed) {
+    var pisos = getPisos(ed.id);
+    var allEls = [];
+    pisos.forEach(function(p) { allEls = allEls.concat(getEls(p.id)); });
+    var s = calcStats(allEls);
+    var rows = pisos.map(function(p, i) {
+      var ps = calcStats(getEls(p.id));
+      return '<div class="res-row">' +
+        '<div class="res-name">P' + (i+1) + ' · ' + p.nombre + '</div>' +
+        '<div class="res-right">' +
+        '<div class="mini-bar"><div class="mini-bar-fill" style="width:' + ps.pct + '%;background:' + getColor(ps.pct) + '"></div></div>' +
+        '<div style="font-size:13px;font-weight:700;color:' + getColor(ps.pct) + ';min-width:36px;text-align:right">' + ps.pct + '%</div>' +
+        '</div></div>';
+    }).join('');
+    return '<div class="res-card">' +
+      '<div class="res-head"><span style="font-size:20px">' + ed.icon + '</span>' +
+      '<div class="res-title">' + ed.nombre + '</div>' +
+      '<div style="font-size:18px;font-weight:700;color:' + getColor(s.pct) + '">' + s.pct + '%</div></div>' +
+      rows + '</div>';
+  }).join('');
 }
 
-window.addEventListener('online',()=>{setOnline(true);load().then(refresh);});
-window.addEventListener('offline',()=>setOnline(false));
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+function toggleEl(elId, currentVal) {
+  if (!isAdmin) return;
+  var newVal = currentVal === true ? false : true;
+  var btn = document.getElementById('tog-' + elId);
+  if (btn) btn.disabled = true;
+  sb.from('elementos').update({
+    instalado: newVal,
+    actualizado_por: currentUser.nombre,
+    actualizado_en: new Date().toISOString()
+  }).eq('id', elId).then(function(res) {
+    if (res.error) { showToast('Error al guardar', 'error'); if (btn) btn.disabled = false; return; }
+    var idx = D.elementos.findIndex(function(e) { return e.id === elId; });
+    if (idx !== -1) {
+      D.elementos[idx].instalado = newVal;
+      D.elementos[idx].actualizado_por = currentUser.nombre;
+      D.elementos[idx].actualizado_en = new Date().toISOString();
+    }
+    renderEls();
+    showToast(newVal ? '✅ Instalado' : '❌ Pendiente', 'success');
+  });
+}
+
+function formatDate(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleDateString('es-DO', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+}
+
+var toastTimer;
+function showToast(msg, type) {
+  var t = document.getElementById('toast-msg');
+  t.textContent = msg;
+  t.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function() { t.className = 'toast'; }, 3000);
+}
+
+function setOnline(on) {
+  var p = document.getElementById('online-pill');
+  p.className = 'opill' + (on ? '' : ' offline');
+  p.innerHTML = '<div class="dot"></div><span>' + (on ? 'En línea' : 'Sin conexión') + '</span>';
+}
+
+window.addEventListener('online', function() { setOnline(true); loadData().then(refreshCurrent); });
+window.addEventListener('offline', function() { setOnline(false); });
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(function() {});
 </script>
 </body>
 </html>

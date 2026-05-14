@@ -160,8 +160,21 @@ body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);height:100dvh;
 .toggle.on::after{transform:translateX(19px);}
 .toggle:disabled{opacity:0.4;}
 
-.el-foto{width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0;cursor:pointer;border:1px solid var(--border);}
-.el-foto-ph{width:44px;height:44px;border-radius:8px;background:var(--bg);border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;flex-shrink:0;}
+.foto-counter{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;cursor:pointer;border:1.5px solid var(--border);background:var(--bg);}
+.foto-counter.has-fotos{background:var(--blue-light);color:var(--blue);border-color:var(--blue);}
+.foto-counter.full{background:var(--green-light);color:var(--green);border-color:var(--green);}
+.foto-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px;}
+.foto-thumb-wrap{position:relative;aspect-ratio:1;}
+.foto-thumb{width:100%;height:100%;object-fit:cover;border-radius:10px;cursor:pointer;}
+.foto-del-btn{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(220,38,38,0.9);color:#fff;border:none;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;line-height:1;}
+.foto-add-tile{aspect-ratio:1;border-radius:10px;background:var(--bg);border:1.5px dashed var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-size:20px;gap:4px;color:var(--text2);}
+.foto-add-tile span{font-size:11px;font-weight:600;}
+.foto-add-tile:active{border-color:var(--blue);}
+.modal-fotos{background:var(--white);border-radius:20px 20px 0 0;padding:20px;padding-bottom:calc(20px + var(--sab));width:100%;max-height:92vh;overflow-y:auto;animation:slideUp 0.3s ease;}
+.mf-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.mf-title{font-size:17px;font-weight:700;}
+.mf-sub{font-size:12px;color:var(--text2);margin-top:2px;}
+.mf-close{width:32px;height:32px;border-radius:50%;background:var(--bg);border:none;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 
 .dash-banner{background:var(--black);border-radius:var(--r);padding:20px;margin-bottom:16px;color:#fff;}
 .dash-blbl{font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;}
@@ -434,6 +447,21 @@ body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);height:100dvh;
   </div>
 </div>
 
+<!-- MODAL GALERÍA DE FOTOS -->
+<div class="modal-overlay hidden" id="modal-fotos" onclick="closeOv(event,'modal-fotos')">
+  <div class="modal-fotos" onclick="event.stopPropagation()">
+    <div class="mf-header">
+      <div>
+        <div class="mf-title" id="mf-title">Fotos de evidencia</div>
+        <div class="mf-sub" id="mf-sub">0 fotos</div>
+      </div>
+      <button class="mf-close" onclick="closeModal('fotos')">✕</button>
+    </div>
+    <div class="foto-gallery" id="foto-gallery"></div>
+    <input type="file" id="foto-gallery-input" accept="image/*" capture="environment" onchange="uploadGalleryFoto(event)" style="display:none">
+  </div>
+</div>
+
 <div class="lightbox hidden" id="lightbox" onclick="closeLightbox()">
   <div class="lb-close">✕</div>
   <img id="lb-img" src="" alt="Foto evidencia">
@@ -448,7 +476,8 @@ var sb=supabase.createClient(SU,SK);
 var U=null,curProjId=null,curEdId=null,curPisoId=null;
 var navStack=[],pendingToggle=null;
 var selEmoji_='🏗️',selColor_='#2563eb';
-var D={proyectos:[],edificios:[],pisos:[],elementos:[],usuarios:[],historial:[]};
+var D={proyectos:[],edificios:[],pisos:[],elementos:[],usuarios:[],historial:[],fotos:[]};
+var curElId=null;
 var appCharts={};
 
 function isAdmin(){return U&&U.rol==='admin';}
@@ -520,7 +549,8 @@ function loadData(){
     sb.from('proyectos').select('*').eq('activo',true).order('creado_en'),
     sb.from('edificios').select('*').order('id'),
     sb.from('pisos').select('*').order('orden'),
-    sb.from('elementos').select('*').order('id')
+    sb.from('elementos').select('*').order('id'),
+    sb.from('fotos').select('*').order('subida_en')
   ];
   if(isAdmin()){
     qs.push(sb.from('usuarios').select('*').order('creado_en'));
@@ -533,7 +563,8 @@ function loadData(){
       D.edificios=allE.filter(function(e){return e.proyecto_id===U.proyecto_id;});
     }else{D.proyectos=allP;D.edificios=allE;}
     D.pisos=r[2].data||[];D.elementos=r[3].data||[];
-    if(isAdmin()){D.usuarios=r[4]?r[4].data||[]:[]; D.historial=r[5]?r[5].data||[]:[]; }
+    D.fotos=r[4].data||[];
+    if(isAdmin()){D.usuarios=r[5]?r[5].data||[]:[]; D.historial=r[6]?r[6].data||[]:[]; }
     setOnline(true);
   });
 }
@@ -550,6 +581,15 @@ function setupRealtime(){
       refreshCurrent();
       if(pl.new.actualizado_por&&pl.new.actualizado_por!==U.nombre)
         showToast((pl.new.instalado?'✅':'❌')+' '+pl.new.actualizado_por+': '+pl.new.nombre,'success');
+    })
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'fotos'},function(pl){
+      var exists=D.fotos.find(function(f){return f.id===pl.new.id;});
+      if(!exists)D.fotos.push(pl.new);
+      renderEls();
+    })
+    .on('postgres_changes',{event:'DELETE',schema:'public',table:'fotos'},function(pl){
+      D.fotos=D.fotos.filter(function(f){return f.id!==pl.old.id;});
+      renderEls();
     })
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'historial'},function(pl){
       if(D.historial)D.historial.unshift(pl.new);
@@ -718,17 +758,16 @@ function renderEls(){
     var cls=el.instalado===true?'si':el.instalado===false?'no':'nd';
     var meta=el.actualizado_por?el.actualizado_por+' · '+formatDate(el.actualizado_en):'Sin actualizar';
     if(el.nota)meta+=' · 📝 '+el.nota.slice(0,25)+(el.nota.length>25?'...':'');
-    var fotoHtml='';
-    if(el.foto_url){
-      fotoHtml='<img class="el-foto" src="'+el.foto_url+'" alt="Foto" onclick="openLightbox(\''+el.foto_url+'\')">';
-    }else if(canEdit()&&el.instalado===true){
-      fotoHtml='<div class="el-foto-ph" onclick="askFoto('+el.id+')">📷</div>';
-    }
+    var elFotos=D.fotos.filter(function(f){return f.elemento_id===el.id;});
+    var fotoCount=elFotos.length;
+    var maxFotos=el.cantidad;
+    var fotoClass=fotoCount===0?'':fotoCount>=maxFotos?'full':'has-fotos';
+    var fotoLabel=fotoCount+'/'+maxFotos;
+    var fotoHtml='<div class="foto-counter '+fotoClass+'" onclick="openFotos('+el.id+',this,'+el.cantidad+')" data-nom="'+el.nombre.replace(/"/g,"'")+'">📷 '+fotoLabel+'</div>';
     var rightHtml=canEdit()
       ?'<button class="toggle '+(el.instalado===true?'on':'')+'" id="tog-'+el.id+'" onclick="askToggle('+el.id+','+el.instalado+')"></button>'
       :'<div class="sbadge '+cls+'">'+(el.instalado===true?'Instalado':el.instalado===false?'Pendiente':'—')+'</div>';
     html+='<div class="el-row" style="animation-delay:'+(i*0.02)+'s">';
-    if(fotoHtml)html+=fotoHtml;
     html+='<div class="sdot '+cls+'"></div>';
     html+='<div class="el-info"><div class="el-name">'+el.nombre+'</div><div class="el-meta">'+meta+'</div></div>';
     html+='<div class="el-right"><div class="el-qty">'+el.cantidad+'</div>'+rightHtml+'</div></div>';
@@ -747,14 +786,75 @@ function previewFoto(e){
   reader.readAsDataURL(file);
 }
 
-function askFoto(elId){
-  pendingToggle={id:elId,current:true,fotoOnly:true};
-  document.getElementById('nota-title').textContent='Agregar foto de evidencia';
-  document.getElementById('nota-btn').textContent='📷 Guardar foto';
-  document.getElementById('nota-txt').value='';
-  document.getElementById('foto-preview').style.display='none';
-  document.getElementById('foto-input').value='';
-  openModal('nota');
+function openFotos(elId,btn,cantidad){
+  curElId=elId;
+  var el=D.elementos.find(function(x){return x.id===elId;});
+  var nombre=el?el.nombre:(btn&&btn.dataset?btn.dataset.nom:'Elemento');
+  var fotos=D.fotos.filter(function(f){return f.elemento_id===elId;});
+  document.getElementById('mf-title').textContent=nombre;
+  document.getElementById('mf-sub').textContent=fotos.length+' de '+cantidad+' fotos subidas';
+  renderGallery(elId,cantidad);
+  openModal('fotos');
+}
+
+function renderGallery(elId,cantidad){
+  var fotos=D.fotos.filter(function(f){return f.elemento_id===elId;});
+  var html='';
+  fotos.forEach(function(f){
+    html+='<div class="foto-thumb-wrap">';
+    html+='<img class="foto-thumb" src="'+f.url+'" onclick="openLightbox(this.src)">';
+    if(isAdmin()){
+      html+='<button class="foto-del-btn" onclick="deleteFoto('+f.id+',\''+f.path+'\','+elId+','+cantidad+')">✕</button>';
+    }
+    html+='</div>';
+  });
+  if(fotos.length<cantidad&&canEdit()){
+    html+='<div class="foto-add-tile" onclick="document.getElementById(\'foto-gallery-input\').click()">';
+    html+='<span style="font-size:24px">📷</span><span>Agregar</span></div>';
+  }
+  var gallery=document.getElementById('foto-gallery');
+  if(gallery)gallery.innerHTML=html;
+  var sub=document.getElementById('mf-sub');
+  if(sub)sub.textContent=fotos.length+' de '+cantidad+' fotos subidas';
+}
+
+function uploadGalleryFoto(e){
+  var file=e.target.files[0];
+  if(!file||!curElId)return;
+  var el=D.elementos.find(function(x){return x.id===curElId;});
+  var fotos=D.fotos.filter(function(f){return f.elemento_id===curElId;});
+  if(fotos.length>=el.cantidad){showToast('Ya tienes el máximo de fotos','error');return;}
+  showToast('Subiendo foto...','');
+  var path='el-'+curElId+'-'+Date.now()+'.jpg';
+  sb.storage.from('fotos').upload(path,file,{contentType:file.type,upsert:false}).then(function(res){
+    if(res.error){showToast('Error al subir foto','error');return;}
+    var url=sb.storage.from('fotos').getPublicUrl(path).data.publicUrl;
+    sb.from('fotos').insert({elemento_id:curElId,url:url,path:path,subida_por:U.nombre}).then(function(r){
+      if(r.error){showToast('Error al guardar','error');return;}
+      if(r.data&&r.data[0])D.fotos.push(r.data[0]);
+      else sb.from('fotos').select('*').eq('path',path).single().then(function(fr){
+        if(fr.data)D.fotos.push(fr.data);
+        renderGallery(curElId,el.cantidad);
+        renderEls();
+      });
+      renderGallery(curElId,el.cantidad);
+      renderEls();
+      showToast('📷 Foto subida','success');
+    });
+    document.getElementById('foto-gallery-input').value='';
+  });
+}
+
+function deleteFoto(fotoId,path,elId,cantidad){
+  if(!isAdmin())return;
+  if(!confirm('¿Eliminar esta foto?'))return;
+  sb.storage.from('fotos').remove([path]);
+  sb.from('fotos').delete().eq('id',fotoId).then(function(){
+    D.fotos=D.fotos.filter(function(f){return f.id!==fotoId;});
+    renderGallery(elId,cantidad);
+    renderEls();
+    showToast('Foto eliminada','success');
+  });
 }
 
 function askToggle(elId,currentVal){
@@ -781,11 +881,9 @@ function confirmToggle(){
   closeModal('nota');
 
   function doUpdate(fotoUrl){
-    var newVal=pt.fotoOnly?true:(pt.current===true?false:true);
-    var update={actualizado_por:U.nombre,actualizado_en:new Date().toISOString()};
-    if(!pt.fotoOnly)update.instalado=newVal;
+    var newVal=pt.current===true?false:true;
+    var update={actualizado_por:U.nombre,actualizado_en:new Date().toISOString(),instalado:newVal};
     if(nota)update.nota=nota;
-    if(fotoUrl)update.foto_url=fotoUrl;
     var btn=document.getElementById('tog-'+pt.id);
     if(btn)btn.disabled=true;
     sb.from('elementos').update(update).eq('id',pt.id).then(function(res){
@@ -793,26 +891,17 @@ function confirmToggle(){
       var idx=D.elementos.findIndex(function(e){return e.id===pt.id;});
       var oldVal=null;
       if(idx!==-1){oldVal=D.elementos[idx].instalado;Object.assign(D.elementos[idx],update);}
-      if(!pt.fotoOnly){
-        sb.from('historial').insert({elemento_id:pt.id,usuario_nombre:U.nombre,accion:newVal?'instalado':'pendiente',valor_anterior:oldVal,valor_nuevo:newVal,nota:nota||null});
-      }
+      sb.from('historial').insert({elemento_id:pt.id,usuario_nombre:U.nombre,accion:newVal?'instalado':'pendiente',valor_anterior:oldVal,valor_nuevo:newVal,nota:nota||null});
       renderEls();
-      showToast(pt.fotoOnly?'📷 Foto guardada':(newVal?'✅ Instalado':'❌ Pendiente'),'success');
+      showToast(newVal?'✅ Instalado':'❌ Pendiente','success');
     });
   }
 
-  if(file){
-    var path='el-'+pt.id+'-'+Date.now()+'.jpg';
-    sb.storage.from('fotos').upload(path,file,{contentType:file.type,upsert:true}).then(function(res){
-      if(res.error){doUpdate(null);return;}
-      var url=sb.storage.from('fotos').getPublicUrl(path).data.publicUrl;
-      doUpdate(url);
-    });
-  }else{doUpdate(null);}
+  doUpdate(null);
 }
 
-function openLightbox(url){
-  document.getElementById('lb-img').src=url;
+function openLightbox(src){
+  document.getElementById('lb-img').src=typeof src==='string'?src:src;
   document.getElementById('lightbox').classList.remove('hidden');
 }
 function closeLightbox(){document.getElementById('lightbox').classList.add('hidden');}

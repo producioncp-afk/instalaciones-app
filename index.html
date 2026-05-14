@@ -15,6 +15,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root {
   --bg:#f1f5f9; --white:#fff; --border:#e2e8f0;
@@ -509,6 +510,32 @@ body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);height:100dvh;
     </div>
     <div class="foto-gallery" id="foto-gallery"></div>
     <input type="file" id="foto-gallery-input" accept="image/*" capture="environment" onchange="uploadGalleryFoto(event)" style="display:none">
+  </div>
+</div>
+
+<!-- MODAL EXCEL -->
+<div class="modal-overlay hidden" id="modal-excel" onclick="closeOv(event,'modal-excel')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">📊 Exportar Excel</div>
+    <div class="modal-field">
+      <label>¿Qué quieres exportar?</label>
+      <select class="modal-select" id="excel-scope" onchange="updateExcelScope()">
+        <option value="proyecto">Todo el proyecto</option>
+        <option value="edificio">Solo el edificio actual</option>
+        <option value="elegir">Elegir edificio específico</option>
+      </select>
+    </div>
+    <div class="modal-field hidden" id="excel-ed-wrap">
+      <label>Selecciona el edificio</label>
+      <select class="modal-select" id="excel-edificio"></select>
+    </div>
+    <div style="background:var(--bg);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:13px;color:var(--text2);">
+      El Excel tendrá el mismo formato del checklist original — elementos como filas, pisos como columnas, con CANTIDAD, PINTADO, INSTALADO y RETOCADO.
+    </div>
+    <div class="modal-row">
+      <button class="modal-btn secondary" onclick="closeModal('excel')">Cancelar</button>
+      <button class="modal-btn primary" style="background:var(--green)" onclick="doExportExcel()">📊 Descargar Excel</button>
+    </div>
   </div>
 </div>
 
@@ -1321,6 +1348,7 @@ function buildDashboard(){
       '<div class="dash-card"><div class="dash-clbl">Días est.</div><div class="dash-cval y">'+daysLeft+'</div></div>'+
     '</div>'+
     '<button class="pdf-btn" onclick="exportPDF()">📄 Exportar reporte PDF</button>'+
+    '<button class="pdf-btn" style="background:var(--green);margin-top:-8px" onclick="openModal(\'excel\')">📊 Exportar reporte Excel</button>'+
     '<div class="chart-card">'+
       '<div class="chart-title">Avance por proyecto</div>'+
       '<div class="chart-wrap"><canvas id="chart-proj"></canvas></div>'+
@@ -1659,6 +1687,17 @@ function openModal(id){
     document.getElementById('m-uem').value='';
     document.getElementById('m-upass').value='';
   }
+  if(id==='excel'){
+    // Populate edificio selector
+    var edSel=document.getElementById('excel-edificio');
+    edSel.innerHTML=D.edificios.map(function(ed){
+      return '<option value="'+ed.id+'">'+ed.icon+' '+ed.nombre+'</option>';
+    }).join('');
+    // Set current edificio if browsing one
+    if(curEdId) edSel.value=curEdId;
+    document.getElementById('excel-scope').value='proyecto';
+    document.getElementById('excel-ed-wrap').classList.add('hidden');
+  }
   document.getElementById('modal-'+id).classList.remove('hidden');
 }
 function closeModal(id){document.getElementById('modal-'+id).classList.add('hidden');}
@@ -1678,6 +1717,145 @@ function saveUser(){
     closeModal('user');showToast('✅ Usuario creado','success');
     loadData().then(buildUsuarios);
   });
+}
+
+function doExportExcel(){
+  var scope=document.getElementById('excel-scope').value;
+  var edIds=[];
+  if(scope==='proyecto'){
+    edIds=D.edificios.map(function(e){return e.id;});
+  }else if(scope==='edificio'){
+    edIds=curEdId?[curEdId]:D.edificios.map(function(e){return e.id;});
+  }else{
+    edIds=[document.getElementById('excel-edificio').value];
+  }
+  closeModal('excel');
+  exportExcel(edIds);
+}
+
+function exportExcel(edIds){
+  if(!window.XLSX){showToast('Cargando librería, intenta de nuevo','error');return;}
+  var wb=XLSX.utils.book_new();
+
+  edIds.forEach(function(edId){
+    var ed=D.edificios.find(function(e){return e.id===edId;});
+    if(!ed)return;
+    var pisos=getPisos(edId);
+
+    // ── Build sheet data ──
+    var sheetData=[];
+
+    // Row 1: Edificio title
+    var titleRow=[ed.nombre];
+    sheetData.push(titleRow);
+    sheetData.push([]); // empty row
+
+    // Row 3: Tipos de habitación header
+    sheetData.push(['TIPO DE HABITACION','','TOTAL']);
+    // Get proyecto for specs
+    var proj=D.proyectos.find(function(p){return p.id===ed.proyecto_id;});
+
+    sheetData.push([]); // space
+    sheetData.push([]); // space
+
+    // Row: Column headers - ELEMENTOS + per piso group
+    var headerRow1=['ELEMENTOS','TOTAL'];
+    var headerRow2=['',''];
+    pisos.forEach(function(p){
+      headerRow1.push(p.nombre,'','','');
+      headerRow2.push('CANTIDAD','PINTADO','INSTALADO','RETOCADO');
+    });
+    sheetData.push(headerRow1);
+    sheetData.push(headerRow2);
+
+    // Get all unique element names across all pisos
+    var allElNames=[];
+    pisos.forEach(function(p){
+      getEls(p.id).forEach(function(el){
+        if(allElNames.indexOf(el.nombre)===-1)allElNames.push(el.nombre);
+      });
+    });
+
+    // Data rows
+    allElNames.forEach(function(nombre){
+      var row=[nombre];
+      // Calculate total quantity across pisos
+      var total=0;
+      pisos.forEach(function(p){
+        var el=getEls(p.id).find(function(e){return e.nombre===nombre;});
+        if(el)total+=el.cantidad||0;
+      });
+      row.push(total);
+      pisos.forEach(function(p){
+        var el=getEls(p.id).find(function(e){return e.nombre===nombre;});
+        if(el){
+          row.push(el.cantidad||0);
+          row.push(el.pintado===true?'SI':el.pintado===false?'NO':'');
+          row.push(el.instalado===true?'SI':el.instalado===false?'NO':'');
+          row.push(el.retocado===true?'SI':el.retocado===false?'NO':'');
+        }else{
+          row.push(0,'','','');
+        }
+      });
+      sheetData.push(row);
+    });
+
+    // Empty row then summary
+    sheetData.push([]);
+    sheetData.push(['Reporte generado:', new Date().toLocaleDateString('es-DO',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'})]);
+    sheetData.push(['Generado por:', window._currentUser||'Sistema']);
+
+    // Create worksheet
+    var ws=XLSX.utils.aoa_to_sheet(sheetData);
+
+    // Column widths
+    var cols=[{wch:35},{wch:8}];
+    pisos.forEach(function(){
+      cols.push({wch:12},{wch:10},{wch:12},{wch:12});
+    });
+    ws['!cols']=cols;
+
+    // Merge cells for piso headers
+    var merges=[];
+    // Title merge
+    merges.push({s:{r:0,c:0},e:{r:0,c:1+pisos.length*4}});
+    // Per piso header merges (row index 5 = headerRow1)
+    pisos.forEach(function(p,i){
+      var startCol=2+i*4;
+      merges.push({s:{r:5,c:startCol},e:{r:5,c:startCol+3}});
+    });
+    ws['!merges']=merges;
+
+    // Sheet name max 31 chars
+    var sheetName=ed.nombre.slice(0,31);
+    XLSX.utils.book_append_sheet(wb,ws,sheetName);
+  });
+
+  // Add summary sheet if multiple edificios
+  if(edIds.length>1){
+    var summaryData=[['RESUMEN GENERAL'],[]];
+    summaryData.push(['Edificio','Pisos','Total Elementos','Instalados','Pendientes','% Progreso']);
+    D.edificios.filter(function(ed){return edIds.indexOf(ed.id)!==-1;}).forEach(function(ed){
+      var pisos=getPisos(ed.id);
+      var all=[];pisos.forEach(function(p){all=all.concat(getEls(p.id));});
+      var s=calcStats(all);
+      summaryData.push([ed.nombre,pisos.length,s.total,s.inst,s.pend,s.pct+'%']);
+    });
+    var wsSummary=XLSX.utils.aoa_to_sheet(summaryData);
+    wsSummary['!cols']=[{wch:25},{wch:8},{wch:16},{wch:12},{wch:12},{wch:12}];
+    XLSX.utils.book_append_sheet(wb,wsSummary,'Resumen');
+  }
+
+  var fecha=new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb,'Ibero_Muebles_'+fecha+'.xlsx');
+  showToast('📊 Excel descargado','success');
+}
+
+function updateExcelScope(){
+  var scope=document.getElementById('excel-scope').value;
+  var wrap=document.getElementById('excel-ed-wrap');
+  if(scope==='elegir')wrap.classList.remove('hidden');
+  else wrap.classList.add('hidden');
 }
 
 function selEmoji(el,e){document.querySelectorAll('.emoji-opt').forEach(function(x){x.classList.remove('selected');});el.classList.add('selected');selEmoji_=e;}

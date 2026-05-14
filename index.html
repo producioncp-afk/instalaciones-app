@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Instalaciones">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0d0f14">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Instalaciones</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --bg: #0d0f14;
+  --surface: #161a24;
+  --surface2: #1e2333;
+  --border: #272d3f;
+  --accent: #4fffb0;
+  --red: #ff6b6b;
+  --yellow: #ffd166;
+  --text: #e8ecf5;
+  --muted: #5a6180;
+  --r: 14px;
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 16px);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; }
+html { height: 100%; }
+body {
+  font-family: 'Sora', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}
+
+/* LOGIN */
+#login-screen {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  flex: 1; padding: 2rem;
+  gap: 0;
+}
+.login-logo {
+  width: 64px; height: 64px; border-radius: 18px;
+  background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 30px; margin-bottom: 1.5rem;
+}
+.login-title { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
+.login-sub { font-size: 13px; color: var(--muted); margin-bottom: 2rem; font-family: 'DM Mono', monospace; }
+.login-form { width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 12px; }
+.login-field { display: flex; flex-direction: column; gap: 6px; }
+.login-field label { font-size: 11px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.login-input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 15px;
+  color: var(--text);
+  font-family: 'Sora', sans-serif;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+}
+.login-input:focus { border-color: var(--accent); }
+.login-btn {
+  background: var(--accent);
+  color: #0d0f14;
+  border: none;
+  border-radius: 10px;
+  padding: 15px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: 'Sora', sans-serif;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: opacity 0.2s;
+}
+.login-btn:active { opacity: 0.8; }
+.login-btn:disabled { opacity: 0.5; }
+.login-error { font-size: 13px; color: var(--red); text-align: center; font-family: 'DM Mono', monospace; min-height: 20px; }
+
+/* APP */
+#app { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+#app.visible { display: flex; }
+
+/* TOPBAR */
+.topbar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px 10px;
+  padding-top: calc(12px + var(--sat));
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0; z-index: 10;
+}
+.back-btn {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--surface); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0; font-size: 22px; color: var(--text);
+  transition: background 0.15s;
+}
+.back-btn:active { background: var(--surface2); }
+.back-btn.hidden { opacity: 0; pointer-events: none; }
+.topbar-info { flex: 1; min-width: 0; }
+.topbar-title { font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.topbar-sub { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 1px; }
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+.online-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+.online-dot.offline { background: var(--red); animation: none; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.logout-btn {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--surface); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 15px; color: var(--muted);
+}
+
+/* SCREENS */
+.screen { display: none; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+.screen.active { display: flex; flex-direction: column; }
+
+/* HOME */
+.home-pad { padding: 20px 16px; flex: 1; }
+.section-lbl {
+  font-size: 10px; font-family: 'DM Mono', monospace;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--muted); margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-lbl::after { content:''; flex:1; height:1px; background:var(--border); }
+.ed-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 16px; margin-bottom: 12px;
+  cursor: pointer; transition: border-color 0.2s, transform 0.1s;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.ed-card:active { transform: scale(0.98); border-color: rgba(79,255,176,0.5); }
+.ed-card-top { display: flex; align-items: center; gap: 12px; }
+.ed-icon {
+  width: 46px; height: 46px; border-radius: 12px;
+  background: rgba(79,255,176,0.08); border: 1px solid rgba(79,255,176,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.ed-info { flex: 1; min-width: 0; }
+.ed-name { font-size: 17px; font-weight: 600; }
+.ed-sub { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 3px; }
+.ed-arrow { color: var(--muted); font-size: 20px; }
+.ed-prog-wrap { display: flex; align-items: center; gap: 10px; }
+.ed-pbar { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.ed-pbar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.6s ease; }
+.ed-pct { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--accent); font-weight: 500; min-width: 40px; text-align: right; }
+
+/* PISOS */
+.pisos-pad { flex: 1; padding: 16px; }
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 14px 16px; }
+.stat-lbl { font-size: 10px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 6px; }
+.stat-num { font-size: 28px; font-weight: 600; letter-spacing: -0.03em; }
+.stat-num.g { color: var(--accent); }
+.stat-num.r { color: var(--red); }
+.piso-item {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 14px 16px; margin-bottom: 10px;
+  cursor: pointer; transition: border-color 0.2s, transform 0.1s;
+}
+.piso-item:active { transform: scale(0.98); border-color: rgba(79,255,176,0.4); }
+.piso-badge {
+  width: 42px; height: 42px; border-radius: 10px;
+  background: rgba(79,255,176,0.08);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Mono', monospace; font-size: 12px; color: var(--accent); flex-shrink: 0;
+}
+.piso-mid { flex: 1; min-width: 0; }
+.piso-name { font-size: 15px; font-weight: 500; }
+.piso-detail { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 3px; }
+.piso-pct { font-size: 15px; font-weight: 600; font-family: 'DM Mono', monospace; flex-shrink: 0; }
+
+/* ELEMENTOS */
+.el-header { background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.el-stats { display: grid; grid-template-columns: repeat(3,1fr); border-bottom: 1px solid var(--border); }
+.el-stat { padding: 14px 8px; text-align: center; }
+.el-stat:not(:last-child) { border-right: 1px solid var(--border); }
+.el-stat-lbl { font-size: 9px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 5px; }
+.el-stat-val { font-size: 24px; font-weight: 600; }
+.el-stat-val.g { color: var(--accent); }
+.el-stat-val.r { color: var(--red); }
+.el-prog { padding: 12px 16px; }
+.el-prog-lbl { font-size: 10px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 8px; }
+.el-prog-row { display: flex; align-items: center; gap: 10px; }
+.pbar { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.pbar-fill { height: 100%; border-radius: 3px; transition: width 0.7s ease; }
+.pbar-fill.hi { background: var(--accent); }
+.pbar-fill.lo { background: var(--red); }
+.pbar-pct { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; min-width: 38px; text-align: right; }
+.el-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
+.el-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(39,45,63,0.6);
+  animation: slideIn 0.2s ease both;
+}
+.el-item:last-child { border-bottom: none; }
+@keyframes slideIn { from { opacity:0; transform:translateX(-6px); } to { opacity:1; transform:translateX(0); } }
+.el-indicator { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.el-indicator.si { background: var(--accent); box-shadow: 0 0 6px rgba(79,255,176,0.4); }
+.el-indicator.no { background: var(--red); }
+.el-indicator.nd { background: var(--border); }
+.el-text { flex: 1; min-width: 0; }
+.el-name-text { font-size: 14px; font-weight: 400; line-height: 1.3; }
+.el-meta { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--muted); margin-top: 3px; }
+.el-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+.el-qty { font-size: 17px; font-weight: 600; font-family: 'DM Mono', monospace; }
+
+/* Toggle switch */
+.toggle-wrap { display: flex; align-items: center; gap: 6px; }
+.toggle-lbl { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--muted); }
+.toggle {
+  width: 44px; height: 24px; border-radius: 12px;
+  background: var(--border); position: relative;
+  cursor: pointer; transition: background 0.3s;
+  border: none; outline: none; flex-shrink: 0;
+}
+.toggle.on { background: var(--accent); }
+.toggle.nd-state { background: var(--surface2); border: 1px solid var(--border); }
+.toggle::after {
+  content: ''; position: absolute;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: white; top: 3px; left: 3px;
+  transition: transform 0.3s;
+}
+.toggle.on::after { transform: translateX(20px); background: #0d0f14; }
+.toggle:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: calc(20px + var(--sab));
+  left: 50%; transform: translateX(-50%) translateY(100px);
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 20px;
+  font-size: 13px; font-family: 'DM Mono', monospace;
+  color: var(--text); z-index: 999;
+  transition: transform 0.3s ease;
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.success { border-color: rgba(79,255,176,0.4); color: var(--accent); }
+.toast.error { border-color: rgba(255,107,107,0.4); color: var(--red); }
+
+/* Loading */
+.loading {
+  display: flex; align-items: center; justify-content: center;
+  padding: 3rem; flex: 1;
+}
+.spinner {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.safe-bottom { height: var(--sab); flex-shrink: 0; }
+
+/* Admin badge */
+.admin-badge {
+  font-size: 10px; font-family: 'DM Mono', monospace;
+  padding: 3px 8px; border-radius: 6px;
+  background: rgba(79,255,176,0.1); color: var(--accent);
+  border: 1px solid rgba(79,255,176,0.2);
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-logo">🏗️</div>
+  <div class="login-title">Instalaciones</div>
+  <div class="login-sub">CHECK-LIST DE SEGUIMIENTO</div>
+  <div class="login-form">
+    <div class="login-field">
+      <label>Correo electrónico</label>
+      <input class="login-input" type="email" id="login-email" placeholder="usuario@empresa.com" autocomplete="email">
+    </div>
+    <div class="login-field">
+      <label>Contraseña</label>
+      <input class="login-input" type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <div class="login-error" id="login-error"></div>
+    <button class="login-btn" id="login-btn" onclick="doLogin()">Entrar</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="back-btn hidden" id="back-btn" onclick="goBack()">‹</div>
+    <div class="topbar-info">
+      <div class="topbar-title" id="t-title">Instalaciones</div>
+      <div class="topbar-sub" id="t-sub">Check-list de seguimiento</div>
+    </div>
+    <div class="topbar-right">
+      <div class="online-dot" id="online-dot"></div>
+      <div class="logout-btn" onclick="doLogout()" title="Cerrar sesión">⏻</div>
+    </div>
+  </div>
+
+  <!-- SCREEN: HOME -->
+  <div class="screen active" id="screen-home">
+    <div class="home-pad">
+      <div class="section-lbl">Edificios</div>
+      <div id="ed-list"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+    <div class="safe-bottom"></div>
+  </div>
+
+  <!-- SCREEN: PISOS -->
+  <div class="screen" id="screen-pisos">
+    <div class="pisos-pad">
+      <div class="stats-grid" id="pisos-stats"></div>
+      <div class="section-lbl">Pisos</div>
+      <div id="piso-list"></div>
+    </div>
+    <div class="safe-bottom"></div>
+  </div>
+
+  <!-- SCREEN: ELEMENTOS -->
+  <div class="screen" id="screen-elementos">
+    <div class="el-header">
+      <div class="el-stats" id="el-stats"></div>
+      <div class="el-prog">
+        <div class="el-prog-lbl">Progreso de instalación</div>
+        <div class="el-prog-row">
+          <div class="pbar"><div class="pbar-fill" id="pbar-fill"></div></div>
+          <div class="pbar-pct" id="pbar-pct">0%</div>
+        </div>
+      </div>
+    </div>
+    <div class="el-list" id="el-list"></div>
+    <div class="safe-bottom"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPA_URL = 'https://zlkmthwmcikcnvxtcmql.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpsa210aHdtY2lrY252eHRjbXFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MjU2MDgsImV4cCI6MjA5NDMwMTYwOH0.IKiEqXCvtVXUrXkkuihSghH08Ebach31MQ7u5e2TBaI';
+const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+let currentUser = null;
+let isAdmin = false;
+let curEd = null, curPisoId = null;
+const navStack = [];
+let realtimeSub = null;
+let allData = { edificios: [], pisos: [], elementos: [] };
+
+// ── LOGIN ──
+document.getElementById('login-email').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('login-password').focus(); });
+document.getElementById('login-password').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-password').value;
+  const btn = document.getElementById('login-btn');
+  const err = document.getElementById('login-error');
+  err.textContent = '';
+  btn.disabled = true;
+  btn.textContent = 'Verificando...';
+
+  const { data, error } = await sb
+    .from('usuarios')
+    .select('*')
+    .eq('email', email)
+    .eq('password_hash', pass)
+    .single();
+
+  if (error || !data) {
+    err.textContent = 'Correo o contraseña incorrectos';
+    btn.disabled = false;
+    btn.textContent = 'Entrar';
+    return;
+  }
+
+  currentUser = data;
+  isAdmin = data.rol === 'admin';
+  localStorage.setItem('instalaciones_user', JSON.stringify(data));
+  startApp();
+}
+
+function doLogout() {
+  localStorage.removeItem('instalaciones_user');
+  currentUser = null;
+  isAdmin = false;
+  if (realtimeSub) sb.removeChannel(realtimeSub);
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').classList.remove('visible');
+  document.getElementById('login-email').value = '';
+  document.getElementById('login-password').value = '';
+}
+
+// Auto-login
+const saved = localStorage.getItem('instalaciones_user');
+if (saved) {
+  try {
+    currentUser = JSON.parse(saved);
+    isAdmin = currentUser.rol === 'admin';
+    startApp();
+  } catch(e) { localStorage.removeItem('instalaciones_user'); }
+}
+
+async function startApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+  document.getElementById('t-sub').textContent = currentUser.nombre + (isAdmin ? ' · Admin' : ' · Viewer');
+  await loadData();
+  buildHome();
+  setupRealtime();
+}
+
+// ── DATA ──
+async function loadData() {
+  const [edRes, piRes, elRes] = await Promise.all([
+    sb.from('edificios').select('*').order('id'),
+    sb.from('pisos').select('*').order('orden'),
+    sb.from('elementos').select('*').order('id')
+  ]);
+  allData.edificios = edRes.data || [];
+  allData.pisos = piRes.data || [];
+  allData.elementos = elRes.data || [];
+  updateOnlineDot(true);
+}
+
+function getPisos(edId) { return allData.pisos.filter(p => p.edificio_id === edId); }
+function getElementos(pisoId) { return allData.elementos.filter(e => e.piso_id === pisoId); }
+
+function calcStats(elementos) {
+  let inst = 0, pend = 0;
+  elementos.forEach(e => {
+    if (e.instalado === true) inst++;
+    if (e.instalado === false) pend++;
+  });
+  const pct = (inst + pend) > 0 ? Math.round(inst / (inst + pend) * 100) : 0;
+  return { inst, pend, pct, total: elementos.length };
+}
+
+function calcEdStats(edId) {
+  const pisos = getPisos(edId);
+  const all = pisos.flatMap(p => getElementos(p.id));
+  return calcStats(all);
+}
+
+// ── REALTIME ──
+function setupRealtime() {
+  realtimeSub = sb.channel('elementos-changes')
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'elementos' }, payload => {
+      const idx = allData.elementos.findIndex(e => e.id === payload.new.id);
+      if (idx !== -1) allData.elementos[idx] = payload.new;
+      onRealtimeUpdate(payload.new);
+    })
+    .subscribe();
+}
+
+function onRealtimeUpdate(updated) {
+  // Refresh current screen
+  const activeScreen = document.querySelector('.screen.active')?.id;
+  if (activeScreen === 'screen-home') buildHome();
+  else if (activeScreen === 'screen-pisos') buildPisos(curEd, false);
+  else if (activeScreen === 'screen-elementos') refreshElementos();
+
+  // Show toast if someone else updated
+  if (updated.actualizado_por && updated.actualizado_por !== currentUser?.nombre) {
+    const st = updated.instalado ? '✅ instalado' : '❌ pendiente';
+    showToast(`${updated.actualizado_por} marcó "${updated.nombre}" como ${st}`, 'success');
+  }
+}
+
+// ── NAVIGATION ──
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  document.getElementById('screen-' + id).scrollTop = 0;
+}
+
+function goBack() {
+  if (!navStack.length) return;
+  const prev = navStack.pop();
+  if (prev === 'home') {
+    show('home');
+    document.getElementById('t-title').textContent = 'Instalaciones';
+    document.getElementById('t-sub').textContent = currentUser.nombre + (isAdmin ? ' · Admin' : ' · Viewer');
+    document.getElementById('back-btn').classList.add('hidden');
+  } else if (prev === 'pisos') {
+    buildPisos(curEd, false);
+    navStack.pop();
+  }
+}
+
+// ── HOME ──
+function buildHome() {
+  const ed_list = document.getElementById('ed-list');
+  if (!allData.edificios.length) {
+    ed_list.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    return;
+  }
+  ed_list.innerHTML = allData.edificios.map(ed => {
+    const s = calcEdStats(ed.id);
+    const pisos = getPisos(ed.id);
+    return `<div class="ed-card" onclick="buildPisos('${ed.id}')">
+      <div class="ed-card-top">
+        <div class="ed-icon">${ed.icon}</div>
+        <div class="ed-info">
+          <div class="ed-name">${ed.nombre}</div>
+          <div class="ed-sub">${pisos.length} pisos · ${s.inst} inst. · ${s.pend} pend.</div>
+        </div>
+        <div class="ed-arrow">›</div>
+      </div>
+      <div class="ed-prog-wrap">
+        <div class="ed-pbar"><div class="ed-pbar-fill" style="width:${s.pct}%"></div></div>
+        <div class="ed-pct">${s.pct}% inst.</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── PISOS ──
+function buildPisos(edId, push = true) {
+  curEd = edId;
+  if (push) navStack.push('home');
+  const ed = allData.edificios.find(e => e.id === edId);
+  const pisos = getPisos(edId);
+  const allEls = pisos.flatMap(p => getElementos(p.id));
+  const s = calcStats(allEls);
+
+  document.getElementById('t-title').textContent = ed.nombre;
+  document.getElementById('t-sub').textContent = `${pisos.length} pisos`;
+  document.getElementById('back-btn').classList.remove('hidden');
+
+  document.getElementById('pisos-stats').innerHTML = `
+    <div class="stat-box"><div class="stat-lbl">Total elementos</div><div class="stat-num">${s.total}</div></div>
+    <div class="stat-box"><div class="stat-lbl">Pisos</div><div class="stat-num">${pisos.length}</div></div>
+    <div class="stat-box"><div class="stat-lbl">Instalados</div><div class="stat-num g">${s.inst}</div></div>
+    <div class="stat-box"><div class="stat-lbl">Pendientes</div><div class="stat-num r">${s.pend}</div></div>`;
+
+  document.getElementById('piso-list').innerHTML = pisos.map((p, i) => {
+    const ps = calcStats(getElementos(p.id));
+    const col = ps.pct >= 70 ? '#4fffb0' : ps.pct >= 30 ? '#ffd166' : '#ff6b6b';
+    return `<div class="piso-item" onclick="buildElementos(${p.id})">
+      <div class="piso-badge">P${i+1}</div>
+      <div class="piso-mid">
+        <div class="piso-name">${p.nombre}</div>
+        <div class="piso-detail">${ps.inst} inst. · ${ps.pend} pend. · ${ps.total} total</div>
+      </div>
+      <div class="piso-pct" style="color:${col}">${ps.pct}%</div>
+    </div>`;
+  }).join('');
+
+  show('pisos');
+}
+
+// ── ELEMENTOS ──
+function buildElementos(pisoId, push = true) {
+  curPisoId = pisoId;
+  if (push) navStack.push('pisos');
+  const piso = allData.pisos.find(p => p.id === pisoId);
+  const ed = allData.edificios.find(e => e.id === piso.edificio_id);
+
+  document.getElementById('t-title').textContent = piso.nombre;
+  document.getElementById('t-sub').textContent = ed.nombre;
+  document.getElementById('back-btn').classList.remove('hidden');
+
+  show('elementos');
+  refreshElementos();
+}
+
+function refreshElementos() {
+  if (!curPisoId) return;
+  const items = getElementos(curPisoId);
+  const s = calcStats(items);
+
+  document.getElementById('el-stats').innerHTML = `
+    <div class="el-stat"><div class="el-stat-lbl">Total</div><div class="el-stat-val">${items.length}</div></div>
+    <div class="el-stat"><div class="el-stat-lbl">Instalados</div><div class="el-stat-val g">${s.inst}</div></div>
+    <div class="el-stat"><div class="el-stat-lbl">Pendientes</div><div class="el-stat-val r">${s.pend}</div></div>`;
+
+  const fill = document.getElementById('pbar-fill');
+  fill.className = 'pbar-fill ' + (s.pct >= 50 ? 'hi' : 'lo');
+  fill.style.width = s.pct + '%';
+  document.getElementById('pbar-pct').textContent = s.pct + '%';
+
+  document.getElementById('el-list').innerHTML = items.map((el, i) => {
+    const cls = el.instalado === true ? 'si' : el.instalado === false ? 'no' : 'nd';
+    const meta = el.actualizado_por
+      ? `${el.actualizado_por} · ${formatDate(el.actualizado_en)}`
+      : 'Sin actualizar';
+
+    const toggleHtml = isAdmin ? `
+      <div class="toggle-wrap">
+        <span class="toggle-lbl">${el.instalado === true ? 'INST.' : el.instalado === false ? 'PEND.' : 'N/D'}</span>
+        <button class="toggle ${el.instalado === true ? 'on' : el.instalado === null ? 'nd-state' : ''}"
+          id="tog-${el.id}"
+          onclick="toggleInstalado(${el.id}, ${el.instalado})"
+          aria-label="Cambiar estado de ${el.nombre}">
+        </button>
+      </div>` : `<div style="font-size:11px; font-family:'DM Mono',monospace; color:${cls==='si'?'var(--accent)':cls==='no'?'var(--red)':'var(--muted)'}">
+        ${el.instalado === true ? 'INSTALADO' : el.instalado === false ? 'PENDIENTE' : '—'}
+      </div>`;
+
+    return `<div class="el-item" style="animation-delay:${i*0.02}s">
+      <div class="el-indicator ${cls}"></div>
+      <div class="el-text">
+        <div class="el-name-text">${el.nombre}</div>
+        <div class="el-meta">${meta}</div>
+      </div>
+      <div class="el-right">
+        <div class="el-qty">${el.cantidad}</div>
+        ${toggleHtml}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── TOGGLE ──
+async function toggleInstalado(elId, currentVal) {
+  if (!isAdmin) return;
+  const newVal = currentVal === true ? false : true;
+  const btn = document.getElementById('tog-' + elId);
+  if (btn) btn.disabled = true;
+
+  const { error } = await sb.from('elementos').update({
+    instalado: newVal,
+    actualizado_por: currentUser.nombre,
+    actualizado_en: new Date().toISOString()
+  }).eq('id', elId);
+
+  if (error) {
+    showToast('Error al guardar', 'error');
+    if (btn) btn.disabled = false;
+    return;
+  }
+
+  // Update local data
+  const idx = allData.elementos.findIndex(e => e.id === elId);
+  if (idx !== -1) {
+    allData.elementos[idx].instalado = newVal;
+    allData.elementos[idx].actualizado_por = currentUser.nombre;
+    allData.elementos[idx].actualizado_en = new Date().toISOString();
+  }
+
+  refreshElementos();
+  showToast(newVal ? '✅ Marcado como instalado' : '❌ Marcado como pendiente', 'success');
+}
+
+// ── UTILS ──
+function formatDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleDateString('es-DO', { day:'2-digit', month:'short' }) + ' ' +
+         d.toLocaleTimeString('es-DO', { hour:'2-digit', minute:'2-digit' });
+}
+
+let toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.className = 'toast'; }, 3000);
+}
+
+function updateOnlineDot(online) {
+  const dot = document.getElementById('online-dot');
+  if (dot) dot.className = 'online-dot' + (online ? '' : ' offline');
+}
+
+// Online/offline detection
+window.addEventListener('online', () => { updateOnlineDot(true); loadData().then(buildHome); });
+window.addEventListener('offline', () => updateOnlineDot(false));
+
+// Service worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>

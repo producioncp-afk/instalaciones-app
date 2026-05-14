@@ -4,285 +4,280 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Instalaciones">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#0d0f14">
+<meta name="theme-color" content="#ffffff">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>Instalaciones</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
-  --bg: #0d0f14;
-  --surface: #161a24;
-  --surface2: #1e2333;
-  --border: #272d3f;
-  --accent: #4fffb0;
-  --red: #ff6b6b;
-  --yellow: #ffd166;
-  --text: #e8ecf5;
-  --muted: #5a6180;
-  --r: 14px;
+  --bg: #f1f5f9;
+  --white: #ffffff;
+  --border: #e2e8f0;
+  --blue: #2563eb;
+  --blue-light: #eff6ff;
+  --green: #16a34a;
+  --green-light: #f0fdf4;
+  --red: #dc2626;
+  --red-light: #fef2f2;
+  --yellow: #d97706;
+  --yellow-light: #fffbeb;
+  --text: #0f172a;
+  --text2: #64748b;
+  --text3: #94a3b8;
+  --r: 16px;
   --sat: env(safe-area-inset-top, 0px);
   --sab: env(safe-area-inset-bottom, 16px);
+  --nb: 68px;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; }
-html { height: 100%; }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html,body { height:100%; background:var(--bg); }
 body {
-  font-family: 'Sora', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  position: fixed;
-  width: 100%;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: var(--text); height:100dvh;
+  display:flex; flex-direction:column;
+  overflow:hidden; position:fixed; width:100%;
 }
 
 /* LOGIN */
 #login-screen {
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  flex: 1; padding: 2rem;
-  gap: 0;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  flex:1; padding:2rem 1.5rem;
+  background:var(--white);
 }
 .login-logo {
-  width: 64px; height: 64px; border-radius: 18px;
-  background: var(--accent);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 30px; margin-bottom: 1.5rem;
+  width:76px; height:76px; border-radius:22px;
+  background:var(--blue); display:flex;
+  align-items:center; justify-content:center;
+  font-size:36px; margin-bottom:1.5rem;
 }
-.login-title { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
-.login-sub { font-size: 13px; color: var(--muted); margin-bottom: 2rem; font-family: 'DM Mono', monospace; }
-.login-form { width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 12px; }
-.login-field { display: flex; flex-direction: column; gap: 6px; }
-.login-field label { font-size: 11px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
-.login-input {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 14px 16px;
-  font-size: 15px;
-  color: var(--text);
-  font-family: 'Sora', sans-serif;
-  outline: none;
-  width: 100%;
-  transition: border-color 0.2s;
-  -webkit-appearance: none;
+.login-title { font-size:26px; font-weight:700; margin-bottom:4px; }
+.login-sub { font-size:14px; color:var(--text2); margin-bottom:2.5rem; }
+.login-form { width:100%; max-width:360px; display:flex; flex-direction:column; gap:14px; }
+.flbl { font-size:13px; font-weight:600; margin-bottom:6px; display:block; }
+.linput {
+  width:100%; padding:14px 16px;
+  background:var(--bg); border:1.5px solid var(--border);
+  border-radius:12px; font-size:15px; color:var(--text);
+  font-family:'Plus Jakarta Sans',sans-serif;
+  outline:none; transition:border-color 0.2s; -webkit-appearance:none;
 }
-.login-input:focus { border-color: var(--accent); }
-.login-btn {
-  background: var(--accent);
-  color: #0d0f14;
-  border: none;
-  border-radius: 10px;
-  padding: 15px;
-  font-size: 15px;
-  font-weight: 600;
-  font-family: 'Sora', sans-serif;
-  cursor: pointer;
-  margin-top: 4px;
-  transition: opacity 0.2s;
+.linput:focus { border-color:var(--blue); background:var(--white); }
+.lbtn {
+  background:var(--blue); color:white; border:none;
+  border-radius:12px; padding:15px; font-size:15px;
+  font-weight:700; font-family:'Plus Jakarta Sans',sans-serif;
+  cursor:pointer; margin-top:4px; transition:opacity 0.2s;
 }
-.login-btn:active { opacity: 0.8; }
-.login-btn:disabled { opacity: 0.5; }
-.login-error { font-size: 13px; color: var(--red); text-align: center; font-family: 'DM Mono', monospace; min-height: 20px; }
+.lbtn:active { opacity:0.85; }
+.lbtn:disabled { opacity:0.5; }
+.lerr { font-size:13px; color:var(--red); text-align:center; min-height:18px; font-weight:500; }
 
 /* APP */
-#app { display: none; flex-direction: column; flex: 1; overflow: hidden; }
-#app.visible { display: flex; }
+#app { display:none; flex-direction:column; flex:1; overflow:hidden; }
+#app.v { display:flex; }
 
 /* TOPBAR */
 .topbar {
-  display: flex; align-items: center; gap: 10px;
-  padding: 12px 16px 10px;
-  padding-top: calc(12px + var(--sat));
-  background: var(--bg);
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0; z-index: 10;
+  display:flex; align-items:center; gap:10px;
+  padding:14px 16px 12px;
+  padding-top:calc(14px + var(--sat));
+  background:var(--white); border-bottom:1px solid var(--border);
+  flex-shrink:0;
 }
 .back-btn {
-  width: 36px; height: 36px; border-radius: 10px;
-  background: var(--surface); border: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; flex-shrink: 0; font-size: 22px; color: var(--text);
-  transition: background 0.15s;
+  width:36px; height:36px; border-radius:10px;
+  background:var(--bg); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; font-size:22px; color:var(--text); flex-shrink:0;
 }
-.back-btn:active { background: var(--surface2); }
-.back-btn.hidden { opacity: 0; pointer-events: none; }
-.topbar-info { flex: 1; min-width: 0; }
-.topbar-title { font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.topbar-sub { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 1px; }
-.topbar-right { display: flex; align-items: center; gap: 8px; }
-.online-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
-.online-dot.offline { background: var(--red); animation: none; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-.logout-btn {
-  width: 32px; height: 32px; border-radius: 8px;
-  background: var(--surface); border: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; font-size: 15px; color: var(--muted);
+.back-btn.h { opacity:0; pointer-events:none; }
+.tb-info { flex:1; min-width:0; }
+.tb-title { font-size:17px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.tb-sub { font-size:12px; color:var(--text2); margin-top:1px; }
+.tb-right { display:flex; align-items:center; gap:8px; }
+.avatar {
+  width:36px; height:36px; border-radius:50%;
+  background:var(--blue); color:white;
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; font-weight:700; cursor:pointer; flex-shrink:0;
 }
+.opill {
+  display:flex; align-items:center; gap:4px;
+  background:var(--green-light); border-radius:20px;
+  padding:4px 10px; font-size:11px; font-weight:600; color:var(--green);
+}
+.opill .d { width:6px; height:6px; border-radius:50%; background:var(--green); }
+.opill.off { background:var(--red-light); color:var(--red); }
+.opill.off .d { background:var(--red); }
 
 /* SCREENS */
-.screen { display: none; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
-.screen.active { display: flex; flex-direction: column; }
+.screen {
+  display:none; flex:1; overflow-y:auto;
+  -webkit-overflow-scrolling:touch; overscroll-behavior:contain;
+  padding-bottom:calc(var(--nb) + var(--sab));
+}
+.screen.active { display:block; }
+
+/* BOTTOM NAV */
+.bnav {
+  display:flex; background:var(--white);
+  border-top:1px solid var(--border);
+  padding-bottom:var(--sab); flex-shrink:0; z-index:100;
+}
+.nitem {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  padding:10px 4px; cursor:pointer; gap:3px;
+  color:var(--text3); transition:color 0.15s;
+}
+.nitem.active { color:var(--blue); }
+.nicon { font-size:22px; line-height:1; }
+.nlbl { font-size:10px; font-weight:700; letter-spacing:0.02em; }
 
 /* HOME */
-.home-pad { padding: 20px 16px; flex: 1; }
-.section-lbl {
-  font-size: 10px; font-family: 'DM Mono', monospace;
-  text-transform: uppercase; letter-spacing: 0.12em;
-  color: var(--muted); margin-bottom: 12px;
-  display: flex; align-items: center; gap: 8px;
+.pad { padding:20px 16px; }
+.hello { font-size:22px; font-weight:700; margin-bottom:2px; }
+.hello-sub { font-size:13px; color:var(--text2); margin-bottom:20px; }
+
+.banner {
+  background:var(--blue); border-radius:var(--r);
+  padding:20px; margin-bottom:20px;
+  display:flex; align-items:center; gap:14px;
 }
-.section-lbl::after { content:''; flex:1; height:1px; background:var(--border); }
+.b-icon { font-size:38px; }
+.b-info { flex:1; }
+.b-lbl { font-size:12px; font-weight:600; color:rgba(255,255,255,0.7); margin-bottom:4px; letter-spacing:0.05em; text-transform:uppercase; }
+.b-val { font-size:26px; font-weight:700; color:white; }
+.b-sub { font-size:12px; color:rgba(255,255,255,0.65); margin-top:2px; }
+.b-pct { font-size:24px; font-weight:700; color:white; background:rgba(255,255,255,0.18); border-radius:12px; padding:8px 14px; flex-shrink:0; }
+
+.sec-title { font-size:16px; font-weight:700; margin-bottom:12px; }
+
 .ed-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--r); padding: 16px; margin-bottom: 12px;
-  cursor: pointer; transition: border-color 0.2s, transform 0.1s;
-  display: flex; flex-direction: column; gap: 12px;
+  background:var(--white); border-radius:var(--r);
+  border:1px solid var(--border); padding:16px;
+  margin-bottom:12px; cursor:pointer;
+  transition:transform 0.1s;
 }
-.ed-card:active { transform: scale(0.98); border-color: rgba(79,255,176,0.5); }
-.ed-card-top { display: flex; align-items: center; gap: 12px; }
-.ed-icon {
-  width: 46px; height: 46px; border-radius: 12px;
-  background: rgba(79,255,176,0.08); border: 1px solid rgba(79,255,176,0.15);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 22px; flex-shrink: 0;
-}
-.ed-info { flex: 1; min-width: 0; }
-.ed-name { font-size: 17px; font-weight: 600; }
-.ed-sub { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 3px; }
-.ed-arrow { color: var(--muted); font-size: 20px; }
-.ed-prog-wrap { display: flex; align-items: center; gap: 10px; }
-.ed-pbar { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
-.ed-pbar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.6s ease; }
-.ed-pct { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--accent); font-weight: 500; min-width: 40px; text-align: right; }
+.ed-card:active { transform:scale(0.98); }
+.ed-top { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+.ed-ico { width:48px; height:48px; border-radius:14px; background:var(--blue-light); display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0; }
+.ed-nm { font-size:16px; font-weight:700; }
+.ed-sb { font-size:12px; color:var(--text2); margin-top:2px; }
+.ed-arr { margin-left:auto; font-size:20px; color:var(--text3); }
+.prog { display:flex; align-items:center; gap:10px; }
+.pb { flex:1; height:6px; background:var(--bg); border-radius:3px; overflow:hidden; }
+.pbf { height:100%; border-radius:3px; transition:width 0.6s; }
+.pct { font-size:13px; font-weight:700; min-width:36px; text-align:right; }
 
 /* PISOS */
-.pisos-pad { flex: 1; padding: 16px; }
-.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-.stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 14px 16px; }
-.stat-lbl { font-size: 10px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 6px; }
-.stat-num { font-size: 28px; font-weight: 600; letter-spacing: -0.03em; }
-.stat-num.g { color: var(--accent); }
-.stat-num.r { color: var(--red); }
-.piso-item {
-  display: flex; align-items: center; gap: 12px;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--r); padding: 14px 16px; margin-bottom: 10px;
-  cursor: pointer; transition: border-color 0.2s, transform 0.1s;
+.sg { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
+.sc { background:var(--white); border-radius:var(--r); border:1px solid var(--border); padding:14px 16px; }
+.sl { font-size:11px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px; }
+.sv { font-size:28px; font-weight:700; }
+.sv.g { color:var(--green); }
+.sv.r { color:var(--red); }
+.sv.b { color:var(--blue); }
+
+.pc {
+  background:var(--white); border-radius:var(--r);
+  border:1px solid var(--border); padding:16px;
+  margin-bottom:10px; cursor:pointer;
+  display:flex; align-items:center; gap:12px;
+  transition:transform 0.1s;
 }
-.piso-item:active { transform: scale(0.98); border-color: rgba(79,255,176,0.4); }
-.piso-badge {
-  width: 42px; height: 42px; border-radius: 10px;
-  background: rgba(79,255,176,0.08);
-  display: flex; align-items: center; justify-content: center;
-  font-family: 'DM Mono', monospace; font-size: 12px; color: var(--accent); flex-shrink: 0;
-}
-.piso-mid { flex: 1; min-width: 0; }
-.piso-name { font-size: 15px; font-weight: 500; }
-.piso-detail { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 3px; }
-.piso-pct { font-size: 15px; font-weight: 600; font-family: 'DM Mono', monospace; flex-shrink: 0; }
+.pc:active { transform:scale(0.98); }
+.pnum { width:44px; height:44px; border-radius:12px; background:var(--blue-light); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:var(--blue); flex-shrink:0; }
+.pi { flex:1; min-width:0; }
+.pn { font-size:15px; font-weight:600; }
+.pd { font-size:12px; color:var(--text2); margin-top:2px; }
+.pr { text-align:right; flex-shrink:0; }
+.pp { font-size:16px; font-weight:700; }
+.pa { font-size:16px; color:var(--text3); }
 
 /* ELEMENTOS */
-.el-header { background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
-.el-stats { display: grid; grid-template-columns: repeat(3,1fr); border-bottom: 1px solid var(--border); }
-.el-stat { padding: 14px 8px; text-align: center; }
-.el-stat:not(:last-child) { border-right: 1px solid var(--border); }
-.el-stat-lbl { font-size: 9px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 5px; }
-.el-stat-val { font-size: 24px; font-weight: 600; }
-.el-stat-val.g { color: var(--accent); }
-.el-stat-val.r { color: var(--red); }
-.el-prog { padding: 12px 16px; }
-.el-prog-lbl { font-size: 10px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 8px; }
-.el-prog-row { display: flex; align-items: center; gap: 10px; }
-.pbar { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-.pbar-fill { height: 100%; border-radius: 3px; transition: width 0.7s ease; }
-.pbar-fill.hi { background: var(--accent); }
-.pbar-fill.lo { background: var(--red); }
-.pbar-pct { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; min-width: 38px; text-align: right; }
-.el-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.esm { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; padding:16px; }
+.esc { background:var(--white); border-radius:12px; border:1px solid var(--border); padding:12px 8px; text-align:center; }
+.esl { font-size:10px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px; }
+.esv { font-size:22px; font-weight:700; }
+.esv.g { color:var(--green); }
+.esv.r { color:var(--red); }
+.epw { padding:0 16px 16px; }
+.epl { font-size:12px; font-weight:600; color:var(--text2); margin-bottom:8px; }
+.epr { display:flex; align-items:center; gap:10px; }
 
-.el-item {
-  display: flex; align-items: center; gap: 12px;
-  padding: 14px 16px;
-  border-bottom: 1px solid rgba(39,45,63,0.6);
-  animation: slideIn 0.2s ease both;
+.elw { background:var(--white); overflow:hidden; }
+.elt { padding:14px 16px 10px; font-size:15px; font-weight:700; border-bottom:1px solid var(--border); }
+.elr {
+  display:flex; align-items:center; gap:12px;
+  padding:14px 16px; border-bottom:1px solid var(--border);
+  animation:fu 0.2s ease both;
 }
-.el-item:last-child { border-bottom: none; }
-@keyframes slideIn { from { opacity:0; transform:translateX(-6px); } to { opacity:1; transform:translateX(0); } }
-.el-indicator { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.el-indicator.si { background: var(--accent); box-shadow: 0 0 6px rgba(79,255,176,0.4); }
-.el-indicator.no { background: var(--red); }
-.el-indicator.nd { background: var(--border); }
-.el-text { flex: 1; min-width: 0; }
-.el-name-text { font-size: 14px; font-weight: 400; line-height: 1.3; }
-.el-meta { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--muted); margin-top: 3px; }
-.el-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
-.el-qty { font-size: 17px; font-weight: 600; font-family: 'DM Mono', monospace; }
+.elr:last-child { border-bottom:none; }
+@keyframes fu { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
+.sd { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.sd.si { background:var(--green); }
+.sd.no { background:var(--red); }
+.sd.nd { background:#cbd5e1; }
+.en { flex:1; }
+.en-nm { font-size:14px; font-weight:500; line-height:1.3; }
+.en-mt { font-size:11px; color:var(--text3); margin-top:2px; }
+.er { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
+.eq { font-size:16px; font-weight:700; }
+.sbg { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; white-space:nowrap; }
+.sbg.si { background:var(--green-light); color:var(--green); }
+.sbg.no { background:var(--red-light); color:var(--red); }
+.sbg.nd { background:var(--bg); color:var(--text3); }
 
-/* Toggle switch */
-.toggle-wrap { display: flex; align-items: center; gap: 6px; }
-.toggle-lbl { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--muted); }
-.toggle {
-  width: 44px; height: 24px; border-radius: 12px;
-  background: var(--border); position: relative;
-  cursor: pointer; transition: background 0.3s;
-  border: none; outline: none; flex-shrink: 0;
+.tgl {
+  width:46px; height:26px; border-radius:13px;
+  background:#e2e8f0; position:relative;
+  cursor:pointer; border:none; outline:none;
+  transition:background 0.25s; flex-shrink:0;
 }
-.toggle.on { background: var(--accent); }
-.toggle.nd-state { background: var(--surface2); border: 1px solid var(--border); }
-.toggle::after {
-  content: ''; position: absolute;
-  width: 18px; height: 18px; border-radius: 50%;
-  background: white; top: 3px; left: 3px;
-  transition: transform 0.3s;
+.tgl.on { background:var(--green); }
+.tgl::after {
+  content:''; position:absolute;
+  width:20px; height:20px; border-radius:50%;
+  background:white; top:3px; left:3px;
+  transition:transform 0.25s;
+  box-shadow:0 1px 4px rgba(0,0,0,0.15);
 }
-.toggle.on::after { transform: translateX(20px); background: #0d0f14; }
-.toggle:disabled { opacity: 0.4; cursor: not-allowed; }
+.tgl.on::after { transform:translateX(20px); }
+.tgl:disabled { opacity:0.4; }
 
-/* Toast */
+/* RESUMEN */
+.rc { background:var(--white); border-radius:var(--r); border:1px solid var(--border); overflow:hidden; margin-bottom:16px; }
+.rch { padding:14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+.rct { font-size:15px; font-weight:700; flex:1; }
+.rr { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--border); }
+.rr:last-child { border-bottom:none; }
+.rn { font-size:14px; font-weight:500; }
+.rrr { display:flex; align-items:center; gap:8px; }
+.mpb { width:60px; height:5px; background:var(--bg); border-radius:3px; overflow:hidden; }
+.mpbf { height:100%; border-radius:3px; }
+
+/* TOAST */
 .toast {
-  position: fixed; bottom: calc(20px + var(--sab));
-  left: 50%; transform: translateX(-50%) translateY(100px);
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 10px; padding: 10px 20px;
-  font-size: 13px; font-family: 'DM Mono', monospace;
-  color: var(--text); z-index: 999;
-  transition: transform 0.3s ease;
-  white-space: nowrap;
+  position:fixed; bottom:calc(var(--nb) + var(--sab) + 12px);
+  left:50%; transform:translateX(-50%) translateY(80px);
+  background:var(--text); color:white; border-radius:12px;
+  padding:10px 20px; font-size:13px; font-weight:600;
+  z-index:999; transition:transform 0.3s; white-space:nowrap;
 }
-.toast.show { transform: translateX(-50%) translateY(0); }
-.toast.success { border-color: rgba(79,255,176,0.4); color: var(--accent); }
-.toast.error { border-color: rgba(255,107,107,0.4); color: var(--red); }
+.toast.show { transform:translateX(-50%) translateY(0); }
+.toast.s { background:var(--green); }
+.toast.e { background:var(--red); }
 
-/* Loading */
-.loading {
-  display: flex; align-items: center; justify-content: center;
-  padding: 3rem; flex: 1;
-}
-.spinner {
-  width: 32px; height: 32px; border-radius: 50%;
-  border: 2px solid var(--border);
-  border-top-color: var(--accent);
-  animation: spin 0.7s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.safe-bottom { height: var(--sab); flex-shrink: 0; }
-
-/* Admin badge */
-.admin-badge {
-  font-size: 10px; font-family: 'DM Mono', monospace;
-  padding: 3px 8px; border-radius: 6px;
-  background: rgba(79,255,176,0.1); color: var(--accent);
-  border: 1px solid rgba(79,255,176,0.2);
-}
+.spin-wrap { display:flex; align-items:center; justify-content:center; padding:4rem; }
+.spin { width:30px; height:30px; border-radius:50%; border:3px solid var(--border); border-top-color:var(--blue); animation:sp 0.7s linear infinite; }
+@keyframes sp { to{transform:rotate(360deg)} }
 </style>
 </head>
 <body>
@@ -291,413 +286,311 @@ body {
 <div id="login-screen">
   <div class="login-logo">🏗️</div>
   <div class="login-title">Instalaciones</div>
-  <div class="login-sub">CHECK-LIST DE SEGUIMIENTO</div>
+  <div class="login-sub">Seguimiento en tiempo real</div>
   <div class="login-form">
-    <div class="login-field">
-      <label>Correo electrónico</label>
-      <input class="login-input" type="email" id="login-email" placeholder="usuario@empresa.com" autocomplete="email">
-    </div>
-    <div class="login-field">
-      <label>Contraseña</label>
-      <input class="login-input" type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
-    </div>
-    <div class="login-error" id="login-error"></div>
-    <button class="login-btn" id="login-btn" onclick="doLogin()">Entrar</button>
+    <div><label class="flbl">Correo electrónico</label><input class="linput" type="email" id="le" placeholder="usuario@empresa.com" autocomplete="email"></div>
+    <div><label class="flbl">Contraseña</label><input class="linput" type="password" id="lp" placeholder="••••••••" autocomplete="current-password"></div>
+    <div class="lerr" id="lerr"></div>
+    <button class="lbtn" id="lbtn" onclick="doLogin()">Entrar</button>
   </div>
 </div>
 
 <!-- APP -->
 <div id="app">
-  <!-- TOPBAR -->
   <div class="topbar">
-    <div class="back-btn hidden" id="back-btn" onclick="goBack()">‹</div>
-    <div class="topbar-info">
-      <div class="topbar-title" id="t-title">Instalaciones</div>
-      <div class="topbar-sub" id="t-sub">Check-list de seguimiento</div>
-    </div>
-    <div class="topbar-right">
-      <div class="online-dot" id="online-dot"></div>
-      <div class="logout-btn" onclick="doLogout()" title="Cerrar sesión">⏻</div>
+    <div class="back-btn h" id="back-btn" onclick="goBack()">‹</div>
+    <div class="tb-info"><div class="tb-title" id="tt">Instalaciones</div><div class="tb-sub" id="ts">Seguimiento del proyecto</div></div>
+    <div class="tb-right">
+      <div class="opill" id="opill"><div class="d"></div><span>En línea</span></div>
+      <div class="avatar" id="av" onclick="doLogout()">AD</div>
     </div>
   </div>
 
-  <!-- SCREEN: HOME -->
   <div class="screen active" id="screen-home">
-    <div class="home-pad">
-      <div class="section-lbl">Edificios</div>
-      <div id="ed-list"><div class="loading"><div class="spinner"></div></div></div>
-    </div>
-    <div class="safe-bottom"></div>
-  </div>
-
-  <!-- SCREEN: PISOS -->
-  <div class="screen" id="screen-pisos">
-    <div class="pisos-pad">
-      <div class="stats-grid" id="pisos-stats"></div>
-      <div class="section-lbl">Pisos</div>
-      <div id="piso-list"></div>
-    </div>
-    <div class="safe-bottom"></div>
-  </div>
-
-  <!-- SCREEN: ELEMENTOS -->
-  <div class="screen" id="screen-elementos">
-    <div class="el-header">
-      <div class="el-stats" id="el-stats"></div>
-      <div class="el-prog">
-        <div class="el-prog-lbl">Progreso de instalación</div>
-        <div class="el-prog-row">
-          <div class="pbar"><div class="pbar-fill" id="pbar-fill"></div></div>
-          <div class="pbar-pct" id="pbar-pct">0%</div>
+    <div class="pad">
+      <div class="hello" id="hello">Bienvenido</div>
+      <div class="hello-sub">Resumen general del proyecto</div>
+      <div class="banner">
+        <div class="b-icon">🏗️</div>
+        <div class="b-info">
+          <div class="b-lbl">Progreso total</div>
+          <div class="b-val" id="bv">—</div>
+          <div class="b-sub" id="bs">Cargando...</div>
         </div>
+        <div class="b-pct" id="bp">—%</div>
       </div>
+      <div class="sec-title">Edificios</div>
+      <div id="ed-list"><div class="spin-wrap"><div class="spin"></div></div></div>
     </div>
-    <div class="el-list" id="el-list"></div>
-    <div class="safe-bottom"></div>
+  </div>
+
+  <div class="screen" id="screen-pisos">
+    <div class="pad">
+      <div class="sg" id="ps"></div>
+      <div class="sec-title">Pisos</div>
+      <div id="pl"></div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-elementos">
+    <div class="esm" id="esm"></div>
+    <div class="epw">
+      <div class="epl">Progreso de instalación</div>
+      <div class="epr"><div class="pb" style="height:8px"><div class="pbf" id="epf"></div></div><div class="pct" id="epp">0%</div></div>
+    </div>
+    <div class="elw"><div class="elt" id="elt">Elementos</div><div id="el"></div></div>
+  </div>
+
+  <div class="screen" id="screen-resumen">
+    <div class="pad" id="rc"><div class="spin-wrap"><div class="spin"></div></div></div>
+  </div>
+
+  <div class="bnav">
+    <div class="nitem active" id="n-home" onclick="tab('home')"><div class="nicon">⊞</div><div class="nlbl">Inicio</div></div>
+    <div class="nitem" id="n-resumen" onclick="tab('resumen')"><div class="nicon">◎</div><div class="nlbl">Resumen</div></div>
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-const SUPA_URL = 'https://zlkmthwmcikcnvxtcmql.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpsa210aHdtY2lrY252eHRjbXFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MjU2MDgsImV4cCI6MjA5NDMwMTYwOH0.IKiEqXCvtVXUrXkkuihSghH08Ebach31MQ7u5e2TBaI';
-const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+const SU='https://zlkmthwmcikcnvxtcmql.supabase.co';
+const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpsa210aHdtY2lrY252eHRjbXFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MjU2MDgsImV4cCI6MjA5NDMwMTYwOH0.IKiEqXCvtVXUrXkkuihSghH08Ebach31MQ7u5e2TBaI';
+const sb=supabase.createClient(SU,SK);
+let U=null,admin=false,curEd=null,curPiso=null;
+const stk=[];
+let D={ed:[],pisos:[],els:[]};
 
-let currentUser = null;
-let isAdmin = false;
-let curEd = null, curPisoId = null;
-const navStack = [];
-let realtimeSub = null;
-let allData = { edificios: [], pisos: [], elementos: [] };
+document.getElementById('le').onkeydown=e=>{if(e.key==='Enter')document.getElementById('lp').focus()};
+document.getElementById('lp').onkeydown=e=>{if(e.key==='Enter')doLogin()};
 
-// ── LOGIN ──
-document.getElementById('login-email').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('login-password').focus(); });
-document.getElementById('login-password').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
-
-async function doLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const pass = document.getElementById('login-password').value;
-  const btn = document.getElementById('login-btn');
-  const err = document.getElementById('login-error');
-  err.textContent = '';
-  btn.disabled = true;
-  btn.textContent = 'Verificando...';
-
-  const { data, error } = await sb
-    .from('usuarios')
-    .select('*')
-    .eq('email', email)
-    .eq('password_hash', pass)
-    .single();
-
-  if (error || !data) {
-    err.textContent = 'Correo o contraseña incorrectos';
-    btn.disabled = false;
-    btn.textContent = 'Entrar';
-    return;
-  }
-
-  currentUser = data;
-  isAdmin = data.rol === 'admin';
-  localStorage.setItem('instalaciones_user', JSON.stringify(data));
-  startApp();
+async function doLogin(){
+  const e=document.getElementById('le').value.trim(),p=document.getElementById('lp').value;
+  const b=document.getElementById('lbtn'),err=document.getElementById('lerr');
+  err.textContent='';b.disabled=true;b.textContent='Verificando...';
+  const{data,error}=await sb.from('usuarios').select('*').eq('email',e).eq('password_hash',p).single();
+  if(error||!data){err.textContent='Correo o contraseña incorrectos';b.disabled=false;b.textContent='Entrar';return;}
+  U=data;admin=data.rol==='admin';
+  localStorage.setItem('iu',JSON.stringify(data));
+  start();
 }
 
-function doLogout() {
-  localStorage.removeItem('instalaciones_user');
-  currentUser = null;
-  isAdmin = false;
-  if (realtimeSub) sb.removeChannel(realtimeSub);
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('app').classList.remove('visible');
-  document.getElementById('login-email').value = '';
-  document.getElementById('login-password').value = '';
+function doLogout(){
+  if(!confirm('¿Cerrar sesión?'))return;
+  localStorage.removeItem('iu');U=null;admin=false;
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app').classList.remove('v');
 }
 
-// Auto-login
-const saved = localStorage.getItem('instalaciones_user');
-if (saved) {
-  try {
-    currentUser = JSON.parse(saved);
-    isAdmin = currentUser.rol === 'admin';
-    startApp();
-  } catch(e) { localStorage.removeItem('instalaciones_user'); }
-}
+const sv=localStorage.getItem('iu');
+if(sv){try{U=JSON.parse(sv);admin=U.rol==='admin';start();}catch(e){localStorage.removeItem('iu');}}
 
-async function startApp() {
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app').classList.add('visible');
-  document.getElementById('t-sub').textContent = currentUser.nombre + (isAdmin ? ' · Admin' : ' · Viewer');
-  await loadData();
+async function start(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').classList.add('v');
+  const ini=U.nombre.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('av').textContent=ini;
+  const h=new Date().getHours();
+  const g=h<12?'Buenos días':h<18?'Buenas tardes':'Buenas noches';
+  document.getElementById('hello').textContent=g+', '+U.nombre.split(' ')[0];
+  await load();
   buildHome();
-  setupRealtime();
+  setupRT();
 }
 
-// ── DATA ──
-async function loadData() {
-  const [edRes, piRes, elRes] = await Promise.all([
+async function load(){
+  const[a,b,c]=await Promise.all([
     sb.from('edificios').select('*').order('id'),
     sb.from('pisos').select('*').order('orden'),
     sb.from('elementos').select('*').order('id')
   ]);
-  allData.edificios = edRes.data || [];
-  allData.pisos = piRes.data || [];
-  allData.elementos = elRes.data || [];
-  updateOnlineDot(true);
+  D.ed=a.data||[];D.pisos=b.data||[];D.els=c.data||[];
+  setOnline(true);
 }
 
-function getPisos(edId) { return allData.pisos.filter(p => p.edificio_id === edId); }
-function getElementos(pisoId) { return allData.elementos.filter(e => e.piso_id === pisoId); }
+const gp=id=>D.pisos.filter(p=>p.edificio_id===id);
+const ge=id=>D.els.filter(e=>e.piso_id===id);
+function cs(els){
+  let i=0,p=0;
+  els.forEach(e=>{if(e.instalado===true)i++;if(e.instalado===false)p++;});
+  return{i,p,t:els.length,pct:(i+p)>0?Math.round(i/(i+p)*100):0};
+}
+const col=pct=>pct>=70?'var(--blue)':pct<30?'var(--red)':'var(--yellow)';
+const cls=pct=>pct>=70?'':'pct<30?'lo':'mid'';
 
-function calcStats(elementos) {
-  let inst = 0, pend = 0;
-  elementos.forEach(e => {
-    if (e.instalado === true) inst++;
-    if (e.instalado === false) pend++;
-  });
-  const pct = (inst + pend) > 0 ? Math.round(inst / (inst + pend) * 100) : 0;
-  return { inst, pend, pct, total: elementos.length };
+function setupRT(){
+  sb.channel('e').on('postgres_changes',{event:'UPDATE',schema:'public',table:'elementos'},pl=>{
+    const i=D.els.findIndex(e=>e.id===pl.new.id);
+    if(i!==-1)D.els[i]=pl.new;
+    refresh();
+    if(pl.new.actualizado_por&&pl.new.actualizado_por!==U?.nombre)
+      toast(`${pl.new.instalado?'✅':'❌'} ${pl.new.actualizado_por}: ${pl.new.nombre}`,'s');
+  }).subscribe();
 }
 
-function calcEdStats(edId) {
-  const pisos = getPisos(edId);
-  const all = pisos.flatMap(p => getElementos(p.id));
-  return calcStats(all);
+function refresh(){
+  const a=document.querySelector('.screen.active')?.id;
+  if(a==='screen-home')buildHome();
+  else if(a==='screen-pisos')buildPisos(curEd,false);
+  else if(a==='screen-elementos')renderEls();
+  else if(a==='screen-resumen')buildResumen();
 }
 
-// ── REALTIME ──
-function setupRealtime() {
-  realtimeSub = sb.channel('elementos-changes')
-    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'elementos' }, payload => {
-      const idx = allData.elementos.findIndex(e => e.id === payload.new.id);
-      if (idx !== -1) allData.elementos[idx] = payload.new;
-      onRealtimeUpdate(payload.new);
-    })
-    .subscribe();
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));const e=document.getElementById('screen-'+id);e.classList.add('active');e.scrollTop=0;}
+
+function tab(t){
+  document.querySelectorAll('.nitem').forEach(n=>n.classList.remove('active'));
+  document.getElementById('n-'+t).classList.add('active');
+  stk.length=0;
+  document.getElementById('back-btn').classList.add('h');
+  document.getElementById('tt').textContent=t==='home'?'Instalaciones':'Resumen';
+  document.getElementById('ts').textContent=t==='home'?'Seguimiento del proyecto':'Estado por edificio';
+  if(t==='home'){show('home');buildHome();}
+  else{show('resumen');buildResumen();}
 }
 
-function onRealtimeUpdate(updated) {
-  // Refresh current screen
-  const activeScreen = document.querySelector('.screen.active')?.id;
-  if (activeScreen === 'screen-home') buildHome();
-  else if (activeScreen === 'screen-pisos') buildPisos(curEd, false);
-  else if (activeScreen === 'screen-elementos') refreshElementos();
-
-  // Show toast if someone else updated
-  if (updated.actualizado_por && updated.actualizado_por !== currentUser?.nombre) {
-    const st = updated.instalado ? '✅ instalado' : '❌ pendiente';
-    showToast(`${updated.actualizado_por} marcó "${updated.nombre}" como ${st}`, 'success');
-  }
+function goBack(){
+  if(!stk.length)return;
+  const prev=stk.pop();
+  if(prev==='home'){
+    show('home');buildHome();
+    document.getElementById('tt').textContent='Instalaciones';
+    document.getElementById('ts').textContent='Seguimiento del proyecto';
+    document.getElementById('back-btn').classList.add('h');
+  }else if(prev==='pisos'){buildPisos(curEd,false);stk.pop();}
 }
 
-// ── NAVIGATION ──
-function show(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + id).classList.add('active');
-  document.getElementById('screen-' + id).scrollTop = 0;
-}
-
-function goBack() {
-  if (!navStack.length) return;
-  const prev = navStack.pop();
-  if (prev === 'home') {
-    show('home');
-    document.getElementById('t-title').textContent = 'Instalaciones';
-    document.getElementById('t-sub').textContent = currentUser.nombre + (isAdmin ? ' · Admin' : ' · Viewer');
-    document.getElementById('back-btn').classList.add('hidden');
-  } else if (prev === 'pisos') {
-    buildPisos(curEd, false);
-    navStack.pop();
-  }
-}
-
-// ── HOME ──
-function buildHome() {
-  const ed_list = document.getElementById('ed-list');
-  if (!allData.edificios.length) {
-    ed_list.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-    return;
-  }
-  ed_list.innerHTML = allData.edificios.map(ed => {
-    const s = calcEdStats(ed.id);
-    const pisos = getPisos(ed.id);
-    return `<div class="ed-card" onclick="buildPisos('${ed.id}')">
-      <div class="ed-card-top">
-        <div class="ed-icon">${ed.icon}</div>
-        <div class="ed-info">
-          <div class="ed-name">${ed.nombre}</div>
-          <div class="ed-sub">${pisos.length} pisos · ${s.inst} inst. · ${s.pend} pend.</div>
-        </div>
-        <div class="ed-arrow">›</div>
+function buildHome(){
+  const all=D.els;const s=cs(all);
+  document.getElementById('bv').textContent=s.i+' instalados';
+  document.getElementById('bs').textContent=s.p+' pendientes · '+s.t+' total';
+  document.getElementById('bp').textContent=s.pct+'%';
+  document.getElementById('ed-list').innerHTML=D.ed.map(ed=>{
+    const p=gp(ed.id);const ee=p.flatMap(x=>ge(x.id));const s=cs(ee);
+    const c=col(s.pct);
+    return`<div class="ed-card" onclick="buildPisos('${ed.id}')">
+      <div class="ed-top">
+        <div class="ed-ico">${ed.icon}</div>
+        <div><div class="ed-nm">${ed.nombre}</div><div class="ed-sb">${p.length} pisos · ${ee.length} elementos</div></div>
+        <div class="ed-arr">›</div>
       </div>
-      <div class="ed-prog-wrap">
-        <div class="ed-pbar"><div class="ed-pbar-fill" style="width:${s.pct}%"></div></div>
-        <div class="ed-pct">${s.pct}% inst.</div>
+      <div class="prog">
+        <div class="pb"><div class="pbf" style="width:${s.pct}%;background:${c}"></div></div>
+        <div class="pct" style="color:${c}">${s.pct}%</div>
       </div>
     </div>`;
   }).join('');
 }
 
-// ── PISOS ──
-function buildPisos(edId, push = true) {
-  curEd = edId;
-  if (push) navStack.push('home');
-  const ed = allData.edificios.find(e => e.id === edId);
-  const pisos = getPisos(edId);
-  const allEls = pisos.flatMap(p => getElementos(p.id));
-  const s = calcStats(allEls);
-
-  document.getElementById('t-title').textContent = ed.nombre;
-  document.getElementById('t-sub').textContent = `${pisos.length} pisos`;
-  document.getElementById('back-btn').classList.remove('hidden');
-
-  document.getElementById('pisos-stats').innerHTML = `
-    <div class="stat-box"><div class="stat-lbl">Total elementos</div><div class="stat-num">${s.total}</div></div>
-    <div class="stat-box"><div class="stat-lbl">Pisos</div><div class="stat-num">${pisos.length}</div></div>
-    <div class="stat-box"><div class="stat-lbl">Instalados</div><div class="stat-num g">${s.inst}</div></div>
-    <div class="stat-box"><div class="stat-lbl">Pendientes</div><div class="stat-num r">${s.pend}</div></div>`;
-
-  document.getElementById('piso-list').innerHTML = pisos.map((p, i) => {
-    const ps = calcStats(getElementos(p.id));
-    const col = ps.pct >= 70 ? '#4fffb0' : ps.pct >= 30 ? '#ffd166' : '#ff6b6b';
-    return `<div class="piso-item" onclick="buildElementos(${p.id})">
-      <div class="piso-badge">P${i+1}</div>
-      <div class="piso-mid">
-        <div class="piso-name">${p.nombre}</div>
-        <div class="piso-detail">${ps.inst} inst. · ${ps.pend} pend. · ${ps.total} total</div>
-      </div>
-      <div class="piso-pct" style="color:${col}">${ps.pct}%</div>
+function buildPisos(edId,push=true){
+  curEd=edId;if(push)stk.push('home');
+  const ed=D.ed.find(e=>e.id===edId);
+  const pisos=gp(edId);const ee=pisos.flatMap(p=>ge(p.id));const s=cs(ee);
+  document.getElementById('tt').textContent=ed.nombre;
+  document.getElementById('ts').textContent=pisos.length+' pisos';
+  document.getElementById('back-btn').classList.remove('h');
+  document.getElementById('ps').innerHTML=`
+    <div class="sc"><div class="sl">Instalados</div><div class="sv g">${s.i}</div></div>
+    <div class="sc"><div class="sl">Pendientes</div><div class="sv r">${s.p}</div></div>
+    <div class="sc"><div class="sl">Total</div><div class="sv b">${s.t}</div></div>
+    <div class="sc"><div class="sl">Progreso</div><div class="sv b">${s.pct}%</div></div>`;
+  document.getElementById('pl').innerHTML=pisos.map((p,i)=>{
+    const ps=cs(ge(p.id));const c=col(ps.pct);
+    return`<div class="pc" onclick="buildEls(${p.id})">
+      <div class="pnum">P${i+1}</div>
+      <div class="pi"><div class="pn">${p.nombre}</div><div class="pd">${ps.i} inst · ${ps.p} pend · ${ps.t} total</div></div>
+      <div class="pr"><div class="pp" style="color:${c}">${ps.pct}%</div><div class="pa">›</div></div>
     </div>`;
   }).join('');
-
   show('pisos');
 }
 
-// ── ELEMENTOS ──
-function buildElementos(pisoId, push = true) {
-  curPisoId = pisoId;
-  if (push) navStack.push('pisos');
-  const piso = allData.pisos.find(p => p.id === pisoId);
-  const ed = allData.edificios.find(e => e.id === piso.edificio_id);
-
-  document.getElementById('t-title').textContent = piso.nombre;
-  document.getElementById('t-sub').textContent = ed.nombre;
-  document.getElementById('back-btn').classList.remove('hidden');
-
-  show('elementos');
-  refreshElementos();
+function buildEls(pisoId,push=true){
+  curPiso=pisoId;if(push)stk.push('pisos');
+  const p=D.pisos.find(x=>x.id===pisoId);
+  const ed=D.ed.find(e=>e.id===p.edificio_id);
+  document.getElementById('tt').textContent=p.nombre;
+  document.getElementById('ts').textContent=ed.nombre;
+  document.getElementById('back-btn').classList.remove('h');
+  document.getElementById('elt').textContent=p.nombre+' · Elementos';
+  show('elementos');renderEls();
 }
 
-function refreshElementos() {
-  if (!curPisoId) return;
-  const items = getElementos(curPisoId);
-  const s = calcStats(items);
-
-  document.getElementById('el-stats').innerHTML = `
-    <div class="el-stat"><div class="el-stat-lbl">Total</div><div class="el-stat-val">${items.length}</div></div>
-    <div class="el-stat"><div class="el-stat-lbl">Instalados</div><div class="el-stat-val g">${s.inst}</div></div>
-    <div class="el-stat"><div class="el-stat-lbl">Pendientes</div><div class="el-stat-val r">${s.pend}</div></div>`;
-
-  const fill = document.getElementById('pbar-fill');
-  fill.className = 'pbar-fill ' + (s.pct >= 50 ? 'hi' : 'lo');
-  fill.style.width = s.pct + '%';
-  document.getElementById('pbar-pct').textContent = s.pct + '%';
-
-  document.getElementById('el-list').innerHTML = items.map((el, i) => {
-    const cls = el.instalado === true ? 'si' : el.instalado === false ? 'no' : 'nd';
-    const meta = el.actualizado_por
-      ? `${el.actualizado_por} · ${formatDate(el.actualizado_en)}`
-      : 'Sin actualizar';
-
-    const toggleHtml = isAdmin ? `
-      <div class="toggle-wrap">
-        <span class="toggle-lbl">${el.instalado === true ? 'INST.' : el.instalado === false ? 'PEND.' : 'N/D'}</span>
-        <button class="toggle ${el.instalado === true ? 'on' : el.instalado === null ? 'nd-state' : ''}"
-          id="tog-${el.id}"
-          onclick="toggleInstalado(${el.id}, ${el.instalado})"
-          aria-label="Cambiar estado de ${el.nombre}">
-        </button>
-      </div>` : `<div style="font-size:11px; font-family:'DM Mono',monospace; color:${cls==='si'?'var(--accent)':cls==='no'?'var(--red)':'var(--muted)'}">
-        ${el.instalado === true ? 'INSTALADO' : el.instalado === false ? 'PENDIENTE' : '—'}
-      </div>`;
-
-    return `<div class="el-item" style="animation-delay:${i*0.02}s">
-      <div class="el-indicator ${cls}"></div>
-      <div class="el-text">
-        <div class="el-name-text">${el.nombre}</div>
-        <div class="el-meta">${meta}</div>
-      </div>
-      <div class="el-right">
-        <div class="el-qty">${el.cantidad}</div>
-        ${toggleHtml}
-      </div>
+function renderEls(){
+  if(!curPiso)return;
+  const items=ge(curPiso);const s=cs(items);
+  document.getElementById('esm').innerHTML=`
+    <div class="esc"><div class="esl">Total</div><div class="esv">${items.length}</div></div>
+    <div class="esc"><div class="esl">Instalados</div><div class="esv g">${s.i}</div></div>
+    <div class="esc"><div class="esl">Pendientes</div><div class="esv r">${s.p}</div></div>`;
+  const f=document.getElementById('epf');
+  f.style.width=s.pct+'%';f.style.background=col(s.pct);
+  document.getElementById('epp').textContent=s.pct+'%';
+  document.getElementById('epp').style.color=col(s.pct);
+  document.getElementById('el').innerHTML=items.map((el,i)=>{
+    const c=el.instalado===true?'si':el.instalado===false?'no':'nd';
+    const mt=el.actualizado_por?el.actualizado_por+' · '+fd(el.actualizado_en):'Sin actualizar';
+    const right=admin
+      ?`<button class="tgl ${el.instalado===true?'on':''}" id="t${el.id}" onclick="toggleEl(${el.id},${el.instalado})"></button>`
+      :`<div class="sbg ${c}">${el.instalado===true?'Instalado':el.instalado===false?'Pendiente':'—'}</div>`;
+    return`<div class="elr" style="animation-delay:${i*0.02}s">
+      <div class="sd ${c}"></div>
+      <div class="en"><div class="en-nm">${el.nombre}</div><div class="en-mt">${mt}</div></div>
+      <div class="er"><div class="eq">${el.cantidad}</div>${right}</div>
     </div>`;
   }).join('');
 }
 
-// ── TOGGLE ──
-async function toggleInstalado(elId, currentVal) {
-  if (!isAdmin) return;
-  const newVal = currentVal === true ? false : true;
-  const btn = document.getElementById('tog-' + elId);
-  if (btn) btn.disabled = true;
-
-  const { error } = await sb.from('elementos').update({
-    instalado: newVal,
-    actualizado_por: currentUser.nombre,
-    actualizado_en: new Date().toISOString()
-  }).eq('id', elId);
-
-  if (error) {
-    showToast('Error al guardar', 'error');
-    if (btn) btn.disabled = false;
-    return;
-  }
-
-  // Update local data
-  const idx = allData.elementos.findIndex(e => e.id === elId);
-  if (idx !== -1) {
-    allData.elementos[idx].instalado = newVal;
-    allData.elementos[idx].actualizado_por = currentUser.nombre;
-    allData.elementos[idx].actualizado_en = new Date().toISOString();
-  }
-
-  refreshElementos();
-  showToast(newVal ? '✅ Marcado como instalado' : '❌ Marcado como pendiente', 'success');
+function buildResumen(){
+  document.getElementById('rc').innerHTML=D.ed.map(ed=>{
+    const pisos=gp(ed.id);const ee=pisos.flatMap(p=>ge(p.id));const s=cs(ee);
+    return`<div class="rc">
+      <div class="rch">
+        <span style="font-size:20px">${ed.icon}</span>
+        <div class="rct" style="flex:1">${ed.nombre}</div>
+        <div style="font-size:18px;font-weight:700;color:${col(s.pct)}">${s.pct}%</div>
+      </div>
+      ${pisos.map((p,i)=>{const ps=cs(ge(p.id));return`<div class="rr">
+        <div class="rn">P${i+1} · ${p.nombre}</div>
+        <div class="rrr">
+          <div class="mpb"><div class="mpbf" style="width:${ps.pct}%;background:${col(ps.pct)}"></div></div>
+          <div style="font-size:13px;font-weight:700;color:${col(ps.pct)};min-width:36px;text-align:right">${ps.pct}%</div>
+        </div>
+      </div>`;}).join('')}
+    </div>`;
+  }).join('');
 }
 
-// ── UTILS ──
-function formatDate(iso) {
-  if (!iso) return '';
-  const d = new Date(iso);
-  return d.toLocaleDateString('es-DO', { day:'2-digit', month:'short' }) + ' ' +
-         d.toLocaleTimeString('es-DO', { hour:'2-digit', minute:'2-digit' });
+async function toggleEl(elId,cur){
+  if(!admin)return;
+  const nv=cur===true?false:true;
+  const b=document.getElementById('t'+elId);if(b)b.disabled=true;
+  const{error}=await sb.from('elementos').update({instalado:nv,actualizado_por:U.nombre,actualizado_en:new Date().toISOString()}).eq('id',elId);
+  if(error){toast('Error al guardar','e');if(b)b.disabled=false;return;}
+  const i=D.els.findIndex(e=>e.id===elId);
+  if(i!==-1){D.els[i].instalado=nv;D.els[i].actualizado_por=U.nombre;D.els[i].actualizado_en=new Date().toISOString();}
+  renderEls();
+  toast(nv?'✅ Instalado':'❌ Pendiente','s');
 }
 
-let toastTimer;
-function showToast(msg, type = '') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show ' + type;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { t.className = 'toast'; }, 3000);
+function fd(iso){if(!iso)return'';return new Date(iso).toLocaleDateString('es-DO',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});}
+
+let tt;
+function toast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show '+type;
+  clearTimeout(tt);tt=setTimeout(()=>{t.className='toast';},3000);
 }
 
-function updateOnlineDot(online) {
-  const dot = document.getElementById('online-dot');
-  if (dot) dot.className = 'online-dot' + (online ? '' : ' offline');
+function setOnline(on){
+  const p=document.getElementById('opill');
+  p.className='opill'+(on?'':' off');
+  p.innerHTML=`<div class="d"></div><span>${on?'En línea':'Sin conexión'}</span>`;
 }
 
-// Online/offline detection
-window.addEventListener('online', () => { updateOnlineDot(true); loadData().then(buildHome); });
-window.addEventListener('offline', () => updateOnlineDot(false));
-
-// Service worker
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(() => {});
-}
+window.addEventListener('online',()=>{setOnline(true);load().then(refresh);});
+window.addEventListener('offline',()=>setOnline(false));
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
 </body>
 </html>

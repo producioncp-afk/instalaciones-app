@@ -434,6 +434,15 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
 .sub-el-add{display:flex;gap:6px;padding:10px 14px;border-top:1px solid var(--border);background:var(--bg);}
 .sub-el-add input{flex:1;padding:9px 10px;background:var(--white);border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:'Inter',sans-serif;outline:none;}
 .sub-el-add-btn{padding:9px 14px;background:var(--blue);color:white;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;}
+
+.ticket-fases{display:flex;align-items:center;padding:12px 14px;gap:0;}
+.fase-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--border);background:var(--white);flex-shrink:0;transition:all 0.3s;position:relative;}
+.fase-dot.done{background:var(--green);border-color:var(--green);}
+.fase-dot.active{background:#f97316;border-color:#f97316;box-shadow:0 0 0 3px rgba(249,115,22,0.2);}
+.fase-line{flex:1;height:2px;background:var(--border);}
+.fase-line.done{background:var(--green);}
+.fase-lbl{font-size:9px;font-weight:600;color:var(--text3);text-align:center;margin-top:3px;white-space:nowrap;}
+.fase-wrap{display:flex;flex-direction:column;align-items:center;}
 </style>
 </head>
 <body>
@@ -2791,6 +2800,62 @@ function aceptarTareaDesdeNotif(){
   });
 }
 
+function buildFaseProgress(fase){
+  var fases=['Recibido','Instalado','Pintado','Retocado','Completado'];
+  var html='<div style="padding:10px 14px 6px;">';
+  // Row with dots and lines
+  html+='<div style="display:flex;align-items:center;">';
+  fases.forEach(function(f,i){
+    var isDone=fase>i;
+    var isActive=fase===i;
+    var dotColor=isDone?'var(--green)':isActive?'#f97316':'var(--white)';
+    var borderColor=isDone?'var(--green)':isActive?'#f97316':'#d1d5db';
+    var shadow=isActive?'0 0 0 3px rgba(249,115,22,0.2)':'none';
+    html+='<div style="display:flex;flex-direction:column;align-items:center;gap:3px;">';
+    html+='<div style="width:14px;height:14px;border-radius:50%;background:'+dotColor+';border:2px solid '+borderColor+';box-shadow:'+shadow+';transition:all 0.3s;flex-shrink:0;"></div>';
+    html+='</div>';
+    if(i<fases.length-1){
+      var lineColor=fase>i?'var(--green)':'#e5e7eb';
+      html+='<div style="flex:1;height:2px;background:'+lineColor+';transition:background 0.3s;"></div>';
+    }
+  });
+  html+='</div>';
+  // Labels row
+  html+='<div style="display:flex;align-items:center;margin-top:4px;">';
+  fases.forEach(function(f,i){
+    var isActive=fase===i;
+    var isDone=fase>i;
+    var color=isDone?'var(--green)':isActive?'#f97316':'#9ca3af';
+    html+='<div style="display:flex;flex-direction:column;align-items:center;min-width:14px;">';
+    html+='<div style="font-size:8px;font-weight:'+(isActive||isDone?'700':'500')+';color:'+color+';white-space:nowrap;transform:none;">'+f+'</div>';
+    html+='</div>';
+    if(i<fases.length-1)html+='<div style="flex:1;"></div>';
+  });
+  html+='</div>';
+  html+='</div>';
+  return html;
+}
+
+function getFaseLabel(fase){
+  var fases=['Recibido','Instalado','Pintado','Retocado','Completado'];
+  return fases[fase]||'Recibido';
+}
+
+function avanzarFase(tareaId, faseActual){
+  var nuevaFase=Math.min(4, faseActual+1);
+  var nuevoEstado=nuevaFase===4?'completada':(nuevaFase>=1?'en_progreso':'aceptada');
+  var update={fase:nuevaFase, estado:nuevoEstado};
+  if(nuevaFase===4)update.completado_en=new Date().toISOString();
+  sb.from('tareas').update(update).eq('id',tareaId).then(function(r){
+    if(r.error){showToast('Error','error');return;}
+    var idx=D.tareas.findIndex(function(t){return t.id===tareaId;});
+    if(idx!==-1)Object.assign(D.tareas[idx],update);
+    buildTareas();
+    updateTareasBadge();
+    showToast('Fase actualizada: '+getFaseLabel(nuevaFase),'success');
+  });
+}
+
 function buildTareas(){
   var el=document.getElementById('tareas-content');
   if(!el)return;
@@ -2833,7 +2898,9 @@ function buildTareas(){
       var ini=usuario?(usuario.nombre.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase()):'??';
       var col=rolColors[usuario?usuario.rol:'trabajador']||'#64748b';
 
-      // TICKET CARD
+      var fase=t.fase||0;
+      var faseLabel=getFaseLabel(fase);
+      var eColor=['#1a56db','#f97316','#f97316','#f97316','var(--green)'][fase]||'#1a56db';
       html+='<div style="background:var(--white);border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,0.06);animation:fadeUp 0.2s ease both;animation-delay:'+(i*0.04)+'s">';
 
       // Ticket header stripe
@@ -2842,19 +2909,19 @@ function buildTareas(){
       html+='<div style="background:rgba(255,255,255,0.2);border-radius:5px;padding:2px 8px;font-size:10px;font-weight:700;color:white;letter-spacing:0.1em;">TICKET #'+ticketNum+'</div>';
       html+='<div style="font-size:11px;color:rgba(255,255,255,0.8);">'+formatDate(t.creado_en)+'</div>';
       html+='</div>';
-      html+='<div style="background:rgba(255,255,255,0.25);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;color:white;">'+estadoLabel+'</div>';
+      html+='<div style="background:rgba(255,255,255,0.25);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;color:white;">'+faseLabel+'</div>';
       html+='</div>';
 
-      // Dashed separator (ticket look)
+      // Fase progress
+      html+=buildFaseProgress(fase);
+
+      // Dashed separator
       html+='<div style="border-top:2px dashed var(--border);margin:0 14px;"></div>';
 
       // Ticket body
       html+='<div style="padding:14px;">';
-
-      // Element name big
       html+='<div style="font-size:17px;font-weight:700;letter-spacing:-0.01em;margin-bottom:10px;">'+t.titulo+'</div>';
 
-      // Info grid
       html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">';
       if(ed)html+='<div style="background:var(--bg);border-radius:7px;padding:8px 10px;"><div style="font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;">Edificio</div><div style="font-size:13px;font-weight:600;">'+ed.nombre+'</div></div>';
       if(piso)html+='<div style="background:var(--bg);border-radius:7px;padding:8px 10px;"><div style="font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;">Piso</div><div style="font-size:13px;font-weight:600;">'+piso.nombre+'</div></div>';
@@ -2864,31 +2931,26 @@ function buildTareas(){
 
       if(t.descripcion)html+='<div style="font-size:13px;color:var(--text2);background:var(--bg);border-radius:7px;padding:10px;margin-bottom:10px;line-height:1.5;">'+t.descripcion+'</div>';
       if(t.foto_url)html+='<img src="'+t.foto_url+'" style="width:100%;max-height:160px;object-fit:cover;border-radius:8px;margin-bottom:10px;cursor:pointer;" onclick="openLightbox(this.src)">';
-
       html+='</div>';
 
       // Dashed separator
       html+='<div style="border-top:2px dashed var(--border);margin:0 14px;"></div>';
 
-      // Assignee and actions
+      // Assignee and fase button
       html+='<div style="padding:12px 14px;display:flex;align-items:center;gap:10px;">';
       html+='<div style="width:34px;height:34px;border-radius:50%;background:'+col+';display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;flex-shrink:0;">'+ini+'</div>';
       html+='<div style="flex:1;font-size:13px;font-weight:600;">'+(usuario?usuario.nombre:'Sin asignar')+'</div>';
 
-      if(t.estado==='pendiente'){
-        html+='<button onclick="updateTareaEstado('+t.id+',\'aceptada\')" style="background:var(--blue);color:white;border:none;border-radius:7px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:\'Inter\',sans-serif;">Aceptar</button>';
-      }else if(t.estado==='aceptada'){
-        html+='<button onclick="updateTareaEstado('+t.id+',\'en_progreso\')" style="background:var(--purple);color:white;border:none;border-radius:7px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:\'Inter\',sans-serif;">En progreso</button>';
-        html+='<button onclick="updateTareaEstado('+t.id+',\'completada\')" style="background:var(--green);color:white;border:none;border-radius:7px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:\'Inter\',sans-serif;margin-left:4px;">Completar</button>';
-      }else if(t.estado==='en_progreso'){
-        html+='<button onclick="updateTareaEstado('+t.id+',\'completada\')" style="background:var(--green);color:white;border:none;border-radius:7px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:\'Inter\',sans-serif;">Completar</button>';
-      }else if(t.estado==='completada'){
-        html+='<div style="font-size:11px;color:var(--green);font-weight:700;display:flex;align-items:center;gap:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>'+formatDate(t.completado_en)+'</div>';
+      if(fase<4){
+        var nextFase=['Instalado','Pintado','Retocado','Completado'][fase]||'Siguiente';
+        var btnColor=fase===3?'var(--green)':'#f97316';
+        html+='<button onclick="avanzarFase('+t.id+','+fase+')" style="background:'+btnColor+';color:white;border:none;border-radius:7px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:\'Inter\',sans-serif;white-space:nowrap;">→ '+nextFase+'</button>';
+      }else{
+        html+='<div style="font-size:11px;color:var(--green);font-weight:700;display:flex;align-items:center;gap:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Completado</div>';
       }
       if(isAdmin())html+='<button onclick="deleteTarea('+t.id+')" style="width:28px;height:28px;border-radius:50%;background:var(--red-light);border:none;color:var(--red);cursor:pointer;display:flex;align-items:center;justify-content:center;margin-left:4px;font-size:12px;">✕</button>';
       html+='</div>';
-
-      html+='</div>'; // end ticket card
+      html+='</div>';
     });
   }
   el.innerHTML=html;

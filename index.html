@@ -2870,13 +2870,49 @@ function avanzarFase(tareaId, faseActual){
   var nuevoEstado=nuevaFase===4?'completada':(nuevaFase>=1?'en_progreso':'aceptada');
   var update={fase:nuevaFase, estado:nuevoEstado};
   if(nuevaFase===4)update.completado_en=new Date().toISOString();
+
+  var tarea=D.tareas.find(function(t){return t.id===tareaId;});
+  var faseNombre=getFaseLabel(nuevaFase);
+  var titulo=tarea?tarea.titulo:'Elemento';
+  var ed=tarea&&tarea.edificio_id?D.edificios.find(function(e){return e.id===tarea.edificio_id;}):null;
+  var piso=tarea&&tarea.piso_id?D.pisos.find(function(p){return p.id===tarea.piso_id;}):null;
+
   sb.from('tareas').update(update).eq('id',tareaId).then(function(r){
     if(r.error){showToast('Error','error');return;}
     var idx=D.tareas.findIndex(function(t){return t.id===tareaId;});
     if(idx!==-1)Object.assign(D.tareas[idx],update);
     buildTareas();
     updateTareasBadge();
-    showToast('Fase actualizada: '+getFaseLabel(nuevaFase),'success');
+    showToast('Fase: '+faseNombre,'success');
+
+    // Notify all admins and supervisors
+    var notifTitle=titulo+' — '+faseNombre;
+    var notifMsg=U.nombre+' marcó como '+faseNombre+
+      (ed?' en '+ed.nombre:'')+
+      (piso?', '+piso.nombre:'')+
+      ' · Ticket #'+String(tareaId).padStart(4,'0');
+
+    // Find admins and supervisors to notify
+    var jefes=D.usuarios.filter(function(u){
+      return (u.rol==='admin'||u.rol==='supervisor')&&u.id!==U.id&&u.activo;
+    });
+
+    jefes.forEach(function(jefe){
+      // Internal notification
+      sb.from('notificaciones').insert([{
+        para_usuario_id:jefe.id,
+        de_usuario_nombre:U.nombre,
+        tipo:'fase',
+        titulo:notifTitle,
+        mensaje:notifMsg,
+        elemento_id:tarea?tarea.elemento_id:null,
+        leida:false
+      }]);
+      // Push notification if has token
+      if(jefe.fcm_token){
+        sendFCMPush(jefe.fcm_token, notifTitle, notifMsg);
+      }
+    });
   });
 }
 

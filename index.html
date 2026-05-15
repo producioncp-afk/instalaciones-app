@@ -1556,6 +1556,7 @@ function sendNotif(){
   sb.from('notificaciones').insert([{
     para_usuario_id:parseInt(paraId),
     de_usuario_nombre:U.nombre,
+    tipo:'general',
     titulo:titulo,
     mensaje:msg,
     leida:false

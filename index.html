@@ -2795,25 +2795,25 @@ function buildTareas(){
   var el=document.getElementById('tareas-content');
   if(!el)return;
 
-  // Admin ve todas, trabajador ve solo las suyas
   var displayTareas=isAdmin()
     ?D.tareas
     :D.tareas.filter(function(t){return t.usuario_id===U.id;});
 
-  var html='';
   var estados={pendiente:'Pendiente',aceptada:'Aceptada',en_progreso:'En progreso',completada:'Completada'};
+  var estadoColors={pendiente:'#854d0e',aceptada:'var(--blue)',en_progreso:'var(--purple)',completada:'var(--green)'};
+  var estadoBg={pendiente:'#fef9c3',aceptada:'var(--blue-light)',en_progreso:'var(--purple-light)',completada:'var(--green-light)'};
+  var estadoBorder={pendiente:'#fcd34d',aceptada:'#93c5fd',en_progreso:'#c4b5fd',completada:'#86efac'};
 
   var pend=displayTareas.filter(function(t){return t.estado==='pendiente';}).length;
   var activ=displayTareas.filter(function(t){return t.estado==='aceptada'||t.estado==='en_progreso';}).length;
 
-  html+='<div class="stats-grid" style="margin-bottom:16px">';
+  var html='<div class="stats-grid" style="margin-bottom:16px">';
   html+='<div class="stat-card"><div class="stat-lbl">Pendientes</div><div class="stat-num r">'+pend+'</div></div>';
   html+='<div class="stat-card"><div class="stat-lbl">En curso</div><div class="stat-num b">'+activ+'</div></div>';
   html+='</div>';
 
   if(!displayTareas.length){
-    html+='<div style="text-align:center;padding:3rem;color:var(--text2);font-size:13px;">';
-    html+='No tienes tareas asignadas todavía.</div>';
+    html+='<div style="text-align:center;padding:3rem;color:var(--text2);font-size:13px;">No hay tareas asignadas todavía.</div>';
   }else{
     var sorted=displayTareas.slice().sort(function(a,b){
       var order={pendiente:0,aceptada:1,en_progreso:2,completada:3};
@@ -2826,40 +2826,74 @@ function buildTareas(){
       var ed=t.edificio_id?D.edificios.find(function(e){return e.id===t.edificio_id;}):null;
       var piso=t.piso_id?D.pisos.find(function(p){return p.id===t.piso_id;}):null;
       var estadoLabel=estados[t.estado]||t.estado;
+      var eColor=estadoColors[t.estado]||'var(--text2)';
+      var eBg=estadoBg[t.estado]||'var(--bg)';
+      var eBorder=estadoBorder[t.estado]||'var(--border)';
+      var ticketNum=String(t.id).padStart(4,'0');
+      var ini=usuario?(usuario.nombre.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase()):'??';
+      var col=rolColors[usuario?usuario.rol:'trabajador']||'#64748b';
 
-      html+='<div class="tarea-card" style="animation-delay:'+(i*0.04)+'s">';
-      html+='<div class="tarea-header">';
-      html+='<div class="tarea-estado '+t.estado+'">'+estadoLabel+'</div>';
-      html+='<div class="tarea-titulo">'+t.titulo+'</div>';
+      // TICKET CARD
+      html+='<div style="background:var(--white);border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,0.06);animation:fadeUp 0.2s ease both;animation-delay:'+(i*0.04)+'s">';
+
+      // Ticket header stripe
+      html+='<div style="background:'+eColor+';padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">';
+      html+='<div style="display:flex;align-items:center;gap:8px;">';
+      html+='<div style="background:rgba(255,255,255,0.2);border-radius:5px;padding:2px 8px;font-size:10px;font-weight:700;color:white;letter-spacing:0.1em;">TICKET #'+ticketNum+'</div>';
+      html+='<div style="font-size:11px;color:rgba(255,255,255,0.8);">'+formatDate(t.creado_en)+'</div>';
       html+='</div>';
-      html+='<div class="tarea-body">';
-      if(usuario)html+='<div class="tarea-detail"><b>Asignado a:</b> '+usuario.nombre+'</div>';
-      if(ed||piso)html+='<div class="tarea-detail"><b>Ubicación:</b> '+(ed?ed.nombre:'')+(piso?' · '+piso.nombre:'')+'</div>';
-      if(elem)html+='<div class="tarea-detail"><b>Cantidad:</b> '+elem.cantidad+' unidades</div>';
-      html+='<div class="tarea-detail"><b>Asignado por:</b> '+t.asignado_por+'</div>';
-      html+='<div class="tarea-detail" style="color:var(--text3)">'+formatDate(t.creado_en)+'</div>';
-      if(t.descripcion)html+='<div class="tarea-detail" style="margin-top:6px;color:var(--text)">'+t.descripcion+'</div>';
-      if(t.foto_url)html+='<img class="tarea-foto" src="'+t.foto_url+'" onclick="openLightbox(this.src)">';
+      html+='<div style="background:rgba(255,255,255,0.25);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;color:white;">'+estadoLabel+'</div>';
       html+='</div>';
 
-      html+='<div class="tarea-actions">';
+      // Dashed separator (ticket look)
+      html+='<div style="border-top:2px dashed var(--border);margin:0 14px;"></div>';
+
+      // Ticket body
+      html+='<div style="padding:14px;">';
+
+      // Element name big
+      html+='<div style="font-size:17px;font-weight:700;letter-spacing:-0.01em;margin-bottom:10px;">'+t.titulo+'</div>';
+
+      // Info grid
+      html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">';
+      if(ed)html+='<div style="background:var(--bg);border-radius:7px;padding:8px 10px;"><div style="font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;">Edificio</div><div style="font-size:13px;font-weight:600;">'+ed.nombre+'</div></div>';
+      if(piso)html+='<div style="background:var(--bg);border-radius:7px;padding:8px 10px;"><div style="font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;">Piso</div><div style="font-size:13px;font-weight:600;">'+piso.nombre+'</div></div>';
+      if(elem)html+='<div style="background:var(--bg);border-radius:7px;padding:8px 10px;"><div style="font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;">Cantidad</div><div style="font-size:13px;font-weight:600;">'+elem.cantidad+' uds.</div></div>';
+      html+='<div style="background:var(--bg);border-radius:7px;padding:8px 10px;"><div style="font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;">Asignado por</div><div style="font-size:13px;font-weight:600;">'+t.asignado_por+'</div></div>';
+      html+='</div>';
+
+      if(t.descripcion)html+='<div style="font-size:13px;color:var(--text2);background:var(--bg);border-radius:7px;padding:10px;margin-bottom:10px;line-height:1.5;">'+t.descripcion+'</div>';
+      if(t.foto_url)html+='<img src="'+t.foto_url+'" style="width:100%;max-height:160px;object-fit:cover;border-radius:8px;margin-bottom:10px;cursor:pointer;" onclick="openLightbox(this.src)">';
+
+      html+='</div>';
+
+      // Dashed separator
+      html+='<div style="border-top:2px dashed var(--border);margin:0 14px;"></div>';
+
+      // Assignee and actions
+      html+='<div style="padding:12px 14px;display:flex;align-items:center;gap:10px;">';
+      html+='<div style="width:34px;height:34px;border-radius:50%;background:'+col+';display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;flex-shrink:0;">'+ini+'</div>';
+      html+='<div style="flex:1;font-size:13px;font-weight:600;">'+(usuario?usuario.nombre:'Sin asignar')+'</div>';
+
       if(t.estado==='pendiente'){
-        html+='<button class="tarea-btn accept" onclick="updateTareaEstado('+t.id+',\'aceptada\')">Aceptar tarea</button>';
+        html+='<button onclick="updateTareaEstado('+t.id+',\'aceptada\')" style="background:var(--blue);color:white;border:none;border-radius:7px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:\'Inter\',sans-serif;">Aceptar</button>';
       }else if(t.estado==='aceptada'){
-        html+='<button class="tarea-btn progress" onclick="updateTareaEstado('+t.id+',\'en_progreso\')">En progreso</button>';
-        html+='<button class="tarea-btn complete" onclick="updateTareaEstado('+t.id+',\'completada\')">Completar</button>';
+        html+='<button onclick="updateTareaEstado('+t.id+',\'en_progreso\')" style="background:var(--purple);color:white;border:none;border-radius:7px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:\'Inter\',sans-serif;">En progreso</button>';
+        html+='<button onclick="updateTareaEstado('+t.id+',\'completada\')" style="background:var(--green);color:white;border:none;border-radius:7px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:\'Inter\',sans-serif;margin-left:4px;">Completar</button>';
       }else if(t.estado==='en_progreso'){
-        html+='<button class="tarea-btn complete" onclick="updateTareaEstado('+t.id+',\'completada\')">Marcar completada</button>';
+        html+='<button onclick="updateTareaEstado('+t.id+',\'completada\')" style="background:var(--green);color:white;border:none;border-radius:7px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:\'Inter\',sans-serif;">Completar</button>';
       }else if(t.estado==='completada'){
-        html+='<div style="font-size:12px;color:var(--green);font-weight:600;display:flex;align-items:center;gap:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Completada '+formatDate(t.completado_en)+'</div>';
+        html+='<div style="font-size:11px;color:var(--green);font-weight:700;display:flex;align-items:center;gap:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>'+formatDate(t.completado_en)+'</div>';
       }
-      if(isAdmin())html+='<button class="tarea-btn secondary" onclick="deleteTarea('+t.id+')" style="max-width:36px;padding:8px">✕</button>';
+      if(isAdmin())html+='<button onclick="deleteTarea('+t.id+')" style="width:28px;height:28px;border-radius:50%;background:var(--red-light);border:none;color:var(--red);cursor:pointer;display:flex;align-items:center;justify-content:center;margin-left:4px;font-size:12px;">✕</button>';
       html+='</div>';
-      html+='</div>';
+
+      html+='</div>'; // end ticket card
     });
   }
   el.innerHTML=html;
 }
+
 
 function updateTareaEstado(tareaId,nuevoEstado){
   var update={estado:nuevoEstado};

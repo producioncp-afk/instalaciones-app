@@ -474,8 +474,9 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
   <!-- PROYECTOS -->
   <div class="screen active" id="screen-home">
     <div class="pad">
-      <div class="hello" id="hello-txt">Bienvenido</div>
+      <div class="hello" id="hello-txt">Hola</div>
       <div class="hello-sub" id="hello-sub">Cargando...</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:2px" id="last-login"></div>
 
       <div class="sec-title">Proyectos</div>
       <div id="proj-list"><div class="spin-wrap"><div class="spin"></div></div></div>
@@ -552,6 +553,14 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
     <div class="el-prog">
       <div class="el-prog-lbl">Progreso de instalación</div>
       <div class="el-prog-row"><div class="pb" style="height:6px"><div class="pbf" id="el-pbar"></div></div><div class="pct-lbl" id="el-pct">0%</div></div>
+    </div>
+    <!-- Filter pills -->
+    <div style="display:flex;gap:8px;overflow-x:auto;padding:0 14px 12px;scrollbar-width:none;" id="el-filters">
+      <div class="seg-pill active" onclick="setElFilter('todos',this)">Todos</div>
+      <div class="seg-pill" onclick="setElFilter('pendientes',this)">Pendientes</div>
+      <div class="seg-pill" onclick="setElFilter('instalados',this)">Instalados</div>
+      <div class="seg-pill" onclick="setElFilter('pintados',this)">Pintados</div>
+      <div class="seg-pill" onclick="setElFilter('retocados',this)">Retocados</div>
     </div>
     <div class="el-wrap"><div class="el-hdr" id="el-hdr" style="display:flex;align-items:center;justify-content:space-between;">
       <span>Elementos</span>
@@ -1192,7 +1201,15 @@ function goBack(){
 
 function buildHome(){
   if(isAdmin())document.getElementById('add-proj-btn').classList.remove('hidden');
+  var firstName=U.nombre.split(' ')[0];
+  document.getElementById('hello-txt').textContent='Hola, '+firstName;
   document.getElementById('hello-sub').textContent=D.proyectos.length+' proyecto'+(D.proyectos.length!==1?'s':'')+' activo'+(D.proyectos.length!==1?'s':'');
+  var lastLogin=localStorage.getItem('last_login_'+U.id);
+  var lastEl=document.getElementById('last-login');
+  if(lastEl&&lastLogin){lastEl.textContent='Última conexión: '+lastLogin;}
+  // Save current login time
+  var now=new Date().toLocaleDateString('es-DO',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+new Date().toLocaleTimeString('es-DO',{hour:'2-digit',minute:'2-digit'});
+  localStorage.setItem('last_login_'+U.id, now);
 
   // ── PROYECTOS ──
   var html='';
@@ -1350,8 +1367,14 @@ function renderEls(){
   fill.style.width=s.pct+'%';fill.style.background=getColor(s.pct);
   document.getElementById('el-pct').textContent=s.pct+'%';
   document.getElementById('el-pct').style.color=getColor(s.pct);
+
+  // Apply filter
+  var filtered=getFilteredEls(items);
+  var hdrSpan=document.getElementById('el-hdr').querySelector('span');
+  if(hdrSpan)hdrSpan.textContent=(curElFilter==='todos'?'Todos los elementos':'Filtro: '+curElFilter)+' ('+filtered.length+')';
+
   var html='';
-  items.forEach(function(el,i){
+  filtered.forEach(function(el,i){
     var cls=el.instalado===true?'si':el.instalado===false?'no':'nd';
     var meta=el.actualizado_por?el.actualizado_por+' · '+formatDate(el.actualizado_en):'Sin actualizar';
     if(el.nota)meta+=' · 📝 '+el.nota.slice(0,25)+(el.nota.length>25?'...':'');
@@ -2281,7 +2304,107 @@ function openLightbox(src){
 }
 function closeLightbox(){document.getElementById('lightbox').classList.add('hidden');}
 
+var curElFilter='todos';
+
+function setElFilter(filter, btn){
+  curElFilter=filter;
+  document.querySelectorAll('#el-filters .seg-pill').forEach(function(p){p.classList.remove('active');});
+  if(btn)btn.classList.add('active');
+  renderEls();
+}
+
+function getFilteredEls(els){
+  if(curElFilter==='todos')return els;
+  if(curElFilter==='pendientes')return els.filter(function(e){return !e.instalado;});
+  if(curElFilter==='instalados')return els.filter(function(e){return e.instalado===true;});
+  if(curElFilter==='pintados')return els.filter(function(e){return e.pintado===true||(e.cantidad_pintado&&e.cantidad_pintado>0);});
+  if(curElFilter==='retocados')return els.filter(function(e){return e.retocado===true||(e.cantidad_retocado&&e.cantidad_retocado>0);});
+  return els;
+}
+
 function buildDashboard(){
+  var allEls=[];
+  D.proyectos.forEach(function(proj){
+    getProjEds(proj.id).forEach(function(ed){
+      getPisos(ed.id).forEach(function(p){
+        allEls=allEls.concat(getEls(p.id));
+      });
+    });
+  });
+  var s=calcStats(allEls);
+  var pintados=allEls.filter(function(e){return e.pintado===true||(e.cantidad_pintado&&e.cantidad_pintado>0);}).length;
+  var retocados=allEls.filter(function(e){return e.retocado===true||(e.cantidad_retocado&&e.cantidad_retocado>0);}).length;
+
+  var html='';
+
+  // Big banner card
+  html+='<div class="dash-banner" style="background:linear-gradient(135deg,#0a0a0a 0%,#1a1a2e 100%);">';
+  html+='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;">';
+  html+='<div><div class="dash-blbl">Progreso general</div><div class="dash-bval">'+s.pct+'%</div>';
+  html+='<div class="dash-bsub">'+s.inst+' de '+allEls.length+' elementos instalados</div></div>';
+  html+='<div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;flex-shrink:0;">';
+  html+='<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="'+getColor(s.pct)+'" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div></div>';
+  // Progress bar in banner
+  html+='<div style="height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden;">';
+  html+='<div style="height:100%;width:'+s.pct+'%;background:'+getColor(s.pct)+';border-radius:3px;transition:width 0.8s;"></div></div>';
+  html+='</div>';
+
+  // Stats grid
+  html+='<div class="dash-grid">';
+  html+='<div class="dash-card"><div class="dash-clbl">Instalados</div><div class="dash-cval g">'+s.inst+'</div></div>';
+  html+='<div class="dash-card"><div class="dash-clbl">Pendientes</div><div class="dash-cval r">'+s.pend+'</div></div>';
+  html+='<div class="dash-card"><div class="dash-clbl">Pintados</div><div class="dash-cval y">'+pintados+'</div></div>';
+  html+='<div class="dash-card"><div class="dash-clbl">Retocados</div><div class="dash-cval b">'+retocados+'</div></div>';
+  html+='</div>';
+
+  // Edificios ranking
+  html+='<div class="chart-card">';
+  html+='<div class="chart-title">Progreso por edificio</div>';
+  var eds=[];
+  D.proyectos.forEach(function(proj){
+    getProjEds(proj.id).forEach(function(ed){
+      var edEls=[];
+      getPisos(ed.id).forEach(function(p){edEls=edEls.concat(getEls(p.id));});
+      var es=calcStats(edEls);
+      eds.push({nombre:ed.nombre,pct:es.pct,inst:es.inst,total:edEls.length,color:getColor(es.pct)});
+    });
+  });
+  eds.sort(function(a,b){return b.pct-a.pct;});
+  eds.forEach(function(ed,i){
+    html+='<div class="rank-row">';
+    html+='<div class="rank-num">'+(i+1)+'</div>';
+    html+='<div class="rank-info"><div class="rank-name">'+ed.nombre+'</div>';
+    html+='<div style="margin-top:4px;height:4px;background:var(--border);border-radius:2px;overflow:hidden;">';
+    html+='<div style="height:100%;width:'+ed.pct+'%;background:'+ed.color+';border-radius:2px;"></div></div></div>';
+    html+='<div class="rank-pct" style="color:'+ed.color+'">'+ed.pct+'%</div>';
+    html+='</div>';
+  });
+  html+='</div>';
+
+  // Estimated completion
+  var seg=D.seguimiento;
+  if(seg.length>0){
+    var last7=seg.filter(function(s){
+      var d=new Date(s.fecha);
+      var now=new Date();
+      return (now-d)<7*24*60*60*1000;
+    });
+    var ritmo=last7.reduce(function(a,r){return a+r.cantidad;},0)/7;
+    if(ritmo>0){
+      var diasRestantes=Math.ceil(s.pend/ritmo);
+      var fechaEst=new Date();
+      fechaEst.setDate(fechaEst.getDate()+diasRestantes);
+      var fechaStr=fechaEst.toLocaleDateString('es-DO',{day:'2-digit',month:'long',year:'numeric'});
+      html+='<div class="dash-card" style="margin-bottom:10px;background:var(--dark);border-color:var(--dborder);">';
+      html+='<div class="dash-clbl" style="color:#6b7280">Estimado de terminación</div>';
+      html+='<div style="font-size:18px;font-weight:700;color:white;margin-top:4px;">'+fechaStr+'</div>';
+      html+='<div style="font-size:12px;color:#6b7280;margin-top:3px;">Ritmo: '+Math.round(ritmo)+' unidades/día</div>';
+      html+='</div>';
+    }
+  }
+
+  document.getElementById('dash-content').innerHTML=html;
+}
   var s=calcStats(D.elementos);
   var hist=D.historial||[];
   var instPerDay=5;
@@ -2314,52 +2437,7 @@ function buildDashboard(){
     rankHtml+='</div>';
   });
 
-  document.getElementById('dash-content').innerHTML=
-    '<div class="dash-banner">'+
-      '<div class="dash-blbl">Progreso global</div>'+
-      '<div class="dash-bval">'+s.pct+'%</div>'+
-      '<div class="dash-bsub">'+s.inst+' instalados · '+s.pend+' pendientes de '+s.total+'</div>'+
-    '</div>'+
-    '<div class="dash-grid">'+
-      '<div class="dash-card"><div class="dash-clbl">Instalados</div><div class="dash-cval g">'+s.inst+'</div></div>'+
-      '<div class="dash-card"><div class="dash-clbl">Pendientes</div><div class="dash-cval r">'+s.pend+'</div></div>'+
-      '<div class="dash-card"><div class="dash-clbl">Proyectos</div><div class="dash-cval b">'+D.proyectos.length+'</div></div>'+
-      '<div class="dash-card"><div class="dash-clbl">Días est.</div><div class="dash-cval y">'+daysLeft+'</div></div>'+
-    '</div>'+
-    '<button class="pdf-btn" onclick="exportPDF()">Exportar PDF</button>'+
-    '<button class="pdf-btn" style="background:var(--green);margin-top:-8px" onclick="openModal(\'excel\')">Exportar Excel</button>'+
-    '<div class="chart-card">'+
-      '<div class="chart-title">Avance por proyecto</div>'+
-      '<div class="chart-wrap"><canvas id="chart-proj"></canvas></div>'+
-    '</div>'+
-    '<div class="chart-card">'+
-      '<div class="chart-title">Edificios con menos avance</div>'+
-      rankHtml+
-    '</div>';
 
-  setTimeout(function(){
-    var ctx=document.getElementById('chart-proj');
-    if(!ctx)return;
-    if(appCharts.proj){appCharts.proj.destroy();appCharts.proj=null;}
-    appCharts.proj=new Chart(ctx,{
-      type:'bar',
-      data:{
-        labels:projData.map(function(p){return p.nombre;}),
-        datasets:[{
-          label:'% Instalado',
-          data:projData.map(function(p){return p.pct;}),
-          backgroundColor:projData.map(function(p){return p.color;}),
-          borderRadius:8,borderSkipped:false
-        }]
-      },
-      options:{
-        responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:false}},
-        scales:{y:{min:0,max:100,ticks:{callback:function(v){return v+'%';}}}}
-      }
-    });
-  },150);
-}
 
 function exportPDF(){
   var jsPDF=window.jspdf?window.jspdf.jsPDF:null;

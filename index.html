@@ -964,38 +964,119 @@ function calcStats(els){
 document.getElementById('inp-email').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('inp-pass').focus();});
 document.getElementById('inp-pass').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
 
+// Username to email mapping for Supabase Auth
+var USERNAME_MAP={
+  'admin':'admin@iberomuebles.app',
+  'hpena':'hpena@iberomuebles.app',
+  'cmendes':'cmendes@iberomuebles.app'
+};
+
+// Rate limiting
+var loginAttempts=0;
+var loginBlockedUntil=null;
+
 function doLogin(){
   var username=document.getElementById('inp-email').value.trim().toLowerCase();
   var pass=document.getElementById('inp-pass').value;
   var btn=document.getElementById('login-btn'),err=document.getElementById('login-err');
-  err.textContent='';btn.disabled=true;btn.textContent='Verificando...';
-  sb.from('usuarios').select('*').eq('username',username).eq('password_hash',pass).eq('activo',true).single().then(function(res){
-    if(res.error||!res.data){
-      err.textContent='Usuario o contraseña incorrectos';
-      btn.disabled=false;btn.textContent='Entrar';return;
+  err.textContent='';
+
+  // Check rate limiting
+  if(loginBlockedUntil&&new Date()<loginBlockedUntil){
+    var secsLeft=Math.ceil((loginBlockedUntil-new Date())/1000);
+    err.textContent='Demasiados intentos. Espera '+secsLeft+' segundos.';
+    return;
+  }
+
+  if(!username||!pass){err.textContent='Completa usuario y contraseña';return;}
+
+  btn.disabled=true;btn.textContent='Verificando...';
+
+  // Get email for this username
+  var email=USERNAME_MAP[username];
+  if(!email){
+    // Try dynamic lookup
+    sb.from('usuarios').select('username').eq('username',username).eq('activo',true).single().then(function(res){
+      if(res.error||!res.data){
+        loginAttempts++;
+        if(loginAttempts>=5){loginBlockedUntil=new Date(Date.now()+60000);loginAttempts=0;}
+        err.textContent='Usuario o contraseña incorrectos ('+loginAttempts+'/5)';
+        btn.disabled=false;btn.textContent='Iniciar sesión';
+      }else{
+        // Build email and try auth
+        var dynEmail=username+'@iberomuebles.app';
+        doSupabaseAuth(dynEmail,pass,btn,err);
+      }
+    });
+    return;
+  }
+
+  doSupabaseAuth(email,pass,btn,err);
+}
+
+function doSupabaseAuth(email,pass,btn,err){
+  sb.auth.signInWithPassword({email:email,password:pass}).then(function(res){
+    if(res.error){
+      loginAttempts++;
+      if(loginAttempts>=5){
+        loginBlockedUntil=new Date(Date.now()+60000);
+        loginAttempts=0;
+        err.textContent='Demasiados intentos fallidos. Espera 60 segundos.';
+      }else{
+        err.textContent='Usuario o contraseña incorrectos ('+loginAttempts+'/5)';
+      }
+      btn.disabled=false;btn.textContent='Iniciar sesión';
+      return;
     }
-    U=res.data;
-    sb.from('usuarios').update({ultimo_acceso:new Date().toISOString()}).eq('id',U.id);
-    localStorage.setItem('inst_u',JSON.stringify(U));
-    startApp();
+    loginAttempts=0;
+    // Get user profile from usuarios table
+    sb.from('usuarios').select('*').eq('auth_id',res.data.user.id).eq('activo',true).single().then(function(uRes){
+      if(uRes.error||!uRes.data){
+        err.textContent='Usuario no encontrado o inactivo';
+        sb.auth.signOut();
+        btn.disabled=false;btn.textContent='Iniciar sesión';
+        return;
+      }
+      U=uRes.data;
+      // Add email to USERNAME_MAP dynamically
+      var uname=U.username;
+      if(!USERNAME_MAP[uname])USERNAME_MAP[uname]=email;
+      sessionStorage.setItem('inst_u',JSON.stringify(U));
+      startApp();
+    });
   });
 }
 
 function doLogout(){
-  localStorage.removeItem('inst_u');U=null;navStack=[];
+  sb.auth.signOut();
+  sessionStorage.removeItem('inst_u');
+  U=null;navStack=[];
   closeModal('menu');
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('app').classList.remove('visible');
   document.getElementById('inp-pass').value='';
   document.getElementById('inp-email').value='';
   document.getElementById('main-bnav').style.display='none';
-  // Reset nav
   document.querySelectorAll('.nitem').forEach(function(n){n.classList.remove('active');});
   document.getElementById('nav-home').classList.add('active');
 }
 
-var saved=localStorage.getItem('inst_u');
-if(saved){try{U=JSON.parse(saved);startApp();}catch(e){localStorage.removeItem('inst_u');}}
+// Check for existing session
+sb.auth.getSession().then(function(res){
+  if(res.data&&res.data.session){
+    var saved=sessionStorage.getItem('inst_u');
+    if(saved){
+      try{U=JSON.parse(saved);startApp();}
+      catch(e){sessionStorage.removeItem('inst_u');sb.auth.signOut();}
+    }else{
+      // Re-fetch user from DB
+      sb.from('usuarios').select('*').eq('auth_id',res.data.session.user.id).eq('activo',true).single().then(function(uRes){
+        if(!uRes.error&&uRes.data){U=uRes.data;sessionStorage.setItem('inst_u',JSON.stringify(U));startApp();}
+        else sb.auth.signOut();
+      });
+    }
+  }
+});
 
 function startApp(){
   document.getElementById('login-screen').style.display='none';
@@ -3583,11 +3664,29 @@ function saveUser(){
   if(tel)data.telefono=tel;
   if(ced)data.cedula=ced;
   if(edad)data.edad=parseInt(edad);
-  sb.from('usuarios').insert(data).then(function(res){
-    if(res.error){showToast('Error: '+res.error.message,'error');return;}
-    closeModal('user');showToast('Miembro agregado al equipo','success');
-    loadData().then(function(){buildHome();if(document.getElementById('screen-equipo').classList.contains('active'))buildEquipoScreen();if(document.getElementById('screen-usuarios').classList.contains('active'))buildUsuarios();});
-  });
+  var authEmail=username+'@iberomuebles.app';
+  // Create Supabase Auth user first
+  sb.auth.admin?
+    // If admin SDK available
+    sb.from('usuarios').insert(data).select().then(function(res){
+      if(res.error){showToast('Error: '+res.error.message,'error');return;}
+      var newUser=res.data[0];
+      D.usuarios.push(newUser);
+      // Add to USERNAME_MAP
+      USERNAME_MAP[username]=authEmail;
+      closeModal('user');showToast('Miembro agregado. Debe crear cuenta en Auth.','success');
+      loadData().then(function(){buildHome();});
+    })
+    :
+    sb.from('usuarios').insert(data).select().then(function(res){
+      if(res.error){showToast('Error: '+res.error.message,'error');return;}
+      var newUser=res.data&&res.data[0]?res.data[0]:null;
+      if(newUser)D.usuarios.push(newUser);
+      USERNAME_MAP[username]=authEmail;
+      closeModal('user');
+      showToast('Miembro creado. Ve a Supabase → Auth y crea: '+authEmail,'success');
+      loadData().then(function(){buildHome();if(document.getElementById('screen-equipo').classList.contains('active'))buildEquipoScreen();if(document.getElementById('screen-usuarios').classList.contains('active'))buildUsuarios();});
+    });
 }
 
 function previewPerfilFoto(e){

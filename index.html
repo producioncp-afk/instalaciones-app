@@ -3624,35 +3624,53 @@ function saveUser(){
   if(!nombre||!username||!pass){showToast('Nombre, usuario y contraseña son requeridos','error');return;}
   if(pass.length<6){showToast('Contraseña mínimo 6 caracteres','error');return;}
   if(!/^[a-z0-9._]+$/.test(username)){showToast('Usuario solo puede tener letras, números y puntos','error');return;}
-  var data={nombre:nombre,username:username,password_hash:pass,rol:rol,
+
+  var data={nombre:nombre,username:username,password_hash:'***',rol:rol,
     proyecto_id:projId?parseInt(projId):null,activo:true};
   if(cargo)data.cargo=cargo;
   if(tel)data.telefono=tel;
   if(ced)data.cedula=ced;
   if(edad)data.edad=parseInt(edad);
-  var authEmail=username+'@iberomuebles.app';
-  // Create Supabase Auth user first
-  sb.auth.admin?
-    // If admin SDK available
-    sb.from('usuarios').insert(data).select().then(function(res){
-      if(res.error){showToast('Error: '+res.error.message,'error');return;}
-      var newUser=res.data[0];
-      D.usuarios.push(newUser);
-      // Add to USERNAME_MAP
-      USERNAME_MAP[username]=authEmail;
-      closeModal('user');showToast('Miembro agregado. Debe crear cuenta en Auth.','success');
-      loadData().then(function(){buildHome();});
-    })
-    :
-    sb.from('usuarios').insert(data).select().then(function(res){
-      if(res.error){showToast('Error: '+res.error.message,'error');return;}
-      var newUser=res.data&&res.data[0]?res.data[0]:null;
-      if(newUser)D.usuarios.push(newUser);
-      USERNAME_MAP[username]=authEmail;
+
+  // Step 1: Create in usuarios table
+  var btn=document.querySelector('#modal-user .modal-btn.primary');
+  if(btn){btn.disabled=true;btn.textContent='Creando...';}
+
+  sb.from('usuarios').insert(data).select().then(function(res){
+    if(res.error){
+      showToast('Error: '+res.error.message,'error');
+      if(btn){btn.disabled=false;btn.textContent='Crear miembro';}
+      return;
+    }
+    var newUser=res.data&&res.data[0]?res.data[0]:null;
+    if(!newUser){showToast('Error al crear','error');return;}
+    D.usuarios.push(newUser);
+
+    // Step 2: Auto-create in Supabase Auth via Edge Function
+    fetch('https://zlkmthwmcikcnvxtcmql.supabase.co/functions/v1/create-user',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+SK},
+      body:JSON.stringify({username:username,password:pass,usuario_id:newUser.id})
+    }).then(function(r){return r.json();}).then(function(result){
+      if(result.success){
+        newUser.auth_id=result.auth_id;
+        showToast('Miembro creado correctamente','success');
+      }else{
+        showToast('Miembro creado pero error en Auth: '+result.error,'error');
+      }
       closeModal('user');
-      showToast('Miembro creado. Ve a Supabase → Auth y crea: '+authEmail,'success');
-      loadData().then(function(){buildHome();if(document.getElementById('screen-equipo').classList.contains('active'))buildEquipoScreen();if(document.getElementById('screen-usuarios').classList.contains('active'))buildUsuarios();});
+      if(btn){btn.disabled=false;btn.textContent='Crear miembro';}
+      loadData().then(function(){
+        buildHome();
+        if(document.getElementById('screen-equipo').classList.contains('active'))buildEquipoScreen();
+        if(document.getElementById('screen-usuarios-home').classList.contains('active'))buildUsuariosHome();
+      });
+    }).catch(function(){
+      showToast('Miembro creado. Configura Auth manualmente.','error');
+      closeModal('user');
+      if(btn){btn.disabled=false;btn.textContent='Crear miembro';}
     });
+  });
 }
 
 function previewPerfilFoto(e){

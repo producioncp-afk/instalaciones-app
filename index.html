@@ -212,7 +212,7 @@ body{font-family:'Inter',sans-serif;color:var(--text);height:100dvh;display:flex
 .det-qty-ctrl{display:flex;align-items:center;gap:10px;}
 .qty-btn{width:30px;height:30px;border-radius:6px;background:var(--bg);border:1px solid var(--border);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .qty-val{font-size:16px;font-weight:700;min-width:28px;text-align:center;}
-.det-nota-input{width:100%;padding:12px 14px;background:var(--bg);border:none;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;outline:none;resize:none;min-height:80px;}
+.det-nota-input{width:100%;padding:12px 14px;background:var(--bg);border:none;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;outline:none;resize:none;min-height:80px;white-space:pre-wrap;}
 .det-save-btn{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--blue);color:white;border:none;border-radius:8px;padding:13px;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;width:calc(100% - 28px);margin:10px 14px;}
 .det-save-btn:active{background:var(--blue-dark);}
 .det-wa-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:#25d366;color:white;border:none;border-radius:8px;padding:13px;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;width:calc(100% - 28px);margin:4px 14px 10px;}
@@ -1062,7 +1062,7 @@ function setupRealtime(){
     })
     .on('postgres_changes',{event:'DELETE',schema:'public',table:'especificaciones'},function(pl){
       D.specs=D.specs.filter(function(s){return s.id!==pl.old.id;});
-      if(document.getElementById('screen-detalle').classList.contains('active'))renderDetalleContent(curElId);
+      if(document.getElementById('screen-detalle').classList.contains('active'))renderDetallePreserveNota(curElId);
     })
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'fotos'},function(pl){
       var exists=D.fotos.find(function(f){return f.id===pl.new.id;});
@@ -1527,7 +1527,7 @@ function renderDetalleContent(elId){
       (canEdit()?
         '<textarea class="det-nota-input" id="det-nota-input" placeholder="Escribe una observación...">'+(el.nota||'')+'</textarea>'
       :
-        '<div style="padding:14px 16px;font-size:14px;color:'+(el.nota?'var(--text)':'var(--text3)')+'">'+( el.nota||'Sin observaciones')+'</div>'
+        '<div style="padding:14px 16px;font-size:14px;color:'+(el.nota?'var(--text)':'var(--text3)')+';white-space:pre-wrap;word-break:break-word;">'+( el.nota||'Sin observaciones')+'</div>'
       )+
     '</div>'+
 
@@ -1889,11 +1889,19 @@ function changeSubCant(elId, campo, delta){
   });
 }
 
+function renderDetallePreserveNota(elId){
+  var notaEl=document.getElementById('det-nota-input');
+  var notaGuardada=notaEl?notaEl.value:'';
+  renderDetalleContent(elId);
+  var notaElNew=document.getElementById('det-nota-input');
+  if(notaElNew&&notaGuardada)notaElNew.value=notaGuardada;
+}
+
 function saveDetalle(elId){
   var el=D.elementos.find(function(x){return x.id===elId;});
   if(!el)return;
   var nota=document.getElementById('det-nota-input');
-  var notaVal=nota?nota.value.trim():el.nota;
+  var notaVal=nota?nota.value:el.nota;
   var update={cantidad:el.cantidad,nota:notaVal,actualizado_por:U.nombre,actualizado_en:new Date().toISOString()};
   sb.from('elementos').update(update).eq('id',elId).then(function(res){
     if(res.error){showToast('Error al guardar','error');return;}
@@ -1913,6 +1921,9 @@ function uploadDetalleFoto(e){
   if(fotos.length>=el.cantidad){showToast('Ya tienes el máximo de fotos','error');inp.value='';return;}
   showToast('Subiendo foto...','');
   inp.disabled=true;
+  // Save current nota text before upload
+  var notaActual=document.getElementById('det-nota-input');
+  var notaGuardada=notaActual?notaActual.value:'';
   var path='el-'+curElId+'-'+Date.now()+'.jpg';
   sb.storage.from('fotos').upload(path,file,{contentType:file.type,upsert:false}).then(function(res){
     inp.disabled=false;inp.value='';
@@ -1926,6 +1937,9 @@ function uploadDetalleFoto(e){
       }
       renderDetalleContent(curElId);
       renderEls();
+      // Restore nota text after re-render
+      var notaEl=document.getElementById('det-nota-input');
+      if(notaEl&&notaGuardada)notaEl.value=notaGuardada;
       showToast('Foto guardada','success');
     });
   });

@@ -964,14 +964,6 @@ function calcStats(els){
 document.getElementById('inp-email').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('inp-pass').focus();});
 document.getElementById('inp-pass').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
 
-// Username to email mapping for Supabase Auth
-var USERNAME_MAP={
-  'admin':'admin@iberomuebles.app',
-  'hpena':'hpena@iberomuebles.app',
-  'cmendes':'cmendes@iberomuebles.app'
-};
-
-// Rate limiting
 var loginAttempts=0;
 var loginBlockedUntil=null;
 
@@ -981,7 +973,7 @@ function doLogin(){
   var btn=document.getElementById('login-btn'),err=document.getElementById('login-err');
   err.textContent='';
 
-  // Check rate limiting
+  // Rate limiting
   if(loginBlockedUntil&&new Date()<loginBlockedUntil){
     var secsLeft=Math.ceil((loginBlockedUntil-new Date())/1000);
     err.textContent='Demasiados intentos. Espera '+secsLeft+' segundos.';
@@ -989,47 +981,25 @@ function doLogin(){
   }
 
   if(!username||!pass){err.textContent='Completa usuario y contraseña';return;}
-
   btn.disabled=true;btn.textContent='Verificando...';
 
-  // Get email for this username
-  var email=USERNAME_MAP[username];
-  if(!email){
-    // Try dynamic lookup
-    sb.from('usuarios').select('username').eq('username',username).eq('activo',true).single().then(function(res){
-      if(res.error||!res.data){
-        loginAttempts++;
-        if(loginAttempts>=5){loginBlockedUntil=new Date(Date.now()+60000);loginAttempts=0;}
-        err.textContent='Usuario o contraseña incorrectos ('+loginAttempts+'/5)';
-        btn.disabled=false;btn.textContent='Iniciar sesión';
-      }else{
-        // Build email and try auth
-        var dynEmail=username+'@iberomuebles.app';
-        doSupabaseAuth(dynEmail,pass,btn,err);
-      }
-    });
-    return;
-  }
-
-  doSupabaseAuth(email,pass,btn,err);
-}
-
-function doSupabaseAuth(email,pass,btn,err){
+  // Sign in with Supabase Auth
+  var email=username+'@iberomuebles.app';
   sb.auth.signInWithPassword({email:email,password:pass}).then(function(res){
     if(res.error){
       loginAttempts++;
       if(loginAttempts>=5){
         loginBlockedUntil=new Date(Date.now()+60000);
         loginAttempts=0;
-        err.textContent='Demasiados intentos fallidos. Espera 60 segundos.';
+        err.textContent='Demasiados intentos. Espera 60 segundos.';
       }else{
-        err.textContent='Usuario o contraseña incorrectos ('+loginAttempts+'/5)';
+        err.textContent='Usuario o contraseña incorrectos';
       }
       btn.disabled=false;btn.textContent='Iniciar sesión';
       return;
     }
     loginAttempts=0;
-    // Get user profile from usuarios table
+    // Get user profile
     sb.from('usuarios').select('*').eq('auth_id',res.data.user.id).eq('activo',true).single().then(function(uRes){
       if(uRes.error||!uRes.data){
         err.textContent='Usuario no encontrado o inactivo';
@@ -1038,9 +1008,6 @@ function doSupabaseAuth(email,pass,btn,err){
         return;
       }
       U=uRes.data;
-      // Add email to USERNAME_MAP dynamically
-      var uname=U.username;
-      if(!USERNAME_MAP[uname])USERNAME_MAP[uname]=email;
       sessionStorage.setItem('inst_u',JSON.stringify(U));
       startApp();
     });
@@ -1061,7 +1028,7 @@ function doLogout(){
   document.getElementById('nav-home').classList.add('active');
 }
 
-// Check for existing session
+// Check existing session
 sb.auth.getSession().then(function(res){
   if(res.data&&res.data.session){
     var saved=sessionStorage.getItem('inst_u');
@@ -1069,7 +1036,6 @@ sb.auth.getSession().then(function(res){
       try{U=JSON.parse(saved);startApp();}
       catch(e){sessionStorage.removeItem('inst_u');sb.auth.signOut();}
     }else{
-      // Re-fetch user from DB
       sb.from('usuarios').select('*').eq('auth_id',res.data.session.user.id).eq('activo',true).single().then(function(uRes){
         if(!uRes.error&&uRes.data){U=uRes.data;sessionStorage.setItem('inst_u',JSON.stringify(U));startApp();}
         else sb.auth.signOut();

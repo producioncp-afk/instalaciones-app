@@ -391,39 +391,37 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
 .toast.show{transform:translateX(-50%) translateY(0);}
 .toast.success{background:var(--green);border-color:var(--green);}
 .toast.error{background:var(--red);border-color:var(--red);}
-.contact-card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);padding:14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;animation:fadeUp 0.2s ease both;}
-.contact-av{width:42px;height:42px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:white;flex-shrink:0;letter-spacing:0.05em;}
-.contact-info{flex:1;min-width:0;}
-.contact-name{font-size:14px;font-weight:600;}
-.contact-role{font-size:12px;color:var(--text2);margin-top:1px;}
-.contact-phone{font-size:12px;color:var(--blue);margin-top:2px;}
-.contact-acts{display:flex;gap:6px;flex-shrink:0;}
-.tarea-card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;margin-bottom:10px;animation:fadeUp 0.2s ease both;}
-.tarea-header{padding:12px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);}
-.tarea-estado{font-size:11px;font-weight:700;padding:3px 9px;border-radius:4px;flex-shrink:0;white-space:nowrap;}
-.tarea-estado.pendiente{background:#fef9c3;color:#854d0e;}
-.tarea-estado.aceptada{background:var(--blue-light);color:var(--blue);}
-.tarea-estado.en_progreso{background:var(--purple-light);color:var(--purple);}
-.tarea-estado.completada{background:var(--green-light);color:var(--green);}
-.tarea-titulo{font-size:14px;font-weight:600;flex:1;min-width:0;}
-.tarea-body{padding:12px 14px;}
-.tarea-detail{font-size:12px;color:var(--text2);margin-bottom:3px;line-height:1.5;}
-.tarea-foto{width:100%;max-height:180px;object-fit:cover;border-radius:8px;margin-top:8px;cursor:pointer;}
-.tarea-actions{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--border);background:var(--bg);}
-.tarea-btn{flex:1;padding:10px;border-radius:7px;font-size:12px;font-weight:600;font-family:'Inter',sans-serif;border:none;cursor:pointer;}
-.tarea-btn.accept{background:var(--blue);color:white;}
-.tarea-btn.progress{background:var(--purple);color:white;}
-.tarea-btn.complete{background:var(--green);color:white;}
-.asignar-contact{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s;}
-.asignar-contact:last-child{border-bottom:none;}
-.asignar-contact:active{background:var(--bg);}
-.asignar-av{width:36px;height:36px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;flex-shrink:0;}
-.asignar-name{font-size:13px;font-weight:600;}
-.asignar-role{font-size:11px;color:var(--text2);margin-top:1px;}
-.asignar-phone{font-size:11px;color:var(--blue);}
 
 /* EXCEL MODAL */
 #modal-excel .modal-info{background:var(--bg);border-radius:7px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--text2);line-height:1.5;}
+.proj-tabs{display:flex;border-bottom:1px solid var(--border);background:var(--white);margin-bottom:16px;}
+.proj-tab{flex:1;padding:12px;text-align:center;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;}
+.proj-tab.active{color:var(--blue);border-bottom-color:var(--blue);}
+.equipo-card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;margin-bottom:10px;cursor:pointer;transition:transform 0.1s;animation:fadeUp 0.2s ease both;}
+.equipo-card:active{transform:scale(0.99);}
+.equipo-banner{height:76px;display:flex;align-items:center;padding:0 16px;gap:14px;}
+.equipo-av{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:white;flex-shrink:0;border:2px solid rgba(255,255,255,0.3);}
+.equipo-nombre{font-size:15px;font-weight:700;color:white;}
+.equipo-rol{font-size:11px;color:rgba(255,255,255,0.7);margin-top:2px;text-transform:uppercase;letter-spacing:0.06em;}
+.equipo-footer{display:flex;border-top:1px solid var(--border);}
+.equipo-stat{flex:1;padding:12px 8px;text-align:center;border-right:1px solid var(--border);}
+.equipo-stat:last-child{border-right:none;}
+.equipo-stat-val{font-size:18px;font-weight:700;}
+.equipo-stat-lbl{font-size:9px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;margin-top:2px;}
+.perfil-screen{background:var(--bg);}
+.perfil-banner{display:flex;align-items:center;padding:20px 16px;gap:14px;}
+.perfil-av{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:white;flex-shrink:0;}
+.perfil-nombre{font-size:19px;font-weight:700;letter-spacing:-0.02em;}
+.perfil-rol{font-size:12px;color:var(--text2);margin-top:3px;text-transform:uppercase;letter-spacing:0.06em;}
+.perfil-stats{display:grid;grid-template-columns:repeat(3,1fr);background:var(--white);border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:12px;}
+.perfil-stat{padding:14px 8px;text-align:center;border-right:1px solid var(--border);}
+.perfil-stat:last-child{border-right:none;}
+.perfil-stat-val{font-size:22px;font-weight:700;letter-spacing:-0.02em;}
+.perfil-stat-lbl{font-size:9px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;margin-top:3px;}
+.asignar-member{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--border);cursor:pointer;}
+.asignar-member:last-child{border-bottom:none;}
+.asignar-member:active{background:var(--bg);}
+.asignar-member-av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;flex-shrink:0;}
 </style>
 </head>
 <body>
@@ -469,11 +467,25 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
 
   <!-- EDIFICIOS -->
   <div class="screen" id="screen-edificios">
-    <div class="pad">
-      <div class="stats-grid" id="ed-stats"></div>
-      <div class="sec-title">Edificios</div>
-      <div id="ed-list"></div>
+    <div class="proj-tabs" id="proj-tabs">
+      <div class="proj-tab active" id="tab-edificios" onclick="switchProjTab('edificios')">Edificios</div>
+      <div class="proj-tab" id="tab-equipo" onclick="switchProjTab('equipo')">Equipo</div>
     </div>
+    <div id="tab-edificios-content">
+      <div class="pad" style="padding-top:0">
+        <div class="stats-grid" id="ed-stats"></div>
+        <div class="sec-title">Edificios</div>
+        <div id="ed-list"></div>
+      </div>
+    </div>
+    <div id="tab-equipo-content" style="display:none">
+      <div class="pad" style="padding-top:0" id="equipo-list"></div>
+    </div>
+  </div>
+
+  <!-- PERFIL MIEMBRO -->
+  <div class="screen" id="screen-perfil">
+    <div id="perfil-content"></div>
   </div>
 
   <!-- PISOS -->
@@ -508,9 +520,6 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
     <div class="pad" id="seg-content"><div class="spin-wrap"><div class="spin"></div></div></div>
   </div>
 
-  <!-- CONTACTOS -->
-  <div class="screen" id="screen-contactos">
-    <div class="pad" id="contactos-content"><div class="spin-wrap"><div class="spin"></div></div></div>
   </div>
 
   <!-- TAREAS -->
@@ -543,9 +552,7 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
     <div class="nitem active" id="nav-home" onclick="switchTab('home')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><div class="nlbl">Inicio</div></div>
     <div class="nitem" id="nav-tareas" onclick="switchTab('tareas')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><div class="nlbl">Tareas</div></div>
     <div class="nitem" id="nav-dashboard" onclick="switchTab('dashboard')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><div class="nlbl">Dashboard</div></div>
-    <div class="nitem" id="nav-seguimiento" onclick="switchTab('seguimiento')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><div class="nlbl">Diario</div></div>
-    <div class="nitem hidden" id="nav-contactos" onclick="switchTab('contactos')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><div class="nlbl">Contactos</div></div>
-    <div class="nitem hidden" id="nav-resumen" onclick="switchTab('resumen')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg><div class="nlbl">Resumen</div></div>
+    <div class="nitem" id="nav-seguimiento" onclick="switchTab('seguimiento')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><div class="nlbl">Diario</div></div>    <div class="nitem hidden" id="nav-resumen" onclick="switchTab('resumen')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg><div class="nlbl">Resumen</div></div>
     <div class="nitem hidden" id="nav-usuarios" onclick="switchTab('usuarios')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><div class="nlbl">Usuarios</div></div>
     <div class="nitem hidden" id="nav-historial" onclick="switchTab('historial')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.88"/></svg><div class="nlbl">Historial</div></div>
   </div>
@@ -726,30 +733,16 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
   </div>
 </div>
 
-<!-- MODAL NUEVO CONTACTO -->
-<div class="modal-overlay hidden" id="modal-contacto" onclick="closeOv(event,'modal-contacto')">
-  <div class="modal" onclick="event.stopPropagation()">
-    <div class="modal-title">Nuevo contacto</div>
-    <div class="modal-field"><label>Nombre completo</label><input class="modal-input" type="text" id="c-nombre" placeholder="Ej: Carlos Méndez"></div>
-    <div class="modal-field"><label>Rol / Oficio</label><input class="modal-input" type="text" id="c-rol" placeholder="Ej: Instalador, Pintor, Retocador..."></div>
-    <div class="modal-field"><label>Teléfono WhatsApp</label><input class="modal-input" type="tel" id="c-telefono" placeholder="+1 809 555 1234"></div>
-    <div class="modal-row">
-      <button class="modal-btn secondary" onclick="closeModal('contacto')">Cancelar</button>
-      <button class="modal-btn primary" onclick="saveContacto()">Agregar contacto</button>
-    </div>
-  </div>
-</div>
-
 <!-- MODAL ASIGNAR TAREA -->
 <div class="modal-overlay hidden" id="modal-asignar" onclick="closeOv(event,'modal-asignar')">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-title">Asignar tarea</div>
     <div style="background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px;font-size:13px;color:var(--text2);" id="asignar-el-info"></div>
-    <div class="modal-field"><label>Descripción de la tarea</label>
-      <textarea class="nota-textarea" id="asignar-desc" placeholder="Ej: Instalar 14 puertas de entrada en el 5to piso..." style="min-height:70px"></textarea>
+    <div class="modal-field"><label>Descripción</label>
+      <textarea class="nota-textarea" id="asignar-desc" style="min-height:60px" placeholder="¿Qué debe hacer?"></textarea>
     </div>
-    <div class="modal-field"><label>Selecciona el contacto</label>
-      <div id="asignar-contactos-list" style="background:var(--white);border:1px solid var(--border);border-radius:8px;overflow:hidden;max-height:250px;overflow-y:auto;"></div>
+    <div class="modal-field"><label>Asignar a</label>
+      <div id="asignar-members" style="background:var(--white);border:1px solid var(--border);border-radius:8px;overflow:hidden;max-height:220px;overflow-y:auto;"></div>
     </div>
     <div class="modal-row">
       <button class="modal-btn secondary" onclick="closeModal('asignar')">Cancelar</button>
@@ -807,7 +800,7 @@ fbMsg.onMessage(function(payload){
 var U=null,curProjId=null,curEdId=null,curPisoId=null;
 var navStack=[],pendingToggle=null;
 var selEmoji_='🏗️',selColor_='#2563eb';
-var D={proyectos:[],edificios:[],pisos:[],elementos:[],usuarios:[],historial:[],fotos:[],specs:[],seguimiento:[],notifs:[],contactos:[],tareas:[]};
+var D={proyectos:[],edificios:[],pisos:[],elementos:[],usuarios:[],historial:[],fotos:[],specs:[],seguimiento:[],notifs:[],tareas:[]};
 var curElId=null;
 var appCharts={};
 
@@ -863,7 +856,6 @@ function startApp(){
   if(isAdmin()){
     document.getElementById('nav-usuarios').classList.remove('hidden');
     document.getElementById('nav-historial').classList.remove('hidden');
-    document.getElementById('nav-contactos').classList.remove('hidden');
     document.getElementById('nav-resumen').classList.remove('hidden');
   }
   setTopbar(true);
@@ -891,7 +883,6 @@ function loadData(){
     sb.from('historial').select('*').order('creado_en',{ascending:false}).limit(200),
     sb.from('notificaciones').select('*').eq('para_usuario_id',U.id).order('creado_en',{ascending:false}).limit(50),
     sb.from('usuarios').select('id,nombre,username,rol,activo,proyecto_id,fcm_token').order('nombre'),
-    sb.from('contactos').select('*').order('nombre'),
     sb.from('tareas').select('*').order('creado_en',{ascending:false})
   ];
   return Promise.all(qs).then(function(r){
@@ -907,8 +898,7 @@ function loadData(){
     D.historial=r[7].data||[];
     D.notifs=r[8].data||[];
     D.usuarios=r[9].data||[];
-    D.contactos=r[10].data||[];
-    D.tareas=r[11].data||[];
+    D.tareas=r[10].data||[];
     setOnline(true);
     updateNotifBadge();
     updateTareasBadge();
@@ -934,15 +924,6 @@ function setupRealtime(){
         updateNotifBadge();
         showToast('Nuevo aviso: '+pl.new.titulo,'success');
       }
-    })
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'contactos'},function(pl){
-      var exists=D.contactos.find(function(c){return c.id===pl.new.id;});
-      if(!exists)D.contactos.push(pl.new);
-      if(document.getElementById('screen-contactos').classList.contains('active'))buildContactos();
-    })
-    .on('postgres_changes',{event:'DELETE',schema:'public',table:'contactos'},function(pl){
-      D.contactos=D.contactos.filter(function(c){return c.id!==pl.old.id;});
-      if(document.getElementById('screen-contactos').classList.contains('active'))buildContactos();
     })
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'tareas'},function(pl){
       var exists=D.tareas.find(function(t){return t.id===pl.new.id;});
@@ -1004,8 +985,8 @@ function refreshCurrent(){
   else if(id==='screen-resumen')buildResumen();
   else if(id==='screen-usuarios')buildUsuarios();
   else if(id==='screen-historial')buildHistorial();
-  else if(id==='screen-contactos')buildContactos();
   else if(id==='screen-tareas')buildTareas();
+  else if(id==='screen-perfil')renderPerfil(curMemberId);
 }
 
 function showScreen(id){
@@ -1032,7 +1013,6 @@ function switchTab(tab){
   else if(tab==='resumen'){setTopbar(false,'Resumen global');showScreen('resumen');buildResumen();}
   else if(tab==='usuarios'){setTopbar(false,'Usuarios');showScreen('usuarios');buildUsuarios();}
   else if(tab==='historial'){setTopbar(false,'Historial');showScreen('historial');buildHistorial();}
-  else if(tab==='contactos'){setTopbar(false,'Directorio de contactos');showScreen('contactos');buildContactos();}
   else if(tab==='tareas'){setTopbar(false,'Mis tareas');showScreen('tareas');buildTareas();}
 }
 
@@ -1045,6 +1025,7 @@ function goBack(){
   }else if(prev==='edificios'){buildEdificios(curProjId,false);navStack.pop();}
   else if(prev==='pisos'){buildPisos(curEdId,false);navStack.pop();}
   else if(prev==='elementos'){buildEls(curPisoId,false);navStack.pop();}
+  else if(prev==='equipo'){buildEdificios(curProjId,false);setTimeout(function(){switchProjTab('equipo');},50);navStack.pop();}
 }
 
 function buildHome(){
@@ -2284,149 +2265,6 @@ function saveSeguimiento(){
   });
 }
 
-function buildContactos(){
-  var html='';
-  var proj=D.proyectos[0];
-  var contacts=D.contactos;
-
-  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">';
-  html+='<div class="sec-title" style="margin:0">'+contacts.length+' contacto'+(contacts.length!==1?'s':'')+'</div>';
-  if(isAdmin())html+='<button onclick="openModal(\'contacto\')" style="background:var(--blue);color:white;border:none;border-radius:7px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif;">+ Agregar</button>';
-  html+='</div>';
-
-  if(!contacts.length){
-    html+='<div style="text-align:center;padding:3rem;color:var(--text2);font-size:13px">No hay contactos todavía.<br>Agrega al instalador, pintor, retocador...</div>';
-  }else{
-    contacts.forEach(function(c,i){
-      var ini=c.nombre.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
-      var colors=['var(--blue)','var(--green)','var(--purple)','var(--yellow)','var(--red)'];
-      var col=colors[i%colors.length];
-      html+='<div class="contact-card" style="animation-delay:'+(i*0.04)+'s">';
-      html+='<div class="contact-av" style="background:'+col+'">'+ini+'</div>';
-      html+='<div class="contact-info">';
-      html+='<div class="contact-name">'+c.nombre+'</div>';
-      html+='<div class="contact-role">'+c.rol+'</div>';
-      html+='<div class="contact-phone">'+c.telefono+'</div>';
-      html+='</div>';
-      html+='<div class="contact-acts">';
-      html+='<a href="https://wa.me/'+c.telefono.replace(/[^0-9]/g,'')+'" target="_blank" class="icon-btn" title="WhatsApp"><svg width="16" height="16" viewBox="0 0 24 24" fill="var(--green)"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg></a>';
-      if(isAdmin())html+='<div class="icon-btn" onclick="deleteContacto('+c.id+')" title="Eliminar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div>';
-      html+='</div></div>';
-    });
-  }
-  document.getElementById('contactos-content').innerHTML=html;
-}
-
-function saveContacto(){
-  var nombre=document.getElementById('c-nombre').value.trim();
-  var rol=document.getElementById('c-rol').value.trim();
-  var telefono=document.getElementById('c-telefono').value.trim();
-  if(!nombre||!rol||!telefono){showToast('Completa todos los campos','error');return;}
-  var projId=D.proyectos[0]?D.proyectos[0].id:null;
-  sb.from('contactos').insert([{nombre:nombre,rol:rol,telefono:telefono,proyecto_id:projId,creado_por:U.nombre}]).select().then(function(r){
-    if(r.error){showToast('Error al guardar','error');return;}
-    if(r.data&&r.data.length>0)D.contactos.push(r.data[0]);
-    closeModal('contacto');
-    document.getElementById('c-nombre').value='';
-    document.getElementById('c-rol').value='';
-    document.getElementById('c-telefono').value='';
-    buildContactos();
-    showToast('Contacto agregado','success');
-  });
-}
-
-function deleteContacto(id){
-  if(!confirm('¿Eliminar este contacto?'))return;
-  sb.from('contactos').delete().eq('id',id).then(function(){
-    D.contactos=D.contactos.filter(function(c){return c.id!==id;});
-    buildContactos();
-    showToast('Contacto eliminado','success');
-  });
-}
-
-function openAsignarModal(elId){
-  var el=D.elementos.find(function(x){return x.id===elId;});
-  var piso=el?D.pisos.find(function(p){return p.id===el.piso_id;}):null;
-  var ed=piso?D.edificios.find(function(e){return e.id===piso.edificio_id;}):null;
-
-  document.getElementById('asignar-el-info').innerHTML=
-    '<b>'+el.nombre+'</b><br>'+
-    (ed?ed.nombre:'')+(piso?' · '+piso.nombre:'')+'<br>'+
-    'Cantidad: '+el.cantidad+' unidades';
-
-  document.getElementById('asignar-desc').value=
-    'Favor instalar '+el.cantidad+' unidades de '+el.nombre+
-    (ed?' en '+ed.nombre:'')+
-    (piso?', '+piso.nombre:'')+'.'  ;
-
-  // Build contacts list
-  var html='';
-  if(!D.contactos.length){
-    html='<div style="padding:14px;text-align:center;font-size:13px;color:var(--text2)">No hay contactos. Agrega uno en la sección Contactos.</div>';
-  }else{
-    var colors=['var(--blue)','var(--green)','var(--purple)','var(--yellow)','var(--red)'];
-    D.contactos.forEach(function(c,i){
-      var ini=c.nombre.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
-      html+='<div class="asignar-contact" onclick="asignarTarea('+elId+','+c.id+')">';
-      html+='<div class="asignar-av" style="background:'+colors[i%colors.length]+'">'+ini+'</div>';
-      html+='<div style="flex:1"><div class="asignar-name">'+c.nombre+'</div>';
-      html+='<div class="asignar-role">'+c.rol+'</div>';
-      html+='<div class="asignar-phone">'+c.telefono+'</div></div>';
-      html+='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>';
-      html+='</div>';
-    });
-  }
-  document.getElementById('asignar-contactos-list').innerHTML=html;
-  openModal('asignar');
-}
-
-function asignarTarea(elId,contactoId){
-  var el=D.elementos.find(function(x){return x.id===elId;});
-  var piso=el?D.pisos.find(function(p){return p.id===el.piso_id;}):null;
-  var ed=piso?D.edificios.find(function(e){return e.id===piso.edificio_id;}):null;
-  var contacto=D.contactos.find(function(c){return c.id===contactoId;});
-  var desc=document.getElementById('asignar-desc').value.trim();
-  if(!desc)desc=el.nombre+' — '+el.cantidad+' unidades';
-
-  // Get last foto of element
-  var elFotos=D.fotos.filter(function(f){return f.elemento_id===elId;});
-  var fotoUrl=elFotos.length>0?elFotos[elFotos.length-1].url:null;
-
-  sb.from('tareas').insert([{
-    elemento_id:elId,
-    contacto_id:contactoId,
-    asignado_por:U.nombre,
-    titulo:el.nombre,
-    descripcion:desc,
-    estado:'pendiente',
-    foto_url:fotoUrl,
-    edificio_id:ed?ed.id:null,
-    piso_id:piso?piso.id:null
-  }]).select().then(function(r){
-    if(r.error){showToast('Error al asignar','error');return;}
-    if(r.data&&r.data.length>0)D.tareas.push(r.data[0]);
-    closeModal('asignar');
-
-    // Send WhatsApp message to contact
-    var msg='*IBERO MUEBLES — Tarea asignada*\n\n';
-    msg+='Hola '+contacto.nombre+', se te asigna la siguiente tarea:\n\n';
-    msg+='*Elemento:* '+el.nombre+'\n';
-    if(ed)msg+='*Edificio:* '+ed.nombre+'\n';
-    if(piso)msg+='*Piso:* '+piso.nombre+'\n';
-    msg+='*Cantidad:* '+el.cantidad+' unidades\n\n';
-    msg+='*Descripción:* '+desc+'\n\n';
-    msg+='Asignado por: '+U.nombre+'\n';
-    msg+='Fecha: '+new Date().toLocaleDateString('es-DO',{day:'2-digit',month:'long',year:'numeric'});
-    if(fotoUrl)msg+='\n\n📷 Foto de referencia adjunta';
-
-    // Open WhatsApp
-    var phone=contacto.telefono.replace(/[^0-9]/g,'');
-    window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg),'_blank');
-
-    showToast('Tarea asignada y WhatsApp abierto','success');
-  });
-}
-
 function buildTareas(){
   // Show tasks assigned TO this user (via usuario_id match) OR all if admin
   var misTareas=isAdmin()?D.tareas:D.tareas.filter(function(t){return t.usuario_id===U.id;});
@@ -2517,6 +2355,208 @@ function deleteTarea(tareaId){
     D.tareas=D.tareas.filter(function(t){return t.id!==tareaId;});
     buildTareas();
     showToast('Tarea eliminada','success');
+  });
+}
+
+var rolColors={'admin':'#1a56db','supervisor':'#6d28d9','trabajador':'#0d7a3d'};
+var curProjTab='edificios';
+var curMemberId=null;
+
+function switchProjTab(tab){
+  curProjTab=tab;
+  document.getElementById('tab-edificios').classList.toggle('active',tab==='edificios');
+  document.getElementById('tab-equipo').classList.toggle('active',tab==='equipo');
+  document.getElementById('tab-edificios-content').style.display=tab==='edificios'?'block':'none';
+  document.getElementById('tab-equipo-content').style.display=tab==='equipo'?'block':'none';
+  if(tab==='equipo')buildEquipo(curProjId);
+}
+
+function getMemberStats(userId){
+  // Count elements marked by this user
+  var inst=D.historial.filter(function(h){return h.usuario_nombre&&D.usuarios.find(function(u){return u.id===userId&&u.nombre===h.usuario_nombre;})&&h.accion==='instalado';}).length;
+  var tareasMiembro=D.tareas.filter(function(t){return t.usuario_id===userId;});
+  var comp=tareasMiembro.filter(function(t){return t.estado==='completada';}).length;
+  var pend=tareasMiembro.filter(function(t){return t.estado==='pendiente';}).length;
+  return{instalados:inst,tareasComp:comp,tareasPend:pend};
+}
+
+function buildEquipo(projId){
+  var miembros=D.usuarios.filter(function(u){
+    return u.activo&&(u.proyecto_id===projId||u.rol==='admin');
+  });
+
+  var html='';
+  if(!miembros.length){
+    html='<div style="text-align:center;padding:3rem;color:var(--text2);font-size:13px">No hay miembros asignados a este proyecto.<br>Ve a Usuarios y asigna el proyecto.</div>';
+  }else{
+    html='<div class="sec-title">'+miembros.length+' miembro'+(miembros.length!==1?'s':'')+' del equipo</div>';
+    miembros.forEach(function(u,i){
+      var ini=u.nombre.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+      var col=rolColors[u.rol]||'#64748b';
+      var stats=getMemberStats(u.id);
+      var rolLabel={admin:'Administrador',supervisor:'Supervisor',trabajador:'Técnico / Instalador'}[u.rol]||u.rol;
+      html+='<div class="equipo-card" style="animation-delay:'+(i*0.06)+'s" onclick="openPerfil('+u.id+')">';
+      html+='<div class="equipo-banner" style="background:'+col+'">';
+      html+='<div class="equipo-av">'+ini+'</div>';
+      html+='<div><div class="equipo-nombre">'+u.nombre+'</div><div class="equipo-rol">'+rolLabel+'</div></div>';
+      html+='<svg style="margin-left:auto;color:rgba(255,255,255,0.5)" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>';
+      html+='</div>';
+      html+='<div class="equipo-footer">';
+      html+='<div class="equipo-stat"><div class="equipo-stat-val g">'+stats.instalados+'</div><div class="equipo-stat-lbl">Instalados</div></div>';
+      html+='<div class="equipo-stat"><div class="equipo-stat-val b">'+stats.tareasComp+'</div><div class="equipo-stat-lbl">Tareas completadas</div></div>';
+      html+='<div class="equipo-stat"><div class="equipo-stat-val '+(stats.tareasPend>0?'r':'')+'">'+stats.tareasPend+'</div><div class="equipo-stat-lbl">Tareas pendientes</div></div>';
+      html+='</div></div>';
+    });
+  }
+  document.getElementById('equipo-list').innerHTML=html;
+}
+
+function openPerfil(userId){
+  curMemberId=userId;
+  var u=D.usuarios.find(function(x){return x.id===userId;});
+  if(!u)return;
+  navStack.push('equipo');
+  setTopbar(false,u.nombre);
+  document.getElementById('back-btn').classList.remove('hidden');
+  showScreen('perfil');
+  renderPerfil(userId);
+}
+
+function renderPerfil(userId){
+  var u=D.usuarios.find(function(x){return x.id===userId;});
+  if(!u)return;
+  var ini=u.nombre.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+  var col=rolColors[u.rol]||'#64748b';
+  var rolLabel={admin:'Administrador',supervisor:'Supervisor',trabajador:'Técnico / Instalador'}[u.rol]||u.rol;
+  var stats=getMemberStats(userId);
+
+  // Get tasks for this user
+  var myTareas=D.tareas.filter(function(t){return t.usuario_id===userId;});
+  var histUser=D.historial.filter(function(h){
+    return h.usuario_nombre===u.nombre;
+  }).slice(0,10);
+
+  var tareasHtml='';
+  if(!myTareas.length){
+    tareasHtml='<div style="padding:14px 16px;font-size:13px;color:var(--text2)">Sin tareas asignadas</div>';
+  }else{
+    var estados={pendiente:'Pendiente',aceptada:'Aceptada',en_progreso:'En progreso',completada:'Completada'};
+    myTareas.forEach(function(t){
+      var el=D.elementos.find(function(x){return x.id===t.elemento_id;});
+      var ed=t.edificio_id?D.edificios.find(function(e){return e.id===t.edificio_id;}):null;
+      tareasHtml+='<div class="tarea-card" style="margin:0;border-radius:0;border-left:none;border-right:none;border-top:none;">';
+      tareasHtml+='<div class="tarea-header"><div class="tarea-estado '+(t.estado||'pendiente')+'">'+( estados[t.estado]||'Pendiente')+'</div>';
+      tareasHtml+='<div class="tarea-titulo">'+t.titulo+'</div></div>';
+      tareasHtml+='<div class="tarea-body">';
+      if(ed)tareasHtml+='<div class="tarea-detail">'+ed.nombre+'</div>';
+      if(t.descripcion)tareasHtml+='<div class="tarea-detail">'+t.descripcion+'</div>';
+      tareasHtml+='</div>';
+      tareasHtml+='<div class="tarea-actions">';
+      if(t.estado==='pendiente')tareasHtml+='<button class="tarea-btn accept" onclick="updateTareaEstado('+t.id+',\'aceptada\')">Aceptar</button>';
+      else if(t.estado==='aceptada')tareasHtml+='<button class="tarea-btn complete" onclick="updateTareaEstado('+t.id+',\'completada\')">Completar</button>';
+      else if(t.estado==='completada')tareasHtml+='<span style="font-size:12px;color:var(--green);font-weight:600">Completada</span>';
+      if(isAdmin())tareasHtml+='<button class="tarea-btn secondary" style="max-width:36px" onclick="deleteTarea('+t.id+')">✕</button>';
+      tareasHtml+='</div></div>';
+    });
+  }
+
+  var histHtml='';
+  histUser.forEach(function(h){
+    var el=D.elementos.find(function(e){return e.id===h.elemento_id;});
+    histHtml+='<div style="padding:10px 16px;border-bottom:1px solid var(--border);font-size:12px;">';
+    histHtml+='<div style="font-weight:600;">'+(h.accion==='instalado'?'<span style="color:var(--green)">✓ Instalado</span>':'<span style="color:var(--red)">✗ Pendiente</span>')+' '+(el?el.nombre:'')+'</div>';
+    histHtml+='<div style="color:var(--text3);margin-top:2px">'+formatDate(h.creado_en)+'</div>';
+    histHtml+='</div>';
+  });
+
+  document.getElementById('perfil-content').innerHTML=
+    '<div style="padding-bottom:calc(var(--nb) + var(--sab))">'+
+    // Banner
+    '<div class="perfil-banner" style="background:'+col+'">' +
+      '<div class="perfil-av">'+ini+'</div>'+
+      '<div><div class="perfil-nombre">'+u.nombre+'</div><div class="perfil-rol">'+rolLabel+'</div></div>'+
+    '</div>'+
+    // Stats
+    '<div class="perfil-stats">'+
+      '<div class="perfil-stat"><div class="perfil-stat-val g">'+stats.instalados+'</div><div class="perfil-stat-lbl">Instalados</div></div>'+
+      '<div class="perfil-stat"><div class="perfil-stat-val b">'+myTareas.length+'</div><div class="perfil-stat-lbl">Tareas</div></div>'+
+      '<div class="perfil-stat"><div class="perfil-stat-val '+(stats.tareasPend>0?'r':'g')+'">'+stats.tareasPend+'</div><div class="perfil-stat-lbl">Pendientes</div></div>'+
+    '</div>'+
+    // Assign task button (admin only)
+    (isAdmin()?'<div style="padding:0 16px 12px"><button onclick="openAsignarDesdePerfilModal('+userId+')" style="width:100%;padding:13px;background:var(--blue);color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>Asignar nueva tarea</button></div>':'')+
+    // Tareas
+    '<div class="det-section" style="margin:0 16px 12px"><div class="det-section-title">Tareas asignadas</div>'+tareasHtml+'</div>'+
+    // Historial
+    (histHtml?'<div class="det-section" style="margin:0 16px 16px"><div class="det-section-title">Actividad reciente</div>'+histHtml+'</div>':'')+
+    '</div>';
+}
+
+function openAsignarDesdePerfilModal(userId){
+  // Open modal to assign a task to this user specifically
+  var u=D.usuarios.find(function(x){return x.id===userId;});
+  if(!u)return;
+  document.getElementById('asignar-el-info').innerHTML='<b>Asignar tarea a: '+u.nombre+'</b><br><span style="color:var(--text2)">'+({admin:'Administrador',supervisor:'Supervisor',trabajador:'Técnico'}[u.rol]||u.rol)+'</span>';
+  document.getElementById('asignar-desc').value='';
+  // Show element picker - list pisos and elements
+  var html='<div style="padding:12px 14px;font-size:12px;color:var(--text2)">Selecciona el elemento a asignar:</div>';
+  D.edificios.filter(function(ed){return ed.proyecto_id===curProjId;}).forEach(function(ed){
+    getPisos(ed.id).forEach(function(p){
+      var els=getEls(p.id).filter(function(el){return el.instalado!==true;});
+      if(!els.length)return;
+      html+='<div style="padding:8px 14px;font-size:11px;font-weight:600;color:var(--text2);background:var(--bg);text-transform:uppercase;letter-spacing:0.05em;">'+ed.nombre+' · '+p.nombre+'</div>';
+      els.forEach(function(el){
+        html+='<div class="asignar-member" onclick="crearTareaParaUsuario('+el.id+','+userId+')">';
+        html+='<div style="flex:1"><div class="asignar-member-name">'+el.nombre+'</div><div class="asignar-member-role">'+el.cantidad+' unidades</div></div>';
+        html+='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>';
+      });
+    });
+  });
+  document.getElementById('asignar-members').innerHTML=html;
+  openModal('asignar');
+}
+
+function crearTareaParaUsuario(elId,userId){
+  var el=D.elementos.find(function(x){return x.id===elId;});
+  var piso=el?D.pisos.find(function(p){return p.id===el.piso_id;}):null;
+  var ed=piso?D.edificios.find(function(e){return e.id===piso.edificio_id;}):null;
+  var desc=document.getElementById('asignar-desc').value.trim();
+  if(!desc)desc='Instalar '+el.cantidad+' unidades de '+el.nombre+(ed?' en '+ed.nombre:'')+(piso?', '+piso.nombre:'');
+  var fotoUrl=D.fotos.filter(function(f){return f.elemento_id===elId;}).slice(-1)[0]?.url||null;
+
+  sb.from('tareas').insert([{
+    elemento_id:elId,
+    usuario_id:userId,
+    asignado_por:U.nombre,
+    titulo:el.nombre,
+    descripcion:desc,
+    estado:'pendiente',
+    foto_url:fotoUrl,
+    edificio_id:ed?ed.id:null,
+    piso_id:piso?piso.id:null
+  }]).select().then(function(r){
+    if(r.error){showToast('Error al asignar','error');return;}
+    if(r.data&&r.data.length>0)D.tareas.push(r.data[0]);
+    closeModal('asignar');
+    renderPerfil(userId);
+    updateTareasBadge();
+    showToast('Tarea asignada','success');
+
+    // Send internal notification to user
+    sb.from('notificaciones').insert([{
+      para_usuario_id:userId,
+      de_usuario_nombre:U.nombre,
+      tipo:'tarea',
+      titulo:'Nueva tarea: '+el.nombre,
+      mensaje:desc,
+      elemento_id:elId,
+      leida:false
+    }]);
+
+    // Push notification if user has token
+    var receptor=D.usuarios.find(function(u){return u.id===userId;});
+    if(receptor&&receptor.fcm_token){
+      sendFCMPush(receptor.fcm_token,'Nueva tarea: '+el.nombre,desc);
+    }
   });
 }
 

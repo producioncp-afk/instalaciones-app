@@ -2841,6 +2841,30 @@ function getFaseLabel(fase){
   return fases[fase]||'Recibido';
 }
 
+function irAlElemento(elId){
+  var el=D.elementos.find(function(x){return x.id===elId;});
+  if(!el){showToast('Elemento no encontrado','error');return;}
+  var piso=D.pisos.find(function(p){return p.id===el.piso_id;});
+  var ed=piso?D.edificios.find(function(e){return e.id===piso.edificio_id;}):null;
+  var proj=ed?D.proyectos.find(function(p){return p.id===ed.proyecto_id;}):null;
+
+  // Navigate: home → edificios → pisos → elementos → detalle
+  navStack=[];
+  switchTab('home');
+  if(proj){
+    buildEdificios(proj.id);
+    if(ed){
+      buildPisos(ed.id);
+      if(piso){
+        buildEls(piso.id);
+        setTimeout(function(){
+          openDetalle(elId);
+        },100);
+      }
+    }
+  }
+}
+
 function avanzarFase(tareaId, faseActual){
   var nuevaFase=Math.min(4, faseActual+1);
   var nuevoEstado=nuevaFase===4?'completada':(nuevaFase>=1?'en_progreso':'aceptada');
@@ -2948,6 +2972,7 @@ function buildTareas(){
       }else{
         html+='<div style="font-size:11px;color:var(--green);font-weight:700;display:flex;align-items:center;gap:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Completado</div>';
       }
+      if(t.elemento_id)html+='<button onclick="irAlElemento('+t.elemento_id+')" style="background:var(--bg);color:var(--blue);border:1px solid var(--blue);border-radius:7px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:\'Inter\',sans-serif;white-space:nowrap;margin-left:4px;display:flex;align-items:center;gap:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>Ver</button>';
       if(isAdmin())html+='<button onclick="deleteTarea('+t.id+')" style="width:28px;height:28px;border-radius:50%;background:var(--red-light);border:none;color:var(--red);cursor:pointer;display:flex;align-items:center;justify-content:center;margin-left:4px;font-size:12px;">✕</button>';
       html+='</div>';
       html+='</div>';
@@ -3202,12 +3227,18 @@ function renderPerfil(userId){
       var eLabel=estadoLabels[t.estado]||t.estado;
       var ticketNum=String(t.id).padStart(4,'0');
 
+      var fase2=t.fase||0;
+      var eColor2=['#1a56db','#f97316','#f97316','#f97316','var(--green)'][fase2]||'#1a56db';
+      var eLabel2=getFaseLabel(fase2);
+
       tareasHtml+='<div style="background:var(--white);border-radius:10px;border:1px solid var(--border);overflow:hidden;margin:8px 16px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">';
       // Header stripe
-      tareasHtml+='<div style="background:'+eColor+';padding:8px 12px;display:flex;align-items:center;justify-content:space-between;">';
+      tareasHtml+='<div style="background:'+eColor2+';padding:8px 12px;display:flex;align-items:center;justify-content:space-between;">';
       tareasHtml+='<div style="background:rgba(255,255,255,0.2);border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;color:white;letter-spacing:0.08em;">TICKET #'+ticketNum+'</div>';
-      tareasHtml+='<div style="background:rgba(255,255,255,0.25);border-radius:20px;padding:2px 9px;font-size:11px;font-weight:700;color:white;">'+eLabel+'</div>';
+      tareasHtml+='<div style="background:rgba(255,255,255,0.25);border-radius:20px;padding:2px 9px;font-size:11px;font-weight:700;color:white;">'+eLabel2+'</div>';
       tareasHtml+='</div>';
+      // Fase progress
+      tareasHtml+=buildFaseProgress(fase2);
       // Dashed line
       tareasHtml+='<div style="border-top:2px dashed var(--border);margin:0 12px;"></div>';
       // Body
@@ -3226,9 +3257,10 @@ function renderPerfil(userId){
       tareasHtml+='<div style="border-top:2px dashed var(--border);margin:0 12px;"></div>';
       // Actions
       tareasHtml+='<div style="padding:10px 12px;display:flex;justify-content:flex-end;gap:6px;">';
-      if(t.estado==='pendiente')tareasHtml+='<button onclick="updateTareaEstado('+t.id+',\'aceptada\')" style="background:var(--blue);color:white;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:\'Inter\',sans-serif;">Aceptar</button>';
-      else if(t.estado==='aceptada')tareasHtml+='<button onclick="updateTareaEstado('+t.id+',\'completada\')" style="background:var(--green);color:white;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:\'Inter\',sans-serif;">Completar</button>';
-      else if(t.estado==='completada')tareasHtml+='<span style="font-size:12px;color:var(--green);font-weight:600;display:flex;align-items:center;gap:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Completada</span>';
+      if(t.estado==='pendiente'||t.fase===0)tareasHtml+='<button onclick="avanzarFase('+t.id+','+(t.fase||0)+')" style="background:#f97316;color:white;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:\'Inter\',sans-serif;">→ Instalado</button>';
+      else if(t.fase>0&&t.fase<4){var nf=['Instalado','Pintado','Retocado','Completado'][t.fase]||'Siguiente';tareasHtml+='<button onclick="avanzarFase('+t.id+','+t.fase+')" style="background:#f97316;color:white;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:\'Inter\',sans-serif;">→ '+nf+'</button>';}
+      else if(t.fase===4)tareasHtml+='<span style="font-size:12px;color:var(--green);font-weight:600;display:flex;align-items:center;gap:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Completado</span>';
+      if(t.elemento_id)tareasHtml+='<button onclick="irAlElemento('+t.elemento_id+')" style="background:var(--bg);color:var(--blue);border:1px solid var(--blue);border-radius:6px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:\'Inter\',sans-serif;">Ver elemento</button>';
       if(isAdmin())tareasHtml+='<button onclick="deleteTarea('+t.id+')" style="width:28px;height:28px;border-radius:50%;background:var(--red-light);border:none;color:var(--red);cursor:pointer;font-size:12px;">✕</button>';
       tareasHtml+='</div>';
       tareasHtml+='</div>';

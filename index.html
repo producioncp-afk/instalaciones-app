@@ -88,6 +88,7 @@ body{font-family:'Inter',sans-serif;color:var(--text);height:100dvh;display:flex
 
 /* SCREENS */
 .screen{display:none;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-bottom:calc(var(--nb) + var(--sab));}
+#screen-historial{background:var(--white);}
 .screen.active{display:block;}
 
 /* BOTTOM NAV */
@@ -579,9 +580,8 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
   </div>
 
   <!-- HISTORIAL -->
-  <div class="screen" id="screen-historial">
-    <div class="pad" style="padding-bottom:8px"><div class="sec-title">Historial de cambios</div></div>
-    <div style="background:var(--white);min-height:60vh"><div id="hist-list"><div class="spin-wrap"><div class="spin"></div></div></div></div>
+  <div class="screen" id="screen-historial" style="background:var(--white);padding-bottom:calc(var(--nb) + var(--sab))">
+    <div id="hist-list"><div class="spin-wrap"><div class="spin"></div></div></div>
   </div>
 
   <!-- RESUMEN -->
@@ -1123,7 +1123,12 @@ function switchTab(tab){
   else if(tab==='seguimiento'){setTopbar(false,'Seguimiento Diario');showScreen('seguimiento');buildSeguimiento();}
   else if(tab==='resumen'){setTopbar(false,'Resumen global');showScreen('resumen');buildResumen();}
   else if(tab==='usuarios'){setTopbar(false,'Usuarios');showScreen('usuarios');buildUsuarios();}
-  else if(tab==='historial'){setTopbar(false,'Historial');showScreen('historial');buildHistorial();}
+  else if(tab==='historial'){
+    setTopbar(false,'Historial');
+    showScreen('historial');
+    // Build immediately with cached data — no spinner
+    buildHistorial();
+  }
   else if(tab==='tareas'){setTopbar(false,'Mis tareas');showScreen('tareas');buildTareas();}
 }
 
@@ -2959,23 +2964,51 @@ function toggleUserActive(userId,active){
 }
 
 function buildHistorial(){
+  var container=document.getElementById('hist-list');
+  if(!container)return;
+  
   if(!D.historial||!D.historial.length){
-    document.getElementById('hist-list').innerHTML='<div style="text-align:center;padding:3rem;color:var(--text2)">Sin cambios registrados.</div>';
+    container.innerHTML='<div style="text-align:center;padding:3rem;color:var(--text2);font-size:13px">Sin cambios registrados.</div>';
     return;
   }
-  var html='';
+
+  var accionLabels={
+    'instalado':'Instalado','pendiente':'Marcado pendiente',
+    'pintado':'Pintado','retocado':'Retocado',
+    'foto':'Foto agregada','nota':'Nota agregada'
+  };
+  var accionColors={
+    'instalado':'var(--green)','pendiente':'var(--red)',
+    'pintado':'var(--yellow)','retocado':'var(--purple)',
+    'foto':'var(--blue)','nota':'var(--blue)'
+  };
+
+  var html='<div style="padding:10px 14px 6px;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border);">'+D.historial.length+' registros</div>';
+  
   D.historial.forEach(function(h,i){
     var el=D.elementos.find(function(e){return e.id===h.elemento_id;});
     var elNom=el?el.nombre:'Elemento #'+h.elemento_id;
-    html+='<div class="hist-row" style="animation-delay:'+(i*0.015)+'s">';
-    html+='<div class="hist-top"><div class="hist-who">'+h.usuario_nombre+'</div>';
-    html+='<div class="hist-act">→ '+(h.accion==='instalado'?'instalado':'pendiente')+'</div>';
-    html+='<div class="hist-time">'+formatDate(h.creado_en)+'</div></div>';
-    html+='<div class="hist-el">📦 '+elNom+'</div>';
-    if(h.nota)html+='<div class="hist-nota">💬 '+h.nota+'</div>';
+    var piso=el?D.pisos.find(function(p){return p.id===el.piso_id;}):null;
+    var ed=piso?D.edificios.find(function(e){return e.id===piso.edificio_id;}):null;
+    var ubicacion=(ed?ed.nombre:'')+(piso?' · '+piso.nombre:'');
+    var accion=h.accion||'instalado';
+    var label=accionLabels[accion]||accion;
+    var color=accionColors[accion]||'var(--text2)';
+    var ini=(h.usuario_nombre||'?').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+    html+='<div class="hist-row" style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);">';
+    html+='<div style="width:32px;height:32px;border-radius:50%;background:var(--blue);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">'+ini+'</div>';
+    html+='<div style="flex:1;min-width:0;">';
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">';
+    html+='<div style="font-size:13px;font-weight:600;">'+h.usuario_nombre+'</div>';
+    html+='<div style="font-size:11px;color:var(--text3);white-space:nowrap;flex-shrink:0;">'+formatDate(h.creado_en)+'</div>';
     html+='</div>';
+    html+='<div style="font-size:12px;margin-top:2px;"><span style="color:'+color+';font-weight:600;">'+label+'</span> · '+elNom+'</div>';
+    if(ubicacion)html+='<div style="font-size:11px;color:var(--text3);margin-top:2px;">'+ubicacion+'</div>';
+    if(h.nota)html+='<div style="font-size:12px;color:var(--blue);margin-top:2px;font-style:italic;">'+h.nota+'</div>';
+    html+='</div></div>';
   });
-  document.getElementById('hist-list').innerHTML=html;
+  
+  container.innerHTML=html;
 }
 
 function saveProject(){

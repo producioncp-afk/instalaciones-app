@@ -2471,20 +2471,19 @@ function aceptarTareaDesdeNotif(){
 }
 
 function buildTareas(){
-  // Show tasks assigned TO this user (via usuario_id match) OR all if admin
-  var misTareas=isAdmin()?D.tareas:D.tareas.filter(function(t){return t.usuario_id===U.id;});
+  var el=document.getElementById('tareas-content');
+  if(!el)return;
 
-  // Also show tasks assigned to contacts (for non-users via contacto)
-  // For now show all tasks where asignado_por matches or all for admin
-  var displayTareas=D.tareas;
+  // Admin ve todas, trabajador ve solo las suyas
+  var displayTareas=isAdmin()
+    ?D.tareas
+    :D.tareas.filter(function(t){return t.usuario_id===U.id;});
 
   var html='';
   var estados={pendiente:'Pendiente',aceptada:'Aceptada',en_progreso:'En progreso',completada:'Completada'};
 
-  // Summary counts
   var pend=displayTareas.filter(function(t){return t.estado==='pendiente';}).length;
   var activ=displayTareas.filter(function(t){return t.estado==='aceptada'||t.estado==='en_progreso';}).length;
-  var comp=displayTareas.filter(function(t){return t.estado==='completada';}).length;
 
   html+='<div class="stats-grid" style="margin-bottom:16px">';
   html+='<div class="stat-card"><div class="stat-lbl">Pendientes</div><div class="stat-num r">'+pend+'</div></div>';
@@ -2492,16 +2491,17 @@ function buildTareas(){
   html+='</div>';
 
   if(!displayTareas.length){
-    html+='<div style="text-align:center;padding:3rem;color:var(--text2);font-size:13px">No hay tareas asignadas todavía.</div>';
+    html+='<div style="text-align:center;padding:3rem;color:var(--text2);font-size:13px;">';
+    html+='No tienes tareas asignadas todavía.</div>';
   }else{
-    // Sort: pending first
     var sorted=displayTareas.slice().sort(function(a,b){
       var order={pendiente:0,aceptada:1,en_progreso:2,completada:3};
       return (order[a.estado]||0)-(order[b.estado]||0);
     });
+
     sorted.forEach(function(t,i){
-      var contacto=D.contactos.find(function(c){return c.id===t.contacto_id;});
-      var el=D.elementos.find(function(x){return x.id===t.elemento_id;});
+      var usuario=D.usuarios.find(function(u){return u.id===t.usuario_id;});
+      var elem=D.elementos.find(function(x){return x.id===t.elemento_id;});
       var ed=t.edificio_id?D.edificios.find(function(e){return e.id===t.edificio_id;}):null;
       var piso=t.piso_id?D.pisos.find(function(p){return p.id===t.piso_id;}):null;
       var estadoLabel=estados[t.estado]||t.estado;
@@ -2512,18 +2512,18 @@ function buildTareas(){
       html+='<div class="tarea-titulo">'+t.titulo+'</div>';
       html+='</div>';
       html+='<div class="tarea-body">';
-      if(contacto)html+='<div class="tarea-detail"><b>Para:</b> '+contacto.nombre+' — '+contacto.rol+'</div>';
+      if(usuario)html+='<div class="tarea-detail"><b>Asignado a:</b> '+usuario.nombre+'</div>';
       if(ed||piso)html+='<div class="tarea-detail"><b>Ubicación:</b> '+(ed?ed.nombre:'')+(piso?' · '+piso.nombre:'')+'</div>';
+      if(elem)html+='<div class="tarea-detail"><b>Cantidad:</b> '+elem.cantidad+' unidades</div>';
       html+='<div class="tarea-detail"><b>Asignado por:</b> '+t.asignado_por+'</div>';
       html+='<div class="tarea-detail" style="color:var(--text3)">'+formatDate(t.creado_en)+'</div>';
       if(t.descripcion)html+='<div class="tarea-detail" style="margin-top:6px;color:var(--text)">'+t.descripcion+'</div>';
       if(t.foto_url)html+='<img class="tarea-foto" src="'+t.foto_url+'" onclick="openLightbox(this.src)">';
       html+='</div>';
 
-      // Action buttons
       html+='<div class="tarea-actions">';
       if(t.estado==='pendiente'){
-        html+='<button class="tarea-btn accept" onclick="updateTareaEstado('+t.id+',\'aceptada\')">Aceptar</button>';
+        html+='<button class="tarea-btn accept" onclick="updateTareaEstado('+t.id+',\'aceptada\')">Aceptar tarea</button>';
       }else if(t.estado==='aceptada'){
         html+='<button class="tarea-btn progress" onclick="updateTareaEstado('+t.id+',\'en_progreso\')">En progreso</button>';
         html+='<button class="tarea-btn complete" onclick="updateTareaEstado('+t.id+',\'completada\')">Completar</button>';
@@ -2537,7 +2537,7 @@ function buildTareas(){
       html+='</div>';
     });
   }
-  document.getElementById('tareas-content').innerHTML=html;
+  el.innerHTML=html;
 }
 
 function updateTareaEstado(tareaId,nuevoEstado){

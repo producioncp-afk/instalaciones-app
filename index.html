@@ -16,6 +16,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js"></script>
 <style>
 :root{
   --bg:#f4f5f7;--white:#fff;--border:#e1e4e8;
@@ -64,8 +66,25 @@ body{font-family:'Inter',sans-serif;color:var(--text);height:100dvh;display:flex
 .tb-title{font-size:15px;font-weight:600;color:#f9fafb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .tb-right{display:flex;align-items:center;gap:8px;}
 .avatar{width:32px;height:32px;border-radius:50%;background:#1a56db;color:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;letter-spacing:0.05em;}
-.opill{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;color:#34d399;background:rgba(52,211,153,0.1);}
-.opill.offline{color:#f87171;background:rgba(248,113,113,0.1);}
+.notif-bell{position:relative;width:32px;height:32px;border-radius:50%;background:#111827;border:1px solid #1f2937;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#9ca3af;}
+.notif-bell.has-unread{color:#f9fafb;}
+.notif-badge{position:absolute;top:-2px;right:-2px;width:16px;height:16px;border-radius:50%;background:var(--red);color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--black);}
+.notif-item{padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s;}
+.notif-item:last-child{border-bottom:none;}
+.notif-item.unread{background:#fffbeb;border-left:3px solid var(--blue);}
+.notif-item:active{background:var(--bg);}
+.notif-title{font-size:13px;font-weight:600;margin-bottom:3px;}
+.notif-msg{font-size:12px;color:var(--text2);line-height:1.4;}
+.notif-time{font-size:11px;color:var(--text3);margin-top:4px;}
+.notif-de{font-size:11px;color:var(--blue);font-weight:600;}
+.notif-empty{text-align:center;padding:3rem;color:var(--text2);font-size:13px;}
+.notif-send-wrap{background:var(--bg);border-radius:8px;padding:12px;margin-bottom:12px;}
+.notif-send-lbl{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;}
+.notif-user-btn{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--white);border:1px solid var(--border);border-radius:7px;margin-bottom:6px;cursor:pointer;font-size:13px;font-weight:500;width:100;text-align:left;}
+.notif-user-btn:last-child{margin-bottom:0;}
+.notif-user-btn:active{background:var(--blue-light);}
+.notif-user-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;flex-shrink:0;}
+
 
 /* SCREENS */
 .screen{display:none;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-bottom:calc(var(--nb) + var(--sab));}
@@ -195,6 +214,15 @@ body{font-family:'Inter',sans-serif;color:var(--text);height:100dvh;display:flex
 .det-nota-input{width:100%;padding:12px 14px;background:var(--bg);border:none;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;outline:none;resize:none;min-height:80px;}
 .det-save-btn{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--blue);color:white;border:none;border-radius:8px;padding:13px;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;width:calc(100% - 28px);margin:10px 14px;}
 .det-save-btn:active{background:var(--blue-dark);}
+.det-wa-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:#25d366;color:white;border:none;border-radius:8px;padding:13px;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;width:calc(100% - 28px);margin:4px 14px 10px;}
+.det-wa-btn:active{background:#1ebe5d;}
+.wa-modal-section{margin-bottom:16px;}
+.wa-modal-lbl{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;}
+.wa-role-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:8px;}
+.wa-role-title{font-size:13px;font-weight:600;margin-bottom:4px;}
+.wa-role-items{font-size:12px;color:var(--text2);line-height:1.6;}
+.wa-send-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:#25d366;color:white;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;width:100%;margin-top:4px;}
+.wa-send-btn:active{background:#1ebe5d;}
 .estado-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;}
 .estado-lbl{font-size:13px;font-weight:500;color:var(--text2);}
 
@@ -343,7 +371,23 @@ body{font-family:'Inter',sans-serif;color:var(--text);height:100dvh;display:flex
 .lb-close{position:absolute;top:18px;right:18px;color:#9ca3af;font-size:20px;cursor:pointer;background:rgba(255,255,255,0.08);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:none;}
 
 /* TOAST */
-.toast{position:fixed;bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) translateY(80px);background:var(--dark);color:white;border-radius:6px;padding:10px 18px;font-size:13px;font-weight:600;z-index:999;transition:transform 0.25s;white-space:nowrap;border:1px solid #374151;}
+.notif-bell{position:relative;width:34px;height:34px;border-radius:7px;background:#111827;border:1px solid #1f2937;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#9ca3af;flex-shrink:0;}
+.notif-bell:active{background:#1f2937;}
+.notif-badge{position:absolute;top:-4px;right:-4px;min-width:17px;height:17px;border-radius:9px;background:#c0392b;color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--black);}
+.notif-badge.hidden{display:none;}
+.notif-item{padding:14px;border-bottom:1px solid var(--border);cursor:pointer;animation:fadeUp 0.2s ease both;}
+.notif-item:last-child{border-bottom:none;}
+.notif-item.unread{background:var(--blue-light);}
+.notif-item:active{background:var(--bg);}
+.notif-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px;}
+.notif-title{font-size:13px;font-weight:600;flex:1;}
+.notif-time{font-size:11px;color:var(--text3);flex-shrink:0;}
+.notif-msg{font-size:12px;color:var(--text2);line-height:1.5;}
+.notif-de{font-size:11px;color:var(--text3);margin-top:3px;}
+.notif-empty{text-align:center;padding:3rem;color:var(--text2);font-size:13px;}
+.notif-send-form{background:var(--bg);border-radius:8px;padding:14px;margin-bottom:14px;}
+.notif-send-title{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;}
+bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) translateY(80px);background:var(--dark);color:white;border-radius:6px;padding:10px 18px;font-size:13px;font-weight:600;z-index:999;transition:transform 0.25s;white-space:nowrap;border:1px solid #374151;}
 .toast.show{transform:translateX(-50%) translateY(0);}
 .toast.success{background:var(--green);border-color:var(--green);}
 .toast.error{background:var(--red);border-color:var(--red);}
@@ -374,6 +418,10 @@ body{font-family:'Inter',sans-serif;color:var(--text);height:100dvh;display:flex
     </div>
     <div class="tb-right">
       <div class="opill" id="online-pill"><svg width="7" height="7" viewBox="0 0 10 10"><circle cx="5" cy="5" r="5" fill="currentColor"/></svg><span>En línea</span></div>
+      <div class="notif-bell" id="notif-bell" onclick="openNotifs()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-badge hidden" id="notif-badge">0</span>
+      </div>
       <div class="avatar" id="user-av" onclick="openUserMenu()">IM</div>
     </div>
   </div>
@@ -597,6 +645,45 @@ body{font-family:'Inter',sans-serif;color:var(--text);height:100dvh;display:flex
   </div>
 </div>
 
+<!-- MODAL WHATSAPP -->
+<div class="modal-overlay hidden" id="modal-wa" onclick="closeOv(event,'modal-wa')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">Enviar pendientes por WhatsApp</div>
+    <div id="wa-content"></div>
+  </div>
+</div>
+
+<!-- MODAL NOTIFICACIONES -->
+<div class="modal-overlay hidden" id="modal-notifs" onclick="closeOv(event,'modal-notifs')">
+  <div class="modal" onclick="event.stopPropagation()" style="max-height:85vh">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div class="modal-title" style="margin:0">Notificaciones</div>
+      <button style="background:none;border:none;font-size:13px;color:var(--blue);cursor:pointer;font-weight:600;" onclick="markAllRead()">Marcar todo leído</button>
+    </div>
+    <div id="notif-list"><div class="notif-empty">Sin notificaciones</div></div>
+  </div>
+</div>
+
+<!-- MODAL ENVIAR NOTIFICACION -->
+<div class="modal-overlay hidden" id="modal-send-notif" onclick="closeOv(event,'modal-send-notif')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">Enviar aviso interno</div>
+    <div class="modal-field"><label>Para</label>
+      <select class="modal-select" id="notif-para"></select>
+    </div>
+    <div class="modal-field"><label>Título</label>
+      <input class="modal-input" type="text" id="notif-titulo" placeholder="Ej: Elemento pendiente de instalar">
+    </div>
+    <div class="modal-field"><label>Mensaje</label>
+      <textarea class="nota-textarea" id="notif-msg" placeholder="Escribe el mensaje detallado..."></textarea>
+    </div>
+    <div class="modal-row">
+      <button class="modal-btn secondary" onclick="closeModal('send-notif')">Cancelar</button>
+      <button class="modal-btn primary" onclick="sendNotif()">Enviar aviso</button>
+    </div>
+  </div>
+</div>
+
 <div class="lightbox hidden" id="lightbox" onclick="closeLightbox()">
   <button class="lb-close" onclick="closeLightbox()">✕</button>
   <img id="lb-img" src="" alt="">
@@ -609,10 +696,45 @@ body{font-family:'Inter',sans-serif;color:var(--text);height:100dvh;display:flex
 var SU='https://zlkmthwmcikcnvxtcmql.supabase.co';
 var SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpsa210aHdtY2lrY252eHRjbXFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MjU2MDgsImV4cCI6MjA5NDMwMTYwOH0.IKiEqXCvtVXUrXkkuihSghH08Ebach31MQ7u5e2TBaI';
 var sb=supabase.createClient(SU,SK);
+
+// ── FIREBASE ──
+var VAPID='BLprbIIJ4lIQpGQG2BEM6sPE2tJI1ye-J8OhlN2HPcsV0HXixbRUKCESRrsBut-H14bQGPyk_Y14kWaWQ8_aJSw';
+var fbApp=firebase.initializeApp({
+  apiKey:'AIzaSyB0CA58zAt0QjiqRko0pE1vnbvtydTeZqQ',
+  authDomain:'iberomuebles-a52eb.firebaseapp.com',
+  projectId:'iberomuebles-a52eb',
+  storageBucket:'iberomuebles-a52eb.firebasestorage.app',
+  messagingSenderId:'1007736455916',
+  appId:'1:1007736455916:web:e51b59b8d49e2bc7bd9bc9'
+});
+var fbMsg=firebase.messaging(fbApp);
+
+function initPush(){
+  if(!('Notification' in window))return;
+  Notification.requestPermission().then(function(perm){
+    if(perm!=='granted')return;
+    fbMsg.getToken({vapidKey:VAPID,serviceWorkerRegistration:window._swReg}).then(function(token){
+      if(!token)return;
+      // Save token to Supabase for this user
+      sb.from('usuarios').update({fcm_token:token}).eq('id',U.id).then(function(){
+        console.log('FCM token guardado');
+      });
+    }).catch(function(e){console.log('FCM token error:',e);});
+  });
+}
+
+// Listen for foreground messages (app open)
+fbMsg.onMessage(function(payload){
+  var title=payload.notification&&payload.notification.title?payload.notification.title:'Ibero Muebles';
+  var body=payload.notification&&payload.notification.body?payload.notification.body:'Tienes un nuevo aviso';
+  showToast(title+': '+body,'success');
+  // Also update badge
+  loadNotifs();
+});
 var U=null,curProjId=null,curEdId=null,curPisoId=null;
 var navStack=[],pendingToggle=null;
 var selEmoji_='🏗️',selColor_='#2563eb';
-var D={proyectos:[],edificios:[],pisos:[],elementos:[],usuarios:[],historial:[],fotos:[],specs:[],seguimiento:[]};
+var D={proyectos:[],edificios:[],pisos:[],elementos:[],usuarios:[],historial:[],fotos:[],specs:[],seguimiento:[],notifs:[]};
 var curElId=null;
 var appCharts={};
 
@@ -671,6 +793,8 @@ function startApp(){
   }
   setTopbar(true);
   loadData().then(function(){buildHome();setupRealtime();});
+  // Init push notifications
+  setTimeout(initPush, 2000);
 }
 
 function openUserMenu(){
@@ -689,7 +813,8 @@ function loadData(){
     sb.from('fotos').select('*').order('subida_en'),
     sb.from('seguimiento_diario').select('*').order('fecha'),
     sb.from('especificaciones').select('*').order('orden'),
-    sb.from('historial').select('*').order('creado_en',{ascending:false}).limit(200)
+    sb.from('historial').select('*').order('creado_en',{ascending:false}).limit(200),
+    sb.from('notificaciones').select('*').eq('para_usuario_id',U.id).order('creado_en',{ascending:false}).limit(50)
   ];
   if(isAdmin()){
     qs.push(sb.from('usuarios').select('*').order('creado_en'));
@@ -705,8 +830,10 @@ function loadData(){
     D.seguimiento=r[5].data||[];
     D.specs=r[6].data||[];
     D.historial=r[7].data||[];
-    if(isAdmin()){D.usuarios=r[8]?r[8].data||[]:[]; }
+    D.notifs=r[8].data||[];
+    if(isAdmin()){D.usuarios=r[9]?r[9].data||[]:[]; }
     setOnline(true);
+    updateNotifBadge();
   });
 }
 
@@ -722,6 +849,13 @@ function setupRealtime(){
       refreshCurrent();
       if(pl.new.actualizado_por&&pl.new.actualizado_por!==U.nombre)
         showToast((pl.new.instalado?'':'')+' '+pl.new.actualizado_por+': '+pl.new.nombre,'success');
+    })
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'notificaciones'},function(pl){
+      if(pl.new.para_usuario_id===U.id){
+        D.notifs.unshift(pl.new);
+        updateNotifBadge();
+        showToast('Nuevo aviso: '+pl.new.titulo,'success');
+      }
     })
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'seguimiento_diario'},function(pl){
       var exists=D.seguimiento.find(function(s){return s.id===pl.new.id;});
@@ -1136,6 +1270,7 @@ function renderDetalleContent(elId){
     '</div>'+
 
     (canEdit()?'<button class="det-save-btn" onclick="saveDetalle('+el.id+')">Guardar cambios</button>':'')+
+    '<button class="det-wa-btn" onclick="openWAModal('+el.id+')"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>Enviar por WhatsApp</button>'+
 
     // Fotos
     '<div class="det-section">'+
@@ -1223,6 +1358,231 @@ function changeQty(elId,delta){
   el.cantidad=newQty;
   var display=document.getElementById('qty-display');
   if(display)display.textContent=newQty;
+}
+
+function openWAModal(elId){
+  var el=D.elementos.find(function(x){return x.id===elId;});
+  if(!el)return;
+  var piso=D.pisos.find(function(p){return p.id===el.piso_id;});
+  var ed=piso?D.edificios.find(function(e){return e.id===piso.edificio_id;}):null;
+  var proj=ed?D.proyectos.find(function(p){return p.id===ed.proyecto_id;}):null;
+
+  // Build pending tasks per role
+  var roles=[
+    {
+      nombre:'Instalador',
+      color:'var(--blue)',
+      pendiente: el.instalado===false,
+      descripcion: el.instalado===false?'Pendiente de instalar':'Ya instalado',
+      campo:'instalado'
+    },
+    {
+      nombre:'Pintor',
+      color:'var(--yellow)',
+      pendiente: el.pintado===false,
+      descripcion: el.pintado===false?'Pendiente de pintar':'Ya pintado',
+      campo:'pintado'
+    },
+    {
+      nombre:'Retocador',
+      color:'var(--green)',
+      pendiente: el.retocado===false,
+      descripcion: el.retocado===false?'Pendiente de retocar':'Ya retocado',
+      campo:'retocado'
+    }
+  ];
+
+  var pendientes=roles.filter(function(r){return r.pendiente;});
+  var completados=roles.filter(function(r){return !r.pendiente;});
+
+  var html='';
+
+  // Info card
+  html+='<div style="background:var(--bg);border-radius:8px;padding:12px 14px;margin-bottom:16px;">';
+  html+='<div style="font-size:13px;font-weight:600;">'+el.nombre+'</div>';
+  html+='<div style="font-size:12px;color:var(--text2);margin-top:3px;">';
+  if(ed)html+=ed.nombre;
+  if(piso)html+=' · '+piso.nombre;
+  html+='<br>Cantidad: '+el.cantidad+' unidades</div>';
+  if(el.nota)html+='<div style="font-size:12px;color:var(--blue);margin-top:4px;font-style:italic;">Nota: '+el.nota+'</div>';
+  html+='</div>';
+
+  if(pendientes.length===0){
+    html+='<div style="text-align:center;padding:1.5rem;color:var(--green);font-weight:600;font-size:14px;">Todo completado — no hay pendientes.</div>';
+  }else{
+    html+='<div class="wa-modal-lbl">Pendientes a notificar</div>';
+    pendientes.forEach(function(r){
+      var msg=buildWAMessage(el,piso,ed,proj,r);
+      html+='<div class="wa-role-card">';
+      html+='<div class="wa-role-title" style="color:'+r.color+'">'+r.nombre+'</div>';
+      html+='<div class="wa-role-items">'+r.descripcion+' — '+el.cantidad+' unidades</div>';
+      html+='<div style="display:flex;gap:8px;margin-top:10px;">';
+      html+='<button class="wa-send-btn" style="flex:1" onclick="sendWA(\''+encodeURIComponent(msg)+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>WhatsApp</button>';
+      if(isAdmin()&&D.usuarios&&D.usuarios.length){
+        html+='<button class="wa-send-btn" style="flex:1;background:var(--blue)" onclick="openNotifSend('+elId+',\''+r.nombre+'\',\''+encodeURIComponent(msg)+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Aviso interno</button>';
+      }
+      html+='</div>';
+      html+='</div>';
+    });
+  }
+
+  if(completados.length>0){
+    html+='<div class="wa-modal-lbl" style="margin-top:14px">Completados</div>';
+    html+='<div style="font-size:12px;color:var(--text2);line-height:2;">';
+    completados.forEach(function(r){
+      html+='<span style="color:var(--green);font-weight:600;">✓</span> '+r.nombre+': '+r.descripcion+'<br>';
+    });
+    html+='</div>';
+  }
+
+  // Send all pendientes at once
+  if(pendientes.length>1){
+    var allMsg=buildWAMessageAll(el,piso,ed,proj,pendientes);
+    html+='<button class="wa-send-btn" style="margin-top:16px;background:var(--dark)" onclick="sendWA(\''+encodeURIComponent(allMsg)+'\')">';
+    html+='<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>';
+    html+='Enviar resumen completo</button>';
+  }
+
+  document.getElementById('wa-content').innerHTML=html;
+  openModal('wa');
+}
+
+function buildWAMessage(el,piso,ed,proj,rol){
+  var fecha=new Date().toLocaleDateString('es-DO',{day:'2-digit',month:'long',year:'numeric'});
+  var msg='*IBERO MUEBLES — Aviso de pendiente*\n';
+  msg+='Fecha: '+fecha+'\n\n';
+  msg+='*Elemento:* '+el.nombre+'\n';
+  if(ed)msg+='*Edificio:* '+ed.nombre+'\n';
+  if(piso)msg+='*Piso:* '+piso.nombre+'\n';
+  msg+='*Cantidad:* '+el.cantidad+' unidades\n\n';
+  msg+='*Tarea pendiente para '+rol.nombre+':*\n';
+  msg+='— '+rol.descripcion+'\n';
+  if(el.nota)msg+='\n*Nota:* '+el.nota+'\n';
+  msg+='\nPor favor confirmar cuando esté listo.\n— '+U.nombre;
+  return msg;
+}
+
+function buildWAMessageAll(el,piso,ed,proj,pendientes){
+  var fecha=new Date().toLocaleDateString('es-DO',{day:'2-digit',month:'long',year:'numeric'});
+  var msg='*IBERO MUEBLES — Resumen de pendientes*\n';
+  msg+='Fecha: '+fecha+'\n\n';
+  msg+='*Elemento:* '+el.nombre+'\n';
+  if(ed)msg+='*Edificio:* '+ed.nombre+'\n';
+  if(piso)msg+='*Piso:* '+piso.nombre+'\n';
+  msg+='*Cantidad:* '+el.cantidad+' unidades\n\n';
+  msg+='*Tareas pendientes:*\n';
+  pendientes.forEach(function(r){
+    msg+='— '+r.nombre+': '+r.descripcion+'\n';
+  });
+  if(el.nota)msg+='\n*Nota:* '+el.nota+'\n';
+  msg+='\n— '+U.nombre;
+  return msg;
+}
+
+function sendWA(encodedMsg){
+  var url='https://wa.me/?text='+encodedMsg;
+  window.open(url,'_blank');
+}
+
+function openNotifSend(elId,rolNombre,msg){
+  // Pre-fill the send notif modal with element context
+  var el=D.elementos.find(function(x){return x.id===elId;});
+  document.getElementById('notif-titulo').value=(el?el.nombre:'')+' — Pendiente para '+rolNombre;
+  document.getElementById('notif-msg').value=msg.replace(/%0A/g,'\n').replace(/%20/g,' ');
+  // Populate users
+  var sel=document.getElementById('notif-para');
+  sel.innerHTML='<option value="">Seleccionar usuario...</option>'+
+    D.usuarios.filter(function(u){return u.id!==U.id&&u.activo;}).map(function(u){
+      return '<option value="'+u.id+'">'+u.nombre+' ('+u.rol+')</option>';
+    }).join('');
+  closeModal('wa');
+  openModal('send-notif');
+}
+
+function openNotifs(){
+  renderNotifList();
+  openModal('notifs');
+  // Mark as read after opening
+  setTimeout(markAllRead,1500);
+}
+
+function renderNotifList(){
+  var notifs=D.notifs;
+  if(!notifs||!notifs.length){
+    document.getElementById('notif-list').innerHTML='<div class="notif-empty">No tienes notificaciones</div>';
+    return;
+  }
+  var html=notifs.map(function(n,i){
+    var cls=n.leida?'':'unread';
+    return '<div class="notif-item '+cls+'" style="animation-delay:'+(i*0.03)+'s">'+
+      '<div class="notif-top">'+
+      '<div class="notif-title">'+n.titulo+'</div>'+
+      '<div class="notif-time">'+formatDate(n.creado_en)+'</div></div>'+
+      '<div class="notif-msg">'+n.mensaje+'</div>'+
+      '<div class="notif-de">De: '+n.de_usuario_nombre+'</div>'+
+      '</div>';
+  }).join('');
+  document.getElementById('notif-list').innerHTML=html;
+}
+
+function markAllRead(){
+  var unread=D.notifs.filter(function(n){return !n.leida;});
+  if(!unread.length)return;
+  unread.forEach(function(n){
+    sb.from('notificaciones').update({leida:true}).eq('id',n.id);
+    n.leida=true;
+  });
+  updateNotifBadge();
+}
+
+function updateNotifBadge(){
+  var unread=(D.notifs||[]).filter(function(n){return !n.leida;}).length;
+  var badge=document.getElementById('notif-badge');
+  if(!badge)return;
+  if(unread>0){
+    badge.textContent=unread>99?'99+':unread;
+    badge.classList.remove('hidden');
+  }else{
+    badge.classList.add('hidden');
+  }
+}
+
+function sendNotif(){
+  var paraId=document.getElementById('notif-para').value;
+  var titulo=document.getElementById('notif-titulo').value.trim();
+  var msg=document.getElementById('notif-msg').value.trim();
+  if(!paraId||!titulo||!msg){showToast('Completa todos los campos','error');return;}
+
+  // Save internal notification
+  sb.from('notificaciones').insert([{
+    para_usuario_id:parseInt(paraId),
+    de_usuario_nombre:U.nombre,
+    titulo:titulo,
+    mensaje:msg,
+    leida:false
+  }]).then(function(r){
+    if(r.error){showToast('Error al enviar','error');return;}
+    closeModal('send-notif');
+    showToast('Aviso enviado','success');
+
+    // Send FCM push if recipient has token
+    var receptor=D.usuarios.find(function(u){return u.id===parseInt(paraId);});
+    if(receptor&&receptor.fcm_token){
+      sendFCMPush(receptor.fcm_token, titulo, msg);
+    }
+  });
+}
+
+function sendFCMPush(token, titulo, mensaje){
+  // Call Supabase Edge Function to send FCM push
+  fetch('https://zlkmthwmcikcnvxtcmql.supabase.co/functions/v1/send-push',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+SK},
+    body:JSON.stringify({token:token,title:titulo,body:mensaje})
+  }).then(function(r){
+    if(r.ok)console.log('Push enviado');
+    else console.log('Push error:',r.status);
+  }).catch(function(e){console.log('Push fetch error:',e);});
 }
 
 function saveDetalle(elId){
@@ -1894,8 +2254,13 @@ function openModal(id){
     document.getElementById('m-uem').value='';
     document.getElementById('m-upass').value='';
   }
-  if(id==='seg'){
-    // populated by openSegModal
+  if(id==='send-notif'){
+    if(!D.usuarios||!D.usuarios.length){
+      showToast('Solo admins pueden enviar avisos','error');return;
+    }
+  }
+  if(id==='notifs'){
+    renderNotifList();
   }
   if(id==='excel'){
     // Populate edificio selector
@@ -2091,7 +2456,14 @@ function setOnline(on){
 
 window.addEventListener('online',function(){setOnline(true);loadData().then(refreshCurrent);});
 window.addEventListener('offline',function(){setOnline(false);});
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(function(){});
+
+// Register service worker and init push
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./firebase-messaging-sw.js').then(function(reg){
+    window._swReg=reg;
+    console.log('SW registrado');
+  }).catch(function(e){console.log('SW error:',e);});
+}
 
 
 </script>

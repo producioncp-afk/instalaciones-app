@@ -391,6 +391,36 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
 .toast.show{transform:translateX(-50%) translateY(0);}
 .toast.success{background:var(--green);border-color:var(--green);}
 .toast.error{background:var(--red);border-color:var(--red);}
+.contact-card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);padding:14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;animation:fadeUp 0.2s ease both;}
+.contact-av{width:42px;height:42px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:white;flex-shrink:0;letter-spacing:0.05em;}
+.contact-info{flex:1;min-width:0;}
+.contact-name{font-size:14px;font-weight:600;}
+.contact-role{font-size:12px;color:var(--text2);margin-top:1px;}
+.contact-phone{font-size:12px;color:var(--blue);margin-top:2px;}
+.contact-acts{display:flex;gap:6px;flex-shrink:0;}
+.tarea-card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;margin-bottom:10px;animation:fadeUp 0.2s ease both;}
+.tarea-header{padding:12px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);}
+.tarea-estado{font-size:11px;font-weight:700;padding:3px 9px;border-radius:4px;flex-shrink:0;white-space:nowrap;}
+.tarea-estado.pendiente{background:#fef9c3;color:#854d0e;}
+.tarea-estado.aceptada{background:var(--blue-light);color:var(--blue);}
+.tarea-estado.en_progreso{background:var(--purple-light);color:var(--purple);}
+.tarea-estado.completada{background:var(--green-light);color:var(--green);}
+.tarea-titulo{font-size:14px;font-weight:600;flex:1;min-width:0;}
+.tarea-body{padding:12px 14px;}
+.tarea-detail{font-size:12px;color:var(--text2);margin-bottom:3px;line-height:1.5;}
+.tarea-foto{width:100%;max-height:180px;object-fit:cover;border-radius:8px;margin-top:8px;cursor:pointer;}
+.tarea-actions{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--border);background:var(--bg);}
+.tarea-btn{flex:1;padding:10px;border-radius:7px;font-size:12px;font-weight:600;font-family:'Inter',sans-serif;border:none;cursor:pointer;}
+.tarea-btn.accept{background:var(--blue);color:white;}
+.tarea-btn.progress{background:var(--purple);color:white;}
+.tarea-btn.complete{background:var(--green);color:white;}
+.asignar-contact{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s;}
+.asignar-contact:last-child{border-bottom:none;}
+.asignar-contact:active{background:var(--bg);}
+.asignar-av{width:36px;height:36px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;flex-shrink:0;}
+.asignar-name{font-size:13px;font-weight:600;}
+.asignar-role{font-size:11px;color:var(--text2);margin-top:1px;}
+.asignar-phone{font-size:11px;color:var(--blue);}
 
 /* EXCEL MODAL */
 #modal-excel .modal-info{background:var(--bg);border-radius:7px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--text2);line-height:1.5;}
@@ -478,6 +508,16 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
     <div class="pad" id="seg-content"><div class="spin-wrap"><div class="spin"></div></div></div>
   </div>
 
+  <!-- CONTACTOS -->
+  <div class="screen" id="screen-contactos">
+    <div class="pad" id="contactos-content"><div class="spin-wrap"><div class="spin"></div></div></div>
+  </div>
+
+  <!-- TAREAS -->
+  <div class="screen" id="screen-tareas">
+    <div class="pad" id="tareas-content"><div class="spin-wrap"><div class="spin"></div></div></div>
+  </div>
+
   <!-- USUARIOS -->
   <div class="screen" id="screen-usuarios">
     <div class="pad">
@@ -501,9 +541,11 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
   <!-- NAV -->
   <div class="bnav">
     <div class="nitem active" id="nav-home" onclick="switchTab('home')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><div class="nlbl">Inicio</div></div>
+    <div class="nitem" id="nav-tareas" onclick="switchTab('tareas')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><div class="nlbl">Tareas</div></div>
     <div class="nitem" id="nav-dashboard" onclick="switchTab('dashboard')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><div class="nlbl">Dashboard</div></div>
     <div class="nitem" id="nav-seguimiento" onclick="switchTab('seguimiento')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><div class="nlbl">Diario</div></div>
-    <div class="nitem" id="nav-resumen" onclick="switchTab('resumen')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg><div class="nlbl">Resumen</div></div>
+    <div class="nitem hidden" id="nav-contactos" onclick="switchTab('contactos')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><div class="nlbl">Contactos</div></div>
+    <div class="nitem hidden" id="nav-resumen" onclick="switchTab('resumen')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg><div class="nlbl">Resumen</div></div>
     <div class="nitem hidden" id="nav-usuarios" onclick="switchTab('usuarios')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><div class="nlbl">Usuarios</div></div>
     <div class="nitem hidden" id="nav-historial" onclick="switchTab('historial')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.88"/></svg><div class="nlbl">Historial</div></div>
   </div>
@@ -684,6 +726,37 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
   </div>
 </div>
 
+<!-- MODAL NUEVO CONTACTO -->
+<div class="modal-overlay hidden" id="modal-contacto" onclick="closeOv(event,'modal-contacto')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">Nuevo contacto</div>
+    <div class="modal-field"><label>Nombre completo</label><input class="modal-input" type="text" id="c-nombre" placeholder="Ej: Carlos Méndez"></div>
+    <div class="modal-field"><label>Rol / Oficio</label><input class="modal-input" type="text" id="c-rol" placeholder="Ej: Instalador, Pintor, Retocador..."></div>
+    <div class="modal-field"><label>Teléfono WhatsApp</label><input class="modal-input" type="tel" id="c-telefono" placeholder="+1 809 555 1234"></div>
+    <div class="modal-row">
+      <button class="modal-btn secondary" onclick="closeModal('contacto')">Cancelar</button>
+      <button class="modal-btn primary" onclick="saveContacto()">Agregar contacto</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ASIGNAR TAREA -->
+<div class="modal-overlay hidden" id="modal-asignar" onclick="closeOv(event,'modal-asignar')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">Asignar tarea</div>
+    <div style="background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px;font-size:13px;color:var(--text2);" id="asignar-el-info"></div>
+    <div class="modal-field"><label>Descripción de la tarea</label>
+      <textarea class="nota-textarea" id="asignar-desc" placeholder="Ej: Instalar 14 puertas de entrada en el 5to piso..." style="min-height:70px"></textarea>
+    </div>
+    <div class="modal-field"><label>Selecciona el contacto</label>
+      <div id="asignar-contactos-list" style="background:var(--white);border:1px solid var(--border);border-radius:8px;overflow:hidden;max-height:250px;overflow-y:auto;"></div>
+    </div>
+    <div class="modal-row">
+      <button class="modal-btn secondary" onclick="closeModal('asignar')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <div class="lightbox hidden" id="lightbox" onclick="closeLightbox()">
   <button class="lb-close" onclick="closeLightbox()">✕</button>
   <img id="lb-img" src="" alt="">
@@ -734,7 +807,7 @@ fbMsg.onMessage(function(payload){
 var U=null,curProjId=null,curEdId=null,curPisoId=null;
 var navStack=[],pendingToggle=null;
 var selEmoji_='🏗️',selColor_='#2563eb';
-var D={proyectos:[],edificios:[],pisos:[],elementos:[],usuarios:[],historial:[],fotos:[],specs:[],seguimiento:[],notifs:[]};
+var D={proyectos:[],edificios:[],pisos:[],elementos:[],usuarios:[],historial:[],fotos:[],specs:[],seguimiento:[],notifs:[],contactos:[],tareas:[]};
 var curElId=null;
 var appCharts={};
 
@@ -790,6 +863,8 @@ function startApp(){
   if(isAdmin()){
     document.getElementById('nav-usuarios').classList.remove('hidden');
     document.getElementById('nav-historial').classList.remove('hidden');
+    document.getElementById('nav-contactos').classList.remove('hidden');
+    document.getElementById('nav-resumen').classList.remove('hidden');
   }
   setTopbar(true);
   loadData().then(function(){buildHome();setupRealtime();});
@@ -815,7 +890,9 @@ function loadData(){
     sb.from('especificaciones').select('*').order('orden'),
     sb.from('historial').select('*').order('creado_en',{ascending:false}).limit(200),
     sb.from('notificaciones').select('*').eq('para_usuario_id',U.id).order('creado_en',{ascending:false}).limit(50),
-    sb.from('usuarios').select('id,nombre,username,rol,activo,proyecto_id,fcm_token').order('nombre')
+    sb.from('usuarios').select('id,nombre,username,rol,activo,proyecto_id,fcm_token').order('nombre'),
+    sb.from('contactos').select('*').order('nombre'),
+    sb.from('tareas').select('*').order('creado_en',{ascending:false})
   ];
   return Promise.all(qs).then(function(r){
     var allP=r[0].data||[],allE=r[1].data||[];
@@ -830,8 +907,11 @@ function loadData(){
     D.historial=r[7].data||[];
     D.notifs=r[8].data||[];
     D.usuarios=r[9].data||[];
+    D.contactos=r[10].data||[];
+    D.tareas=r[11].data||[];
     setOnline(true);
     updateNotifBadge();
+    updateTareasBadge();
   });
 }
 
@@ -854,6 +934,27 @@ function setupRealtime(){
         updateNotifBadge();
         showToast('Nuevo aviso: '+pl.new.titulo,'success');
       }
+    })
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'contactos'},function(pl){
+      var exists=D.contactos.find(function(c){return c.id===pl.new.id;});
+      if(!exists)D.contactos.push(pl.new);
+      if(document.getElementById('screen-contactos').classList.contains('active'))buildContactos();
+    })
+    .on('postgres_changes',{event:'DELETE',schema:'public',table:'contactos'},function(pl){
+      D.contactos=D.contactos.filter(function(c){return c.id!==pl.old.id;});
+      if(document.getElementById('screen-contactos').classList.contains('active'))buildContactos();
+    })
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'tareas'},function(pl){
+      var exists=D.tareas.find(function(t){return t.id===pl.new.id;});
+      if(!exists)D.tareas.push(pl.new);
+      if(document.getElementById('screen-tareas').classList.contains('active'))buildTareas();
+      // Badge on tareas nav if new task for me
+      updateTareasBadge();
+    })
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'tareas'},function(pl){
+      var idx=D.tareas.findIndex(function(t){return t.id===pl.new.id;});
+      if(idx!==-1)D.tareas[idx]=pl.new;
+      if(document.getElementById('screen-tareas').classList.contains('active'))buildTareas();
     })
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'seguimiento_diario'},function(pl){
       var exists=D.seguimiento.find(function(s){return s.id===pl.new.id;});
@@ -903,6 +1004,8 @@ function refreshCurrent(){
   else if(id==='screen-resumen')buildResumen();
   else if(id==='screen-usuarios')buildUsuarios();
   else if(id==='screen-historial')buildHistorial();
+  else if(id==='screen-contactos')buildContactos();
+  else if(id==='screen-tareas')buildTareas();
 }
 
 function showScreen(id){
@@ -929,6 +1032,8 @@ function switchTab(tab){
   else if(tab==='resumen'){setTopbar(false,'Resumen global');showScreen('resumen');buildResumen();}
   else if(tab==='usuarios'){setTopbar(false,'Usuarios');showScreen('usuarios');buildUsuarios();}
   else if(tab==='historial'){setTopbar(false,'Historial');showScreen('historial');buildHistorial();}
+  else if(tab==='contactos'){setTopbar(false,'Directorio de contactos');showScreen('contactos');buildContactos();}
+  else if(tab==='tareas'){setTopbar(false,'Mis tareas');showScreen('tareas');buildTareas();}
 }
 
 function goBack(){
@@ -1269,6 +1374,7 @@ function renderDetalleContent(elId){
 
     (canEdit()?'<button class="det-save-btn" onclick="saveDetalle('+el.id+')">Guardar cambios</button>':'')+
     '<button class="det-wa-btn" onclick="openWAModal('+el.id+')"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>Enviar por WhatsApp</button>'+
+    (isAdmin()?'<button class="det-wa-btn" style="background:var(--purple)" onclick="openAsignarModal('+el.id+')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Asignar tarea a contacto</button>':'')+
 
     // Fotos
     '<div class="det-section">'+
@@ -1531,6 +1637,25 @@ function markAllRead(){
     n.leida=true;
   });
   updateNotifBadge();
+}
+
+function updateTareasBadge(){
+  var pend=D.tareas.filter(function(t){return t.estado==='pendiente';}).length;
+  var nav=document.getElementById('nav-tareas');
+  if(!nav)return;
+  var badge=nav.querySelector('.notif-badge');
+  if(pend>0){
+    if(!badge){
+      badge=document.createElement('span');
+      badge.className='notif-badge';
+      badge.style.cssText='position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;border-radius:8px;background:var(--red);color:white;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 3px;border:2px solid var(--black);';
+      nav.style.position='relative';
+      nav.appendChild(badge);
+    }
+    badge.textContent=pend;
+  }else if(badge){
+    badge.remove();
+  }
 }
 
 function updateNotifBadge(){
@@ -2156,6 +2281,242 @@ function saveSeguimiento(){
     closeModal('seg');
     buildSeguimiento();
     showToast('Registrado','success');
+  });
+}
+
+function buildContactos(){
+  var html='';
+  var proj=D.proyectos[0];
+  var contacts=D.contactos;
+
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">';
+  html+='<div class="sec-title" style="margin:0">'+contacts.length+' contacto'+(contacts.length!==1?'s':'')+'</div>';
+  if(isAdmin())html+='<button onclick="openModal(\'contacto\')" style="background:var(--blue);color:white;border:none;border-radius:7px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif;">+ Agregar</button>';
+  html+='</div>';
+
+  if(!contacts.length){
+    html+='<div style="text-align:center;padding:3rem;color:var(--text2);font-size:13px">No hay contactos todavía.<br>Agrega al instalador, pintor, retocador...</div>';
+  }else{
+    contacts.forEach(function(c,i){
+      var ini=c.nombre.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+      var colors=['var(--blue)','var(--green)','var(--purple)','var(--yellow)','var(--red)'];
+      var col=colors[i%colors.length];
+      html+='<div class="contact-card" style="animation-delay:'+(i*0.04)+'s">';
+      html+='<div class="contact-av" style="background:'+col+'">'+ini+'</div>';
+      html+='<div class="contact-info">';
+      html+='<div class="contact-name">'+c.nombre+'</div>';
+      html+='<div class="contact-role">'+c.rol+'</div>';
+      html+='<div class="contact-phone">'+c.telefono+'</div>';
+      html+='</div>';
+      html+='<div class="contact-acts">';
+      html+='<a href="https://wa.me/'+c.telefono.replace(/[^0-9]/g,'')+'" target="_blank" class="icon-btn" title="WhatsApp"><svg width="16" height="16" viewBox="0 0 24 24" fill="var(--green)"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg></a>';
+      if(isAdmin())html+='<div class="icon-btn" onclick="deleteContacto('+c.id+')" title="Eliminar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div>';
+      html+='</div></div>';
+    });
+  }
+  document.getElementById('contactos-content').innerHTML=html;
+}
+
+function saveContacto(){
+  var nombre=document.getElementById('c-nombre').value.trim();
+  var rol=document.getElementById('c-rol').value.trim();
+  var telefono=document.getElementById('c-telefono').value.trim();
+  if(!nombre||!rol||!telefono){showToast('Completa todos los campos','error');return;}
+  var projId=D.proyectos[0]?D.proyectos[0].id:null;
+  sb.from('contactos').insert([{nombre:nombre,rol:rol,telefono:telefono,proyecto_id:projId,creado_por:U.nombre}]).select().then(function(r){
+    if(r.error){showToast('Error al guardar','error');return;}
+    if(r.data&&r.data.length>0)D.contactos.push(r.data[0]);
+    closeModal('contacto');
+    document.getElementById('c-nombre').value='';
+    document.getElementById('c-rol').value='';
+    document.getElementById('c-telefono').value='';
+    buildContactos();
+    showToast('Contacto agregado','success');
+  });
+}
+
+function deleteContacto(id){
+  if(!confirm('¿Eliminar este contacto?'))return;
+  sb.from('contactos').delete().eq('id',id).then(function(){
+    D.contactos=D.contactos.filter(function(c){return c.id!==id;});
+    buildContactos();
+    showToast('Contacto eliminado','success');
+  });
+}
+
+function openAsignarModal(elId){
+  var el=D.elementos.find(function(x){return x.id===elId;});
+  var piso=el?D.pisos.find(function(p){return p.id===el.piso_id;}):null;
+  var ed=piso?D.edificios.find(function(e){return e.id===piso.edificio_id;}):null;
+
+  document.getElementById('asignar-el-info').innerHTML=
+    '<b>'+el.nombre+'</b><br>'+
+    (ed?ed.nombre:'')+(piso?' · '+piso.nombre:'')+'<br>'+
+    'Cantidad: '+el.cantidad+' unidades';
+
+  document.getElementById('asignar-desc').value=
+    'Favor instalar '+el.cantidad+' unidades de '+el.nombre+
+    (ed?' en '+ed.nombre:'')+
+    (piso?', '+piso.nombre:'')+'.'  ;
+
+  // Build contacts list
+  var html='';
+  if(!D.contactos.length){
+    html='<div style="padding:14px;text-align:center;font-size:13px;color:var(--text2)">No hay contactos. Agrega uno en la sección Contactos.</div>';
+  }else{
+    var colors=['var(--blue)','var(--green)','var(--purple)','var(--yellow)','var(--red)'];
+    D.contactos.forEach(function(c,i){
+      var ini=c.nombre.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+      html+='<div class="asignar-contact" onclick="asignarTarea('+elId+','+c.id+')">';
+      html+='<div class="asignar-av" style="background:'+colors[i%colors.length]+'">'+ini+'</div>';
+      html+='<div style="flex:1"><div class="asignar-name">'+c.nombre+'</div>';
+      html+='<div class="asignar-role">'+c.rol+'</div>';
+      html+='<div class="asignar-phone">'+c.telefono+'</div></div>';
+      html+='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>';
+      html+='</div>';
+    });
+  }
+  document.getElementById('asignar-contactos-list').innerHTML=html;
+  openModal('asignar');
+}
+
+function asignarTarea(elId,contactoId){
+  var el=D.elementos.find(function(x){return x.id===elId;});
+  var piso=el?D.pisos.find(function(p){return p.id===el.piso_id;}):null;
+  var ed=piso?D.edificios.find(function(e){return e.id===piso.edificio_id;}):null;
+  var contacto=D.contactos.find(function(c){return c.id===contactoId;});
+  var desc=document.getElementById('asignar-desc').value.trim();
+  if(!desc)desc=el.nombre+' — '+el.cantidad+' unidades';
+
+  // Get last foto of element
+  var elFotos=D.fotos.filter(function(f){return f.elemento_id===elId;});
+  var fotoUrl=elFotos.length>0?elFotos[elFotos.length-1].url:null;
+
+  sb.from('tareas').insert([{
+    elemento_id:elId,
+    contacto_id:contactoId,
+    asignado_por:U.nombre,
+    titulo:el.nombre,
+    descripcion:desc,
+    estado:'pendiente',
+    foto_url:fotoUrl,
+    edificio_id:ed?ed.id:null,
+    piso_id:piso?piso.id:null
+  }]).select().then(function(r){
+    if(r.error){showToast('Error al asignar','error');return;}
+    if(r.data&&r.data.length>0)D.tareas.push(r.data[0]);
+    closeModal('asignar');
+
+    // Send WhatsApp message to contact
+    var msg='*IBERO MUEBLES — Tarea asignada*\n\n';
+    msg+='Hola '+contacto.nombre+', se te asigna la siguiente tarea:\n\n';
+    msg+='*Elemento:* '+el.nombre+'\n';
+    if(ed)msg+='*Edificio:* '+ed.nombre+'\n';
+    if(piso)msg+='*Piso:* '+piso.nombre+'\n';
+    msg+='*Cantidad:* '+el.cantidad+' unidades\n\n';
+    msg+='*Descripción:* '+desc+'\n\n';
+    msg+='Asignado por: '+U.nombre+'\n';
+    msg+='Fecha: '+new Date().toLocaleDateString('es-DO',{day:'2-digit',month:'long',year:'numeric'});
+    if(fotoUrl)msg+='\n\n📷 Foto de referencia adjunta';
+
+    // Open WhatsApp
+    var phone=contacto.telefono.replace(/[^0-9]/g,'');
+    window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg),'_blank');
+
+    showToast('Tarea asignada y WhatsApp abierto','success');
+  });
+}
+
+function buildTareas(){
+  // Show tasks assigned TO this user (via usuario_id match) OR all if admin
+  var misTareas=isAdmin()?D.tareas:D.tareas.filter(function(t){return t.usuario_id===U.id;});
+
+  // Also show tasks assigned to contacts (for non-users via contacto)
+  // For now show all tasks where asignado_por matches or all for admin
+  var displayTareas=D.tareas;
+
+  var html='';
+  var estados={pendiente:'Pendiente',aceptada:'Aceptada',en_progreso:'En progreso',completada:'Completada'};
+
+  // Summary counts
+  var pend=displayTareas.filter(function(t){return t.estado==='pendiente';}).length;
+  var activ=displayTareas.filter(function(t){return t.estado==='aceptada'||t.estado==='en_progreso';}).length;
+  var comp=displayTareas.filter(function(t){return t.estado==='completada';}).length;
+
+  html+='<div class="stats-grid" style="margin-bottom:16px">';
+  html+='<div class="stat-card"><div class="stat-lbl">Pendientes</div><div class="stat-num r">'+pend+'</div></div>';
+  html+='<div class="stat-card"><div class="stat-lbl">En curso</div><div class="stat-num b">'+activ+'</div></div>';
+  html+='</div>';
+
+  if(!displayTareas.length){
+    html+='<div style="text-align:center;padding:3rem;color:var(--text2);font-size:13px">No hay tareas asignadas todavía.</div>';
+  }else{
+    // Sort: pending first
+    var sorted=displayTareas.slice().sort(function(a,b){
+      var order={pendiente:0,aceptada:1,en_progreso:2,completada:3};
+      return (order[a.estado]||0)-(order[b.estado]||0);
+    });
+    sorted.forEach(function(t,i){
+      var contacto=D.contactos.find(function(c){return c.id===t.contacto_id;});
+      var el=D.elementos.find(function(x){return x.id===t.elemento_id;});
+      var ed=t.edificio_id?D.edificios.find(function(e){return e.id===t.edificio_id;}):null;
+      var piso=t.piso_id?D.pisos.find(function(p){return p.id===t.piso_id;}):null;
+      var estadoLabel=estados[t.estado]||t.estado;
+
+      html+='<div class="tarea-card" style="animation-delay:'+(i*0.04)+'s">';
+      html+='<div class="tarea-header">';
+      html+='<div class="tarea-estado '+t.estado+'">'+estadoLabel+'</div>';
+      html+='<div class="tarea-titulo">'+t.titulo+'</div>';
+      html+='</div>';
+      html+='<div class="tarea-body">';
+      if(contacto)html+='<div class="tarea-detail"><b>Para:</b> '+contacto.nombre+' — '+contacto.rol+'</div>';
+      if(ed||piso)html+='<div class="tarea-detail"><b>Ubicación:</b> '+(ed?ed.nombre:'')+(piso?' · '+piso.nombre:'')+'</div>';
+      html+='<div class="tarea-detail"><b>Asignado por:</b> '+t.asignado_por+'</div>';
+      html+='<div class="tarea-detail" style="color:var(--text3)">'+formatDate(t.creado_en)+'</div>';
+      if(t.descripcion)html+='<div class="tarea-detail" style="margin-top:6px;color:var(--text)">'+t.descripcion+'</div>';
+      if(t.foto_url)html+='<img class="tarea-foto" src="'+t.foto_url+'" onclick="openLightbox(this.src)">';
+      html+='</div>';
+
+      // Action buttons
+      html+='<div class="tarea-actions">';
+      if(t.estado==='pendiente'){
+        html+='<button class="tarea-btn accept" onclick="updateTareaEstado('+t.id+',\'aceptada\')">Aceptar</button>';
+      }else if(t.estado==='aceptada'){
+        html+='<button class="tarea-btn progress" onclick="updateTareaEstado('+t.id+',\'en_progreso\')">En progreso</button>';
+        html+='<button class="tarea-btn complete" onclick="updateTareaEstado('+t.id+',\'completada\')">Completar</button>';
+      }else if(t.estado==='en_progreso'){
+        html+='<button class="tarea-btn complete" onclick="updateTareaEstado('+t.id+',\'completada\')">Marcar completada</button>';
+      }else if(t.estado==='completada'){
+        html+='<div style="font-size:12px;color:var(--green);font-weight:600;display:flex;align-items:center;gap:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Completada '+formatDate(t.completado_en)+'</div>';
+      }
+      if(isAdmin())html+='<button class="tarea-btn secondary" onclick="deleteTarea('+t.id+')" style="max-width:36px;padding:8px">✕</button>';
+      html+='</div>';
+      html+='</div>';
+    });
+  }
+  document.getElementById('tareas-content').innerHTML=html;
+}
+
+function updateTareaEstado(tareaId,nuevoEstado){
+  var update={estado:nuevoEstado};
+  if(nuevoEstado==='completada')update.completado_en=new Date().toISOString();
+  if(nuevoEstado==='aceptada')update.aceptado_en=new Date().toISOString();
+  sb.from('tareas').update(update).eq('id',tareaId).then(function(r){
+    if(r.error){showToast('Error','error');return;}
+    var idx=D.tareas.findIndex(function(t){return t.id===tareaId;});
+    if(idx!==-1)Object.assign(D.tareas[idx],update);
+    buildTareas();
+    var labels={pendiente:'Pendiente',aceptada:'Tarea aceptada',en_progreso:'En progreso',completada:'Tarea completada'};
+    showToast(labels[nuevoEstado]||nuevoEstado,'success');
+  });
+}
+
+function deleteTarea(tareaId){
+  if(!confirm('¿Eliminar esta tarea?'))return;
+  sb.from('tareas').delete().eq('id',tareaId).then(function(){
+    D.tareas=D.tareas.filter(function(t){return t.id!==tareaId;});
+    buildTareas();
+    showToast('Tarea eliminada','success');
   });
 }
 

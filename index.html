@@ -458,11 +458,43 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
   <div class="screen active" id="screen-home">
     <div class="pad">
       <div class="hello" id="hello-txt">Bienvenido</div>
-      <div class="hello-sub" id="hello-sub">Cargando proyectos...</div>
-      <div class="sec-title">Proyectos activos</div>
+      <div class="hello-sub" id="hello-sub">Cargando...</div>
+
+      <div class="sec-title">Proyectos</div>
       <div id="proj-list"><div class="spin-wrap"><div class="spin"></div></div></div>
       <div id="add-proj-btn" class="add-btn hidden" onclick="openModal('proj')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Nuevo proyecto</div>
+
+      <div class="sec-title" style="margin-top:8px">Equipo</div>
+      <div id="equipo-home-list"></div>
+
+      <div class="sec-title" style="margin-top:8px">Reportes</div>
+      <div id="reportes-home-card"></div>
+
+      <div class="sec-title" style="margin-top:8px" id="usuarios-home-title" style="display:none">Usuarios</div>
+      <div id="usuarios-home-card"></div>
     </div>
+  </div>
+
+  <!-- REPORTES -->
+  <div class="screen" id="screen-reportes">
+    <div class="pad" id="reportes-content"></div>
+  </div>
+
+  <!-- USUARIOS SCREEN desde inicio -->
+  <div class="screen" id="screen-usuarios-home">
+    <div class="pad">
+      <div class="sec-title">Usuarios del sistema</div>
+      <div id="user-list-home"></div>
+      <div class="add-btn" onclick="openModal('user')" style="margin-top:4px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nuevo miembro
+      </div>
+    </div>
+  </div>
+
+  <!-- EQUIPO -->
+  <div class="screen" id="screen-equipo">
+    <div class="pad" id="equipo-screen-content"><div class="spin-wrap"><div class="spin"></div></div></div>
   </div>
 
   <!-- EDIFICIOS -->
@@ -552,9 +584,11 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
     <div class="nitem active" id="nav-home" onclick="switchTab('home')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><div class="nlbl">Inicio</div></div>
     <div class="nitem" id="nav-tareas" onclick="switchTab('tareas')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><div class="nlbl">Tareas</div></div>
     <div class="nitem" id="nav-dashboard" onclick="switchTab('dashboard')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><div class="nlbl">Dashboard</div></div>
-    <div class="nitem" id="nav-seguimiento" onclick="switchTab('seguimiento')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><div class="nlbl">Diario</div></div>    <div class="nitem hidden" id="nav-resumen" onclick="switchTab('resumen')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg><div class="nlbl">Resumen</div></div>
-    <div class="nitem hidden" id="nav-usuarios" onclick="switchTab('usuarios')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><div class="nlbl">Usuarios</div></div>
-    <div class="nitem hidden" id="nav-historial" onclick="switchTab('historial')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.88"/></svg><div class="nlbl">Historial</div></div>
+    <div class="nitem" id="nav-historial" onclick="switchTab('historial')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.88"/></svg><div class="nlbl">Historial</div></div>
+    <!-- hidden nav items still needed for switchTab -->
+    <div class="nitem hidden" id="nav-seguimiento"></div>
+    <div class="nitem hidden" id="nav-resumen"></div>
+    <div class="nitem hidden" id="nav-usuarios"></div>
   </div>
 </div>
 
@@ -598,7 +632,7 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
 <!-- MODAL USUARIO -->
 <div class="modal-overlay hidden" id="modal-user" onclick="closeOv(event,'modal-user')">
   <div class="modal" onclick="event.stopPropagation()">
-    <div class="modal-title">Nuevo usuario</div>
+    <div class="modal-title">Nuevo miembro del equipo</div>
     <div class="modal-field"><label>Nombre completo</label><input class="modal-input" type="text" id="m-unom" placeholder="Ej: Juan Pérez"></div>
     <div class="modal-field"><label>Nombre de usuario</label><input class="modal-input" type="text" id="m-uem" placeholder="ej: juan.perez" autocomplete="off"></div>
     <div class="modal-field"><label>Contraseña</label><input class="modal-input" type="text" id="m-upass" placeholder="Mínimo 6 caracteres"></div>
@@ -610,9 +644,15 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
       </select>
     </div>
     <div class="modal-field"><label>Proyecto asignado</label><select class="modal-select" id="m-uproj"></select></div>
+    <div style="height:1px;background:var(--border);margin:4px 0 12px"></div>
+    <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;">Datos del empleado (opcional)</div>
+    <div class="modal-field"><label>Cargo / Oficio</label><input class="modal-input" type="text" id="m-ucargo" placeholder="Ej: Instalador de puertas"></div>
+    <div class="modal-field"><label>Teléfono</label><input class="modal-input" type="tel" id="m-utel" placeholder="+1 809 555 1234"></div>
+    <div class="modal-field"><label>Cédula</label><input class="modal-input" type="text" id="m-uced" placeholder="000-0000000-0"></div>
+    <div class="modal-field"><label>Edad</label><input class="modal-input" type="number" id="m-uedad" placeholder="Ej: 28" min="16" max="80"></div>
     <div class="modal-row">
       <button class="modal-btn secondary" onclick="closeModal('user')">Cancelar</button>
-      <button class="modal-btn primary" onclick="saveUser()">Crear usuario</button>
+      <button class="modal-btn primary" onclick="saveUser()">Crear miembro</button>
     </div>
   </div>
 </div>
@@ -750,6 +790,28 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
   </div>
 </div>
 
+<!-- MODAL EDITAR PERFIL EMPLEADO -->
+<div class="modal-overlay hidden" id="modal-edit-perfil" onclick="closeOv(event,'modal-edit-perfil')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">Editar perfil</div>
+    <div class="modal-field"><label>Foto de perfil</label>
+      <input type="file" id="perfil-foto-input" accept="image/*" onchange="previewPerfilFoto(event)" style="display:none">
+      <div style="display:flex;align-items:center;gap:12px;margin-top:4px;">
+        <div id="perfil-foto-preview-wrap" style="width:56px;height:56px;border-radius:50%;overflow:hidden;background:var(--bg);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:var(--text2);" id="perfil-av-preview">?</div>
+        <button onclick="document.getElementById('perfil-foto-input').click()" style="padding:8px 14px;background:var(--bg);border:1px solid var(--border);border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Cambiar foto</button>
+      </div>
+    </div>
+    <div class="modal-field"><label>Cargo / Oficio</label><input class="modal-input" type="text" id="ep-cargo" placeholder="Ej: Instalador de puertas"></div>
+    <div class="modal-field"><label>Teléfono</label><input class="modal-input" type="tel" id="ep-tel" placeholder="+1 809 555 1234"></div>
+    <div class="modal-field"><label>Cédula</label><input class="modal-input" type="text" id="ep-ced" placeholder="000-0000000-0"></div>
+    <div class="modal-field"><label>Edad</label><input class="modal-input" type="number" id="ep-edad" placeholder="Ej: 28" min="16" max="80"></div>
+    <div class="modal-row">
+      <button class="modal-btn secondary" onclick="closeModal('edit-perfil')">Cancelar</button>
+      <button class="modal-btn primary" onclick="saveEditPerfil()">Guardar</button>
+    </div>
+  </div>
+</div>
+
 <div class="lightbox hidden" id="lightbox" onclick="closeLightbox()">
   <button class="lb-close" onclick="closeLightbox()">✕</button>
   <img id="lb-img" src="" alt="">
@@ -854,9 +916,8 @@ function startApp(){
   var h=new Date().getHours();
   document.getElementById('hello-txt').textContent=(h<12?'Buenos días':h<18?'Buenas tardes':'Buenas noches')+', '+parts[0];
   if(isAdmin()){
-    document.getElementById('nav-usuarios').classList.remove('hidden');
+    // historial visible for all in nav
     document.getElementById('nav-historial').classList.remove('hidden');
-    document.getElementById('nav-resumen').classList.remove('hidden');
   }
   setTopbar(true);
   loadData().then(function(){buildHome();setupRealtime();});
@@ -987,6 +1048,9 @@ function refreshCurrent(){
   else if(id==='screen-historial')buildHistorial();
   else if(id==='screen-tareas')buildTareas();
   else if(id==='screen-perfil')renderPerfil(curMemberId);
+  else if(id==='screen-equipo')buildEquipoScreen();
+  else if(id==='screen-reportes')buildReportesScreen();
+  else if(id==='screen-usuarios-home')buildUsuariosHome();
 }
 
 function showScreen(id){
@@ -1026,33 +1090,85 @@ function goBack(){
   else if(prev==='pisos'){buildPisos(curEdId,false);navStack.pop();}
   else if(prev==='elementos'){buildEls(curPisoId,false);navStack.pop();}
   else if(prev==='equipo'){buildEdificios(curProjId,false);setTimeout(function(){switchProjTab('equipo');},50);navStack.pop();}
+  else if(prev==='equipo_screen'){setTopbar(false,'Equipo de obra');showScreen('equipo');buildEquipoScreen();navStack.pop();}
 }
 
 function buildHome(){
   if(isAdmin())document.getElementById('add-proj-btn').classList.remove('hidden');
   document.getElementById('hello-sub').textContent=D.proyectos.length+' proyecto'+(D.proyectos.length!==1?'s':'')+' activo'+(D.proyectos.length!==1?'s':'');
-  if(!D.proyectos.length){
-    document.getElementById('proj-list').innerHTML='<div style="text-align:center;padding:2rem;color:var(--text2);font-size:14px">No hay proyectos todavía.</div>';
-    return;
-  }
+
+  // ── PROYECTOS ──
   var html='';
-  D.proyectos.forEach(function(proj){
-    var eds=getProjEds(proj.id),all=[];
-    eds.forEach(function(ed){getPisos(ed.id).forEach(function(p){all=all.concat(getEls(p.id));});});
-    var s=calcStats(all);
-    html+='<div class="proj-card" onclick="buildEdificios('+proj.id+')">';
-    html+='<div class="proj-banner" style="background:'+proj.color+'">';
-    html+='<div class="proj-icon">'+proj.icon+'</div>';
-    html+='<div style="flex:1"><div class="proj-name">'+proj.nombre+'</div><div class="proj-loc">📍 '+proj.ubicacion+'</div></div>';
-    html+='<div class="proj-arr">›</div></div>';
-    html+='<div class="proj-footer"><div class="proj-stats">';
-    html+='<div class="proj-stat"><b>'+eds.length+'</b> edif.</div>';
-    html+='<div class="proj-stat"><b>'+s.inst+'</b> inst.</div>';
-    html+='<div class="proj-stat"><b>'+s.pend+'</b> pend.</div>';
-    html+='</div><div class="prog"><div class="pb"><div class="pbf" style="width:'+s.pct+'%;background:'+proj.color+'"></div></div>';
-    html+='<div class="pct-lbl" style="color:'+proj.color+'">'+s.pct+'%</div></div></div></div>';
-  });
+  if(!D.proyectos.length){
+    html='<div style="text-align:center;padding:2rem;color:var(--text2);font-size:14px">No hay proyectos todavía.</div>';
+  }else{
+    D.proyectos.forEach(function(proj){
+      var eds=getProjEds(proj.id),all=[];
+      eds.forEach(function(ed){getPisos(ed.id).forEach(function(p){all=all.concat(getEls(p.id));});});
+      var s=calcStats(all);
+      html+='<div class="proj-card" onclick="buildEdificios('+proj.id+')">';
+      html+='<div class="proj-banner" style="background:'+proj.color+'">';
+      html+='<div class="proj-icon">'+proj.icon+'</div>';
+      html+='<div style="flex:1"><div class="proj-name">'+proj.nombre+'</div><div class="proj-loc">📍 '+proj.ubicacion+'</div></div>';
+      html+='<div class="proj-arr">›</div></div>';
+      html+='<div class="proj-footer"><div class="proj-stats">';
+      html+='<div class="proj-stat"><b>'+eds.length+'</b> edif.</div>';
+      html+='<div class="proj-stat"><b>'+s.inst+'</b> inst.</div>';
+      html+='<div class="proj-stat"><b>'+s.pend+'</b> pend.</div>';
+      html+='</div><div class="prog"><div class="pb"><div class="pbf" style="width:'+s.pct+'%;background:'+proj.color+'"></div></div>';
+      html+='<div class="pct-lbl" style="color:'+proj.color+'">'+s.pct+'%</div></div></div></div>';
+    });
+  }
   document.getElementById('proj-list').innerHTML=html;
+
+  // ── EQUIPO ──
+  var equipo=D.usuarios.filter(function(u){return u.activo;});
+  var activos=equipo.length;
+  var tareasPend=D.tareas.filter(function(t){return t.estado==='pendiente';}).length;
+  var tareasComp=D.tareas.filter(function(t){return t.estado==='completada';}).length;
+  var rolCounts={};
+  equipo.forEach(function(u){rolCounts[u.rol]=(rolCounts[u.rol]||0)+1;});
+  var rolDesc=Object.keys(rolCounts).map(function(r){
+    var l={admin:'Admin',supervisor:'Supervisor',trabajador:'Técnico'}[r]||r;
+    return rolCounts[r]+' '+l;
+  }).join(' · ');
+
+  var eHtml='<div class="proj-card" onclick="openEquipoScreen()">';
+  eHtml+='<div class="proj-banner" style="background:#111827">';
+  eHtml+='<div class="proj-ed-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>';
+  eHtml+='<div style="flex:1"><div class="proj-name">Equipo de obra</div><div class="proj-loc">'+rolDesc+'</div></div>';
+  eHtml+='<div class="proj-arr">›</div></div>';
+  eHtml+='<div class="proj-footer"><div class="proj-stats">';
+  eHtml+='<div class="proj-stat"><b>'+activos+'</b> miembros</div>';
+  eHtml+='<div class="proj-stat"><b>'+tareasPend+'</b> pend.</div>';
+  eHtml+='<div class="proj-stat"><b>'+tareasComp+'</b> completadas</div>';
+  eHtml+='</div></div></div>';
+
+  document.getElementById('equipo-home-list').innerHTML=eHtml;
+
+  // ── REPORTES card ──
+  var rHtml='<div class="proj-card" onclick="openReportesScreen()">';
+  rHtml+='<div class="proj-banner" style="background:#0d7a3d">';
+  rHtml+='<div class="proj-ed-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>';
+  rHtml+='<div style="flex:1"><div class="proj-name">Reportes</div><div class="proj-loc">PDF · Excel · Resumen · Seguimiento diario</div></div>';
+  rHtml+='<div class="proj-arr">›</div></div></div>';
+  document.getElementById('reportes-home-card').innerHTML=rHtml;
+
+  // ── USUARIOS card (admin only) ──
+  var uCard=document.getElementById('usuarios-home-card');
+  var uTitle=document.getElementById('usuarios-home-title');
+  if(isAdmin()&&uCard){
+    var totalU=D.usuarios.filter(function(u){return u.activo;}).length;
+    var uHtml='<div class="proj-card" onclick="openUsuariosScreen()">';
+    uHtml+='<div class="proj-banner" style="background:#6d28d9">';
+    uHtml+='<div class="proj-ed-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>';
+    uHtml+='<div style="flex:1"><div class="proj-name">Usuarios</div><div class="proj-loc">'+totalU+' usuario'+(totalU!==1?'s':'')+' activo'+(totalU!==1?'s':'')+' en el sistema</div></div>';
+    uHtml+='<div class="proj-arr">›</div></div></div>';
+    uCard.innerHTML=uHtml;
+    if(uTitle)uTitle.style.display='block';
+  }else if(uCard){
+    uCard.innerHTML='';
+  }
 }
 
 function buildEdificios(projId,push){
@@ -2411,11 +2527,141 @@ function buildEquipo(projId){
   document.getElementById('equipo-list').innerHTML=html;
 }
 
+function openReportesScreen(){
+  navStack.push('home');
+  setTopbar(false,'Reportes');
+  document.getElementById('back-btn').classList.remove('hidden');
+  showScreen('reportes');
+  buildReportesScreen();
+}
+
+function buildReportesScreen(){
+  var html='';
+
+  // PDF
+  html+='<div class="det-section" style="margin:0 0 12px">';
+  html+='<div class="det-section-title">Exportar</div>';
+  html+='<div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px;">';
+  html+='<button onclick="exportPDF()" style="display:flex;align-items:center;gap:10px;padding:14px;background:var(--dark);color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif;width:100%"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Exportar reporte PDF</button>';
+  html+='<button onclick="openModal(\'excel\')" style="display:flex;align-items:center;gap:10px;padding:14px;background:var(--green);color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif;width:100%"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>Exportar Excel</button>';
+  html+='</div></div>';
+
+  // Seguimiento diario
+  html+='<div class="det-section" style="margin:0 0 12px">';
+  html+='<div class="det-section-title">Seguimiento diario</div>';
+  html+='<div style="padding:0" id="reporte-seg-content"></div>';
+  html+='</div>';
+
+  // Resumen global
+  html+='<div class="det-section" style="margin:0 0 16px">';
+  html+='<div class="det-section-title">Resumen por edificio</div>';
+  var resHtml='';
+  D.proyectos.forEach(function(proj){
+    var eds=getProjEds(proj.id);
+    eds.forEach(function(ed){
+      var edEls=[];getPisos(ed.id).forEach(function(p){edEls=edEls.concat(getEls(p.id));});
+      var es=calcStats(edEls);
+      resHtml+='<div class="res-row"><div class="res-name">'+ed.nombre+'</div>';
+      resHtml+='<div class="res-right"><div class="mini-bar"><div class="mini-bar-fill" style="width:'+es.pct+'%;background:'+getColor(es.pct)+'"></div></div>';
+      resHtml+='<div style="font-size:13px;font-weight:700;color:'+getColor(es.pct)+';min-width:36px;text-align:right">'+es.pct+'%</div></div></div>';
+    });
+  });
+  html+=resHtml||'<div style="padding:14px;color:var(--text2);font-size:13px">Sin datos.</div>';
+  html+='</div>';
+
+  document.getElementById('reportes-content').innerHTML=html;
+
+  // Build mini seguimiento
+  var seg=D.seguimiento.slice().sort(function(a,b){return b.fecha.localeCompare(a.fecha);}).slice(0,10);
+  var segHtml='';
+  if(!seg.length){
+    segHtml='<div style="padding:14px 16px;font-size:13px;color:var(--text2)">Sin registros todavía.</div>';
+  }else{
+    var byDate={};
+    seg.forEach(function(s){if(!byDate[s.fecha])byDate[s.fecha]=[];byDate[s.fecha].push(s);});
+    Object.keys(byDate).sort(function(a,b){return b.localeCompare(a);}).forEach(function(fecha){
+      var rows=byDate[fecha];
+      var total=rows.reduce(function(a,r){return a+r.cantidad;},0);
+      var fechaStr=new Date(fecha+'T12:00:00').toLocaleDateString('es-DO',{weekday:'short',day:'2-digit',month:'short'});
+      segHtml+='<div style="padding:10px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">';
+      segHtml+='<div style="font-size:13px;font-weight:600">'+fechaStr+'</div>';
+      segHtml+='<div style="font-size:13px;color:var(--green);font-weight:700">+'+total+' uds</div></div>';
+    });
+  }
+  var segEl=document.getElementById('reporte-seg-content');
+  if(segEl)segEl.innerHTML=segHtml;
+}
+
+function openUsuariosScreen(){
+  navStack.push('home');
+  setTopbar(false,'Usuarios');
+  document.getElementById('back-btn').classList.remove('hidden');
+  showScreen('usuarios-home');
+  buildUsuariosHome();
+}
+
+function buildUsuariosHome(){
+  var rolColors2={admin:'var(--blue)',supervisor:'var(--purple)',trabajador:'var(--green)'};
+  var html='';
+  D.usuarios.forEach(function(u,i){
+    var proj=u.proyecto_id?D.proyectos.find(function(p){return p.id===u.proyecto_id;}):null;
+    var ini=u.nombre.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+    var c=rolColors2[u.rol]||'var(--text2)';
+    html+='<div class="user-card" style="animation-delay:'+(i*0.04)+'s">';
+    html+='<div class="user-av-big" style="background:'+c+'">'+ini+'</div>';
+    html+='<div class="user-info"><div class="user-name">'+u.nombre+(u.activo?'':' <span style="font-size:11px;color:var(--red)">Inactivo</span>')+'</div>';
+    html+='<div class="user-email">@'+( u.username||'—')+'</div>';
+    html+='<div class="user-proj">'+(proj?'📁 '+proj.nombre:u.rol==='admin'?'Acceso global':'Sin proyecto')+'</div></div>';
+    html+='<div class="user-acts"><div class="role-badge '+u.rol+'">'+u.rol+'</div>';
+    if(u.id!==U.id)html+='<div class="icon-btn" onclick="toggleUserActive('+u.id+','+u.activo+')">'+(u.activo?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>')+'</div>';
+    html+='</div></div>';
+  });
+  var el=document.getElementById('user-list-home');
+  if(el)el.innerHTML=html||'<div style="text-align:center;padding:2rem;color:var(--text2)">No hay usuarios.</div>';
+}
+
+function openEquipoScreen(){
+  navStack.push('home');
+  setTopbar(false,'Equipo de obra');
+  document.getElementById('back-btn').classList.remove('hidden');
+  showScreen('equipo');
+  buildEquipoScreen();
+}
+
+function buildEquipoScreen(){
+  var equipo=D.usuarios.filter(function(u){return u.activo;});
+  var html='';
+
+  if(!equipo.length){
+    html='<div style="text-align:center;padding:3rem;color:var(--text2);font-size:13px">No hay miembros en el equipo.</div>';
+  }else{
+    equipo.forEach(function(u,i){
+      var ini=u.nombre.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+      var col=rolColors[u.rol]||'#64748b';
+      var rolLabel={admin:'Administrador',supervisor:'Supervisor',trabajador:'Técnico / Instalador'}[u.rol]||u.rol;
+      var stats=getMemberStats(u.id);
+      var myTareas=D.tareas.filter(function(t){return t.usuario_id===u.id;});
+      html+='<div class="equipo-card" style="animation-delay:'+(i*0.06)+'s" onclick="openPerfil('+u.id+')">';
+      html+='<div class="equipo-banner" style="background:'+col+'">';
+      html+=(u.foto_perfil?'<img src="'+u.foto_perfil+'" style="width:50px;height:50px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(255,255,255,0.3)">':'<div class="equipo-av">'+ini+'</div>');
+      html+='<div style="flex:1"><div class="equipo-nombre">'+u.nombre+'</div><div class="equipo-rol">'+(u.cargo||rolLabel)+'</div></div>';
+      html+='<svg style="color:rgba(255,255,255,0.5)" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>';
+      html+='</div>';
+      html+='<div class="equipo-footer">';
+      html+='<div class="equipo-stat"><div class="equipo-stat-val g">'+stats.instalados+'</div><div class="equipo-stat-lbl">Instalados</div></div>';
+      html+='<div class="equipo-stat"><div class="equipo-stat-val b">'+myTareas.length+'</div><div class="equipo-stat-lbl">Tareas</div></div>';
+      html+='<div class="equipo-stat"><div class="equipo-stat-val '+(stats.tareasPend>0?'r':'')+'">'+stats.tareasPend+'</div><div class="equipo-stat-lbl">Pendientes</div></div>';
+      html+='</div></div>';
+    });
+  }
+  document.getElementById('equipo-screen-content').innerHTML=html;
+}
+
 function openPerfil(userId){
   curMemberId=userId;
   var u=D.usuarios.find(function(x){return x.id===userId;});
   if(!u)return;
-  navStack.push('equipo');
+  navStack.push('equipo_screen');
   setTopbar(false,u.nombre);
   document.getElementById('back-btn').classList.remove('hidden');
   showScreen('perfil');
@@ -2471,13 +2717,28 @@ function renderPerfil(userId){
 
   document.getElementById('perfil-content').innerHTML=
     '<div style="padding-bottom:calc(var(--nb) + var(--sab))">'+
-    // Banner
+    // Banner con foto o avatar
     '<div class="perfil-banner" style="background:'+col+'">' +
-      '<div class="perfil-av">'+ini+'</div>'+
-      '<div><div class="perfil-nombre">'+u.nombre+'</div><div class="perfil-rol">'+rolLabel+'</div></div>'+
+      (u.foto_perfil
+        ?'<img src="'+u.foto_perfil+'" style="width:64px;height:64px;border-radius:50%;object-fit:cover;flex-shrink:0;border:3px solid rgba(255,255,255,0.4)">'
+        :'<div class="perfil-av" style="background:rgba(255,255,255,0.15)">'+ini+'</div>')+
+      '<div style="flex:1"><div class="perfil-nombre">'+u.nombre+'</div>'+
+      '<div class="perfil-rol">'+(u.cargo||rolLabel)+'</div></div>'+
+      (isAdmin()?'<button onclick="openEditPerfil('+userId+')" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:7px;padding:7px 12px;color:white;font-size:12px;font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif;">Editar</button>':'')+
+    '</div>'+
+    // Info del empleado
+    '<div class="det-section" style="margin:12px 16px 0">'+
+      '<div class="det-section-title">Información del empleado</div>'+
+      '<div class="det-row"><div class="det-row-label">Usuario</div><div class="det-row-value">@'+u.username+'</div></div>'+
+      '<div class="det-row"><div class="det-row-label">Rol</div><div class="det-row-value">'+rolLabel+'</div></div>'+
+      (u.cargo?'<div class="det-row"><div class="det-row-label">Cargo</div><div class="det-row-value">'+u.cargo+'</div></div>':'')+
+      (u.telefono?'<div class="det-row"><div class="det-row-label">Teléfono</div><div class="det-row-value"><a href="tel:'+u.telefono+'" style="color:var(--blue);text-decoration:none">'+u.telefono+'</a></div></div>':'')+
+      (u.cedula?'<div class="det-row"><div class="det-row-label">Cédula</div><div class="det-row-value">'+u.cedula+'</div></div>':'')+
+      (u.edad?'<div class="det-row"><div class="det-row-label">Edad</div><div class="det-row-value">'+u.edad+' años</div></div>':'')+
+      (!u.cargo&&!u.telefono&&!u.cedula&&!u.edad?'<div style="padding:14px 16px;font-size:13px;color:var(--text2)">Sin datos adicionales. '+(isAdmin()?'Toca Editar para agregar.':'')+'</div>':'')+
     '</div>'+
     // Stats
-    '<div class="perfil-stats">'+
+    '<div class="perfil-stats" style="margin-top:12px">'+
       '<div class="perfil-stat"><div class="perfil-stat-val g">'+stats.instalados+'</div><div class="perfil-stat-lbl">Instalados</div></div>'+
       '<div class="perfil-stat"><div class="perfil-stat-val b">'+myTareas.length+'</div><div class="perfil-stat-lbl">Tareas</div></div>'+
       '<div class="perfil-stat"><div class="perfil-stat-val '+(stats.tareasPend>0?'r':'g')+'">'+stats.tareasPend+'</div><div class="perfil-stat-lbl">Pendientes</div></div>'+
@@ -2683,14 +2944,93 @@ function saveUser(){
   var pass=document.getElementById('m-upass').value.trim();
   var rol=document.getElementById('m-urol').value;
   var projId=document.getElementById('m-uproj').value;
-  if(!nombre||!username||!pass){showToast('Todos los campos son requeridos','error');return;}
+  var cargo=document.getElementById('m-ucargo')?document.getElementById('m-ucargo').value.trim():'';
+  var tel=document.getElementById('m-utel')?document.getElementById('m-utel').value.trim():'';
+  var ced=document.getElementById('m-uced')?document.getElementById('m-uced').value.trim():'';
+  var edad=document.getElementById('m-uedad')?document.getElementById('m-uedad').value:'';
+  if(!nombre||!username||!pass){showToast('Nombre, usuario y contraseña son requeridos','error');return;}
   if(pass.length<6){showToast('Contraseña mínimo 6 caracteres','error');return;}
-  if(!/^[a-z0-9._]+$/.test(username)){showToast('Usuario solo puede tener letras, números, puntos','error');return;}
-  sb.from('usuarios').insert({nombre:nombre,username:username,password_hash:pass,rol:rol,proyecto_id:projId?parseInt(projId):null,activo:true}).then(function(res){
-    if(res.error){showToast('Error: '+res.error.message,'error');console.error('Supabase error:',res.error);return;}
-    closeModal('user');showToast('Usuario creado','success');
-    loadData().then(buildUsuarios);
+  if(!/^[a-z0-9._]+$/.test(username)){showToast('Usuario solo puede tener letras, números y puntos','error');return;}
+  var data={nombre:nombre,username:username,password_hash:pass,rol:rol,
+    proyecto_id:projId?parseInt(projId):null,activo:true};
+  if(cargo)data.cargo=cargo;
+  if(tel)data.telefono=tel;
+  if(ced)data.cedula=ced;
+  if(edad)data.edad=parseInt(edad);
+  sb.from('usuarios').insert(data).then(function(res){
+    if(res.error){showToast('Error: '+res.error.message,'error');return;}
+    closeModal('user');showToast('Miembro agregado al equipo','success');
+    loadData().then(function(){buildHome();if(document.getElementById('screen-equipo').classList.contains('active'))buildEquipoScreen();if(document.getElementById('screen-usuarios').classList.contains('active'))buildUsuarios();});
   });
+}
+
+function previewPerfilFoto(e){
+  var file=e.target.files[0];
+  if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    var wrap=document.getElementById('perfil-foto-preview-wrap');
+    if(wrap)wrap.innerHTML='<img src="'+ev.target.result+'" style="width:100%;height:100%;object-fit:cover;">';
+  };
+  reader.readAsDataURL(file);
+}
+
+function openEditPerfil(userId){
+  var u=D.usuarios.find(function(x){return x.id===userId;});
+  if(!u)return;
+  document.getElementById('ep-cargo').value=u.cargo||'';
+  document.getElementById('ep-tel').value=u.telefono||'';
+  document.getElementById('ep-ced').value=u.cedula||'';
+  document.getElementById('ep-edad').value=u.edad||'';
+  var wrap=document.getElementById('perfil-foto-preview-wrap');
+  if(wrap){
+    var ini=u.nombre.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+    wrap.innerHTML=u.foto_perfil?'<img src="'+u.foto_perfil+'" style="width:100%;height:100%;object-fit:cover;">':ini;
+    wrap.style.background=rolColors[u.rol]||'#64748b';
+    wrap.style.color='white';
+    wrap.style.fontSize='18px';
+  }
+  document.getElementById('perfil-foto-input').value='';
+  openModal('edit-perfil');
+  window._editPerfilUserId=userId;
+}
+
+function saveEditPerfil(){
+  var userId=window._editPerfilUserId;
+  if(!userId)return;
+  var cargo=document.getElementById('ep-cargo').value.trim();
+  var tel=document.getElementById('ep-tel').value.trim();
+  var ced=document.getElementById('ep-ced').value.trim();
+  var edad=document.getElementById('ep-edad').value;
+  var file=document.getElementById('perfil-foto-input').files[0];
+
+  function doSave(fotoUrl){
+    var update={};
+    if(cargo)update.cargo=cargo;
+    if(tel)update.telefono=tel;
+    if(ced)update.cedula=ced;
+    if(edad)update.edad=parseInt(edad);
+    if(fotoUrl)update.foto_perfil=fotoUrl;
+    sb.from('usuarios').update(update).eq('id',userId).then(function(r){
+      if(r.error){showToast('Error al guardar','error');return;}
+      var idx=D.usuarios.findIndex(function(u){return u.id===userId;});
+      if(idx!==-1)Object.assign(D.usuarios[idx],update);
+      closeModal('edit-perfil');
+      renderPerfil(userId);
+      buildEquipoScreen();
+      buildHome();
+      showToast('Perfil actualizado','success');
+    });
+  }
+
+  if(file){
+    var path='perfil-'+userId+'-'+Date.now()+'.jpg';
+    sb.storage.from('fotos').upload(path,file,{contentType:file.type,upsert:true}).then(function(res){
+      if(res.error){doSave(null);return;}
+      var url=sb.storage.from('fotos').getPublicUrl(path).data.publicUrl;
+      doSave(url);
+    });
+  }else{doSave(null);}
 }
 
 function doExportExcel(){

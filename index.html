@@ -3227,7 +3227,10 @@ function buildUsuariosHome(){
     html+='<div class="user-email">@'+( u.username||'—')+'</div>';
     html+='<div class="user-proj">'+(proj?'📁 '+proj.nombre:u.rol==='admin'?'Acceso global':'Sin proyecto')+'</div></div>';
     html+='<div class="user-acts"><div class="role-badge '+u.rol+'">'+u.rol+'</div>';
-    if(u.id!==U.id)html+='<div class="icon-btn" onclick="toggleUserActive('+u.id+','+u.activo+')">'+(u.activo?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>')+'</div>';
+    if(u.id!==U.id){
+      html+='<div class="icon-btn" onclick="toggleUserActive('+u.id+','+u.activo+')" title="'+(u.activo?'Desactivar':'Activar')+'">'+(u.activo?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>')+'</div>';
+      html+='<div class="icon-btn" onclick="deleteUser('+u.id+')" title="Eliminar" style="color:var(--red);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div>';
+    }
     html+='</div></div>';
   });
   var el=document.getElementById('user-list-home');
@@ -3509,8 +3512,27 @@ function buildUsuarios(){
 
 function toggleUserActive(userId,active){
   sb.from('usuarios').update({activo:!active}).eq('id',userId).then(function(){
-    loadData().then(buildUsuarios);
+    loadData().then(function(){buildUsuariosHome();});
     showToast(active?'Usuario desactivado':'Usuario activado','success');
+  });
+}
+
+function deleteUser(userId){
+  var u=D.usuarios.find(function(x){return x.id===userId;});
+  if(!u)return;
+  if(!confirm('¿Eliminar a '+u.nombre+' permanentemente? Esta acción no se puede deshacer.'))return;
+  // Delete from usuarios table
+  sb.from('usuarios').delete().eq('id',userId).then(function(r){
+    if(r.error){showToast('Error al eliminar','error');return;}
+    D.usuarios=D.usuarios.filter(function(x){return x.id!==userId;});
+    // Also delete from Auth via Edge Function
+    fetch('https://zlkmthwmcikcnvxtcmql.supabase.co/functions/v1/create-user',{
+      method:'DELETE',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+SK},
+      body:JSON.stringify({auth_id:u.auth_id})
+    }).catch(function(){});
+    buildUsuariosHome();
+    showToast(u.nombre+' eliminado','success');
   });
 }
 

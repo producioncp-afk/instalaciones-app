@@ -3130,23 +3130,46 @@ function renderPerfil(userId){
   if(!myTareas.length){
     tareasHtml='<div style="padding:14px 16px;font-size:13px;color:var(--text2)">Sin tareas asignadas</div>';
   }else{
-    var estados={pendiente:'Pendiente',aceptada:'Aceptada',en_progreso:'En progreso',completada:'Completada'};
-    myTareas.forEach(function(t){
-      var el=D.elementos.find(function(x){return x.id===t.elemento_id;});
+    var estadoColors={pendiente:'#854d0e',aceptada:'var(--blue)',en_progreso:'var(--purple)',completada:'var(--green)'};
+    var estadoLabels={pendiente:'Pendiente',aceptada:'Aceptada',en_progreso:'En progreso',completada:'Completada'};
+    myTareas.forEach(function(t,i){
+      var elem=D.elementos.find(function(x){return x.id===t.elemento_id;});
       var ed=t.edificio_id?D.edificios.find(function(e){return e.id===t.edificio_id;}):null;
-      tareasHtml+='<div class="tarea-card" style="margin:0;border-radius:0;border-left:none;border-right:none;border-top:none;">';
-      tareasHtml+='<div class="tarea-header"><div class="tarea-estado '+(t.estado||'pendiente')+'">'+( estados[t.estado]||'Pendiente')+'</div>';
-      tareasHtml+='<div class="tarea-titulo">'+t.titulo+'</div></div>';
-      tareasHtml+='<div class="tarea-body">';
-      if(ed)tareasHtml+='<div class="tarea-detail">'+ed.nombre+'</div>';
-      if(t.descripcion)tareasHtml+='<div class="tarea-detail">'+t.descripcion+'</div>';
+      var piso=t.piso_id?D.pisos.find(function(p){return p.id===t.piso_id;}):null;
+      var eColor=estadoColors[t.estado]||'var(--text2)';
+      var eLabel=estadoLabels[t.estado]||t.estado;
+      var ticketNum=String(t.id).padStart(4,'0');
+
+      tareasHtml+='<div style="background:var(--white);border-radius:10px;border:1px solid var(--border);overflow:hidden;margin:8px 16px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">';
+      // Header stripe
+      tareasHtml+='<div style="background:'+eColor+';padding:8px 12px;display:flex;align-items:center;justify-content:space-between;">';
+      tareasHtml+='<div style="background:rgba(255,255,255,0.2);border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;color:white;letter-spacing:0.08em;">TICKET #'+ticketNum+'</div>';
+      tareasHtml+='<div style="background:rgba(255,255,255,0.25);border-radius:20px;padding:2px 9px;font-size:11px;font-weight:700;color:white;">'+eLabel+'</div>';
       tareasHtml+='</div>';
-      tareasHtml+='<div class="tarea-actions">';
-      if(t.estado==='pendiente')tareasHtml+='<button class="tarea-btn accept" onclick="updateTareaEstado('+t.id+',\'aceptada\')">Aceptar</button>';
-      else if(t.estado==='aceptada')tareasHtml+='<button class="tarea-btn complete" onclick="updateTareaEstado('+t.id+',\'completada\')">Completar</button>';
-      else if(t.estado==='completada')tareasHtml+='<span style="font-size:12px;color:var(--green);font-weight:600">Completada</span>';
-      if(isAdmin())tareasHtml+='<button class="tarea-btn secondary" style="max-width:36px" onclick="deleteTarea('+t.id+')">✕</button>';
-      tareasHtml+='</div></div>';
+      // Dashed line
+      tareasHtml+='<div style="border-top:2px dashed var(--border);margin:0 12px;"></div>';
+      // Body
+      tareasHtml+='<div style="padding:12px;">';
+      tareasHtml+='<div style="font-size:15px;font-weight:700;margin-bottom:8px;">'+t.titulo+'</div>';
+      if(ed||piso){
+        tareasHtml+='<div style="display:flex;gap:6px;margin-bottom:8px;">';
+        if(ed)tareasHtml+='<div style="background:var(--bg);border-radius:6px;padding:6px 9px;font-size:12px;font-weight:600;flex:1;">'+ed.nombre+'</div>';
+        if(piso)tareasHtml+='<div style="background:var(--bg);border-radius:6px;padding:6px 9px;font-size:12px;font-weight:600;flex:1;">'+piso.nombre+'</div>';
+        tareasHtml+='</div>';
+      }
+      if(elem)tareasHtml+='<div style="font-size:12px;color:var(--text2);margin-bottom:6px;">Cantidad: '+elem.cantidad+' unidades</div>';
+      if(t.descripcion)tareasHtml+='<div style="font-size:12px;color:var(--text2);background:var(--bg);border-radius:6px;padding:8px;line-height:1.5;">'+t.descripcion+'</div>';
+      tareasHtml+='</div>';
+      // Dashed line
+      tareasHtml+='<div style="border-top:2px dashed var(--border);margin:0 12px;"></div>';
+      // Actions
+      tareasHtml+='<div style="padding:10px 12px;display:flex;justify-content:flex-end;gap:6px;">';
+      if(t.estado==='pendiente')tareasHtml+='<button onclick="updateTareaEstado('+t.id+',\'aceptada\')" style="background:var(--blue);color:white;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:\'Inter\',sans-serif;">Aceptar</button>';
+      else if(t.estado==='aceptada')tareasHtml+='<button onclick="updateTareaEstado('+t.id+',\'completada\')" style="background:var(--green);color:white;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:\'Inter\',sans-serif;">Completar</button>';
+      else if(t.estado==='completada')tareasHtml+='<span style="font-size:12px;color:var(--green);font-weight:600;display:flex;align-items:center;gap:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Completada</span>';
+      if(isAdmin())tareasHtml+='<button onclick="deleteTarea('+t.id+')" style="width:28px;height:28px;border-radius:50%;background:var(--red-light);border:none;color:var(--red);cursor:pointer;font-size:12px;">✕</button>';
+      tareasHtml+='</div>';
+      tareasHtml+='</div>';
     });
   }
 
@@ -3190,7 +3213,8 @@ function renderPerfil(userId){
     // Assign task button (admin only)
     (isAdmin()?'<div style="padding:0 16px 12px"><button onclick="openAsignarDesdePerfilModal('+userId+')" style="width:100%;padding:13px;background:var(--blue);color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>Asignar nueva tarea</button></div>':'')+
     // Tareas
-    '<div class="det-section" style="margin:0 16px 12px"><div class="det-section-title">Tareas asignadas</div>'+tareasHtml+'</div>'+
+    '<div style="padding:10px 16px 4px;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;">Tareas asignadas</div>'+
+    tareasHtml+
     // Historial
     (histHtml?'<div class="det-section" style="margin:0 16px 16px"><div class="det-section-title">Actividad reciente</div>'+histHtml+'</div>':'')+
     '</div>';

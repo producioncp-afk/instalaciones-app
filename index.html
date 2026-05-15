@@ -1842,7 +1842,7 @@ function sendNotif(){
 
 function sendFCMPush(token, titulo, mensaje){
   // Call Supabase Edge Function to send FCM push
-  fetch('https://zlkmthwmcikcnvxtcmql.supabase.co/functions/v1/send-push',{
+  fetch('https://zlkmthwmcikcnvxtcmql.supabase.co/functions/v1/quick-task',{
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+SK},
     body:JSON.stringify({token:token,title:titulo,body:mensaje})

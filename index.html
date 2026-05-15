@@ -814,11 +814,9 @@ function loadData(){
     sb.from('seguimiento_diario').select('*').order('fecha'),
     sb.from('especificaciones').select('*').order('orden'),
     sb.from('historial').select('*').order('creado_en',{ascending:false}).limit(200),
-    sb.from('notificaciones').select('*').eq('para_usuario_id',U.id).order('creado_en',{ascending:false}).limit(50)
+    sb.from('notificaciones').select('*').eq('para_usuario_id',U.id).order('creado_en',{ascending:false}).limit(50),
+    sb.from('usuarios').select('id,nombre,username,rol,activo,proyecto_id,fcm_token').order('nombre')
   ];
-  if(isAdmin()){
-    qs.push(sb.from('usuarios').select('*').order('creado_en'));
-  }
   return Promise.all(qs).then(function(r){
     var allP=r[0].data||[],allE=r[1].data||[];
     if(!isAdmin()&&U.proyecto_id){
@@ -831,7 +829,7 @@ function loadData(){
     D.specs=r[6].data||[];
     D.historial=r[7].data||[];
     D.notifs=r[8].data||[];
-    if(isAdmin()){D.usuarios=r[9]?r[9].data||[]:[]; }
+    D.usuarios=r[9].data||[];
     setOnline(true);
     updateNotifBadge();
   });
@@ -1551,9 +1549,10 @@ function sendNotif(){
   var paraId=document.getElementById('notif-para').value;
   var titulo=document.getElementById('notif-titulo').value.trim();
   var msg=document.getElementById('notif-msg').value.trim();
-  if(!paraId||!titulo||!msg){showToast('Completa todos los campos','error');return;}
+  if(!paraId){showToast('Selecciona un usuario','error');return;}
+  if(!titulo){showToast('Escribe un título','error');return;}
+  if(!msg)msg=titulo; // Si no hay mensaje usa el título
 
-  // Save internal notification
   sb.from('notificaciones').insert([{
     para_usuario_id:parseInt(paraId),
     de_usuario_nombre:U.nombre,
@@ -1561,14 +1560,12 @@ function sendNotif(){
     mensaje:msg,
     leida:false
   }]).then(function(r){
-    if(r.error){showToast('Error al enviar','error');return;}
+    if(r.error){showToast('Error: '+r.error.message,'error');return;}
     closeModal('send-notif');
     showToast('Aviso enviado','success');
-
-    // Send FCM push if recipient has token
     var receptor=D.usuarios.find(function(u){return u.id===parseInt(paraId);});
     if(receptor&&receptor.fcm_token){
-      sendFCMPush(receptor.fcm_token, titulo, msg);
+      sendFCMPush(receptor.fcm_token,titulo,msg);
     }
   });
 }

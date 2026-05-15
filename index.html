@@ -553,7 +553,10 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
       <div class="el-prog-lbl">Progreso de instalación</div>
       <div class="el-prog-row"><div class="pb" style="height:6px"><div class="pbf" id="el-pbar"></div></div><div class="pct-lbl" id="el-pct">0%</div></div>
     </div>
-    <div class="el-wrap"><div class="el-hdr" id="el-hdr">Elementos</div><div id="el-list"></div></div>
+    <div class="el-wrap"><div class="el-hdr" id="el-hdr" style="display:flex;align-items:center;justify-content:space-between;">
+      <span>Elementos</span>
+      <button id="add-el-btn" onclick="openModalNuevoElemento(curPisoId)" style="display:none;background:var(--blue);color:white;border:none;border-radius:6px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">+ Agregar</button>
+    </div><div id="el-list"></div></div>
   </div>
 
   <!-- DETALLE -->
@@ -844,6 +847,25 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
     <div class="modal-row">
       <button class="modal-btn secondary" onclick="closeModal('tarea-recibida')">Ver después</button>
       <button class="modal-btn primary" style="background:var(--green)" id="tr-accept-btn" onclick="aceptarTareaDesdeNotif()">Aceptar tarea</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NUEVO ELEMENTO -->
+<div class="modal-overlay hidden" id="modal-nuevo-el" onclick="closeOv(event,'modal-nuevo-el')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">Nuevo elemento</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:14px;">Piso: <b id="ne-piso"></b></div>
+    <input type="hidden" id="ne-piso-id">
+    <div class="modal-field"><label>Nombre del elemento</label>
+      <input class="modal-input" type="text" id="ne-nombre" placeholder="Ej: ESPEJO BAÑO" style="text-transform:uppercase">
+    </div>
+    <div class="modal-field"><label>Cantidad</label>
+      <input class="modal-input" type="number" id="ne-cantidad" placeholder="Ej: 14" min="1">
+    </div>
+    <div class="modal-row">
+      <button class="modal-btn secondary" onclick="closeModal('nuevo-el')">Cancelar</button>
+      <button class="modal-btn primary" onclick="saveNuevoElemento()">Crear elemento</button>
     </div>
   </div>
 </div>
@@ -1311,7 +1333,9 @@ function buildEls(pisoId,push){
   var ed=D.edificios.find(function(e){return e.id===piso.edificio_id;});
   setTopbar(false,piso.nombre);
   document.getElementById('back-btn').classList.remove('hidden');
-  document.getElementById('el-hdr').textContent=piso.nombre+' · Elementos';
+  document.getElementById('el-hdr').querySelector('span').textContent=piso.nombre+' · Elementos';
+  var addBtn=document.getElementById('add-el-btn');
+  if(addBtn)addBtn.style.display=isAdmin()?'block':'none';
   showScreen('elementos');renderEls();
 }
 
@@ -1509,16 +1533,25 @@ function renderDetalleContent(elId){
         '<div class="det-row"><div class="det-row-label">Estado</div><div class="det-row-value">'+estadoLabel+'</div></div>'
       )+
       '<div class="det-row">'+
-        '<div class="det-row-label">Cantidad de unidades</div>'+
+        '<div class="det-row-label">Cantidad total</div>'+
         (canEditQty?
-          '<div class="det-qty-ctrl">'+
-            '<button class="qty-btn" onclick="changeQty('+el.id+',-1)">−</button>'+
-            '<div class="qty-val" id="qty-display">'+el.cantidad+'</div>'+
-            '<button class="qty-btn" onclick="changeQty('+el.id+',1)">+</button>'+
-          '</div>'
+          '<input type="number" id="qty-display" value="'+el.cantidad+'" min="1" '+
+          'onchange="changeQtyDirect('+el.id+',this.value)" '+
+          'style="width:70px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:14px;font-weight:700;font-family:Inter,sans-serif;text-align:center;background:var(--bg);color:var(--text);outline:none;">'
         :
           '<div class="det-row-value">'+el.cantidad+'</div>'
         )+
+      '</div>'+
+      '<div class="det-row">'+
+        '<div class="det-row-label">Instalados</div>'+
+        (canEdit()?
+          '<div class="det-qty-ctrl">'+
+            '<button class="qty-btn" onclick="changeSubCant('+el.id+',\'cantidad_instalada\',-1)">−</button>'+
+            '<div class="qty-val" id="qi-'+el.id+'">'+(el.cantidad_instalada||0)+'</div>'+
+            '<button class="qty-btn" onclick="changeSubCant('+el.id+',\'cantidad_instalada\',1)">+</button>'+
+            '<span style="font-size:12px;color:var(--text2);margin-left:6px;font-weight:600;">de '+el.cantidad+'</span>'+
+          '</div>'
+        :'<div class="det-row-value">'+(el.cantidad_instalada||0)+' de '+el.cantidad+'</div>')+
       '</div>'+
       '<div class="det-row"><div class="det-row-label">Actualizado por</div><div class="det-row-value">'+( el.actualizado_por||'—')+'</div></div>'+
       '<div class="det-row"><div class="det-row-label">Última actualización</div><div class="det-row-value">'+(el.actualizado_en?formatDate(el.actualizado_en):'—')+'</div></div>'+
@@ -1715,13 +1748,57 @@ function toggleField(elId, field, currentVal){
   });
 }
 
+function changeQtyDirect(elId, newVal){
+  var el=D.elementos.find(function(x){return x.id===elId;});
+  if(!el)return;
+  var qty=Math.max(1,parseInt(newVal)||1);
+  el.cantidad=qty;
+  var saveBtn=document.querySelector('.det-save-btn');
+  if(saveBtn)saveBtn.style.background='var(--yellow)';
+}
+
 function changeQty(elId,delta){
   var el=D.elementos.find(function(x){return x.id===elId;});
   if(!el)return;
   var newQty=Math.max(1,el.cantidad+delta);
   el.cantidad=newQty;
   var display=document.getElementById('qty-display');
-  if(display)display.textContent=newQty;
+  if(display)display.value=newQty;
+  var saveBtn=document.querySelector('.det-save-btn');
+  if(saveBtn)saveBtn.style.background='var(--yellow)';
+}
+
+function openModalNuevoElemento(pisoId){
+  var piso=D.pisos.find(function(p){return p.id===pisoId;});
+  document.getElementById('ne-piso').textContent=piso?piso.nombre:'Piso';
+  document.getElementById('ne-nombre').value='';
+  document.getElementById('ne-cantidad').value='1';
+  document.getElementById('ne-piso-id').value=pisoId;
+  openModal('nuevo-el');
+}
+
+function saveNuevoElemento(){
+  var nombre=document.getElementById('ne-nombre').value.trim().toUpperCase();
+  var cantidad=parseInt(document.getElementById('ne-cantidad').value)||1;
+  var pisoId=parseInt(document.getElementById('ne-piso-id').value);
+  if(!nombre){showToast('Escribe el nombre del elemento','error');return;}
+  sb.from('elementos').insert([{
+    piso_id:pisoId,
+    nombre:nombre,
+    cantidad:cantidad,
+    instalado:false,
+    pintado:false,
+    retocado:false,
+    cantidad_pintado:0,
+    cantidad_retocado:0,
+    creado_por:U.nombre
+  }]).select().then(function(r){
+    if(r.error){showToast('Error al crear','error');return;}
+    if(r.data&&r.data.length>0)D.elementos.push(r.data[0]);
+    closeModal('nuevo-el');
+    renderEls();
+    showToast('Elemento creado','success');
+  });
 }
 
 function openWAModal(elId){
@@ -1971,22 +2048,33 @@ function sendFCMPush(token, titulo, mensaje){
 function changeSubCant(elId, campo, delta){
   var el=D.elementos.find(function(x){return x.id===elId;});
   if(!el)return;
-  var prefix=campo==='cantidad_pintado'?'qp-':'qr-';
+  var prefixMap={'cantidad_pintado':'qp-','cantidad_retocado':'qr-','cantidad_instalada':'qi-'};
+  var prefix=prefixMap[campo]||'q-';
   var cur=el[campo]||0;
   var newVal=Math.max(0,Math.min(el.cantidad,cur+delta));
   if(newVal===cur)return;
   el[campo]=newVal;
   var valEl=document.getElementById(prefix+elId);
   if(valEl)valEl.textContent=newVal;
-  // Auto-toggle pintado/retocado boolean based on quantity
-  var boolCampo=campo==='cantidad_pintado'?'pintado':'retocado';
   var update={};
   update[campo]=newVal;
-  update[boolCampo]=newVal>=el.cantidad;
+  // Auto-toggle boolean based on quantity reaching max
+  if(campo==='cantidad_instalada'){
+    update.instalado=newVal>=el.cantidad;
+    el.instalado=update.instalado;
+    var tog=document.getElementById('det-toggle');
+    if(tog){tog.className='toggle'+(update.instalado?' on':'');}
+  }else if(campo==='cantidad_pintado'){
+    update.pintado=newVal>=el.cantidad;
+    el.pintado=update.pintado;
+  }else if(campo==='cantidad_retocado'){
+    update.retocado=newVal>=el.cantidad;
+    el.retocado=update.retocado;
+  }
   sb.from('elementos').update(update).eq('id',elId).then(function(r){
     if(r.error){showToast('Error al guardar','error');return;}
     Object.assign(el,update);
-    showToast(campo==='cantidad_pintado'?'Pintado actualizado':'Retocado actualizado','success');
+    showToast(newVal+' de '+el.cantidad+' '+campo.replace('cantidad_',''),'success');
   });
 }
 
@@ -2001,13 +2089,16 @@ function renderDetallePreserveNota(elId){
 function saveDetalle(elId){
   var el=D.elementos.find(function(x){return x.id===elId;});
   if(!el)return;
+  var qtyInput=document.getElementById('qty-display');
+  if(qtyInput&&qtyInput.value)el.cantidad=Math.max(1,parseInt(qtyInput.value)||el.cantidad);
   var nota=document.getElementById('det-nota-input');
   var notaVal=nota?nota.value:el.nota;
   var update={cantidad:el.cantidad,nota:notaVal,actualizado_por:U.nombre,actualizado_en:new Date().toISOString()};
   sb.from('elementos').update(update).eq('id',elId).then(function(res){
     if(res.error){showToast('Error al guardar','error');return;}
     Object.assign(el,update);
-    renderDetalleContent(elId);
+    var saveBtn=document.querySelector('.det-save-btn');
+    if(saveBtn)saveBtn.style.background='';
     renderEls();
     showToast('Guardado','success');
   });

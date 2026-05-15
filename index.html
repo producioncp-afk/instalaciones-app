@@ -556,7 +556,7 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
 
   <!-- TAREAS -->
   <div class="screen" id="screen-tareas">
-    <div class="pad" id="tareas-content"><div class="spin-wrap"><div class="spin"></div></div></div>
+    <div class="pad" id="tareas-content"></div>
   </div>
 
   <!-- USUARIOS -->
@@ -571,7 +571,7 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
   <!-- HISTORIAL -->
   <div class="screen" id="screen-historial">
     <div class="pad" style="padding-bottom:8px"><div class="sec-title">Historial de cambios</div></div>
-    <div style="background:var(--white)"><div id="hist-list"><div class="spin-wrap"><div class="spin"></div></div></div></div>
+    <div style="background:var(--white);min-height:60vh"><div id="hist-list"><div class="spin-wrap"><div class="spin"></div></div></div></div>
   </div>
 
   <!-- RESUMEN -->
@@ -812,6 +812,26 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
   </div>
 </div>
 
+<!-- MODAL TAREA RECIBIDA -->
+<div class="modal-overlay hidden" id="modal-tarea-recibida" onclick="closeOv(event,'modal-tarea-recibida')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="width:56px;height:56px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+      <div style="font-size:18px;font-weight:700;margin-bottom:4px">Nueva tarea asignada</div>
+      <div style="font-size:13px;color:var(--text2)" id="tr-asignador"></div>
+    </div>
+    <div style="background:var(--bg);border-radius:10px;padding:14px;margin-bottom:16px">
+      <div style="font-size:16px;font-weight:700;margin-bottom:8px" id="tr-titulo"></div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.6" id="tr-detalles"></div>
+      <img id="tr-foto" src="" alt="" style="width:100%;border-radius:8px;margin-top:10px;display:none;max-height:160px;object-fit:cover">
+    </div>
+    <div class="modal-row">
+      <button class="modal-btn secondary" onclick="closeModal('tarea-recibida')">Ver después</button>
+      <button class="modal-btn primary" style="background:var(--green)" id="tr-accept-btn" onclick="aceptarTareaDesdeNotif()">Aceptar tarea</button>
+    </div>
+  </div>
+</div>
+
 <div class="lightbox hidden" id="lightbox" onclick="closeLightbox()">
   <button class="lb-close" onclick="closeLightbox()">✕</button>
   <img id="lb-img" src="" alt="">
@@ -990,8 +1010,11 @@ function setupRealtime(){
       var exists=D.tareas.find(function(t){return t.id===pl.new.id;});
       if(!exists)D.tareas.push(pl.new);
       if(document.getElementById('screen-tareas').classList.contains('active'))buildTareas();
-      // Badge on tareas nav if new task for me
       updateTareasBadge();
+      // Show popup if task is for current user
+      if(pl.new.usuario_id===U.id){
+        showTareaRecibidaPopup(pl.new);
+      }
     })
     .on('postgres_changes',{event:'UPDATE',schema:'public',table:'tareas'},function(pl){
       var idx=D.tareas.findIndex(function(t){return t.id===pl.new.id;});
@@ -2339,8 +2362,12 @@ function buildSeguimiento(){
       rows.forEach(function(r){
         var ed=D.edificios.find(function(e){return e.id===r.edificio_id;});
         html+='<div class="seg-el-row">';
-        html+='<div><div class="seg-el-name">'+r.elemento_nombre+'</div>';
-        html+='<div class="seg-el-ed">'+(ed?ed.nombre:'Edificio '+r.edificio_id)+'</div></div>';
+        html+='<div style="flex:1">';
+        html+='<div class="seg-el-name">'+r.elemento_nombre+'</div>';
+        html+='<div class="seg-el-ed" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:3px">';
+        html+='<span>'+(ed?ed.nombre:'Edificio '+r.edificio_id)+'</span>';
+        if(r.usuario_nombre)html+='<span style="color:var(--blue);font-weight:600">'+r.usuario_nombre+'</span>';
+        html+='</div></div>';
         html+='<div class="seg-el-cant">+'+r.cantidad+'</div></div>';
       });
       html+='</div>';
@@ -2378,6 +2405,44 @@ function saveSeguimiento(){
     closeModal('seg');
     buildSeguimiento();
     showToast('Registrado','success');
+  });
+}
+
+var _tareaRecibidaId=null;
+
+function showTareaRecibidaPopup(tarea){
+  _tareaRecibidaId=tarea.id;
+  var ed=tarea.edificio_id?D.edificios.find(function(e){return e.id===tarea.edificio_id;}):null;
+  var piso=tarea.piso_id?D.pisos.find(function(p){return p.id===tarea.piso_id;}):null;
+  var el=tarea.elemento_id?D.elementos.find(function(x){return x.id===tarea.elemento_id;}):null;
+
+  document.getElementById('tr-asignador').textContent='Asignado por: '+tarea.asignado_por;
+  document.getElementById('tr-titulo').textContent=tarea.titulo;
+
+  var detalles='';
+  if(ed)detalles+='Edificio: '+ed.nombre+'\n';
+  if(piso)detalles+='Piso: '+piso.nombre+'\n';
+  if(el)detalles+='Cantidad: '+el.cantidad+' unidades\n';
+  if(tarea.descripcion)detalles+='\n'+tarea.descripcion;
+  document.getElementById('tr-detalles').textContent=detalles.trim();
+
+  var fotoEl=document.getElementById('tr-foto');
+  if(tarea.foto_url){fotoEl.src=tarea.foto_url;fotoEl.style.display='block';}
+  else{fotoEl.style.display='none';}
+
+  document.getElementById('modal-tarea-recibida').classList.remove('hidden');
+}
+
+function aceptarTareaDesdeNotif(){
+  if(!_tareaRecibidaId)return;
+  sb.from('tareas').update({estado:'aceptada',aceptado_en:new Date().toISOString()}).eq('id',_tareaRecibidaId).then(function(r){
+    if(r.error){showToast('Error','error');return;}
+    var idx=D.tareas.findIndex(function(t){return t.id===_tareaRecibidaId;});
+    if(idx!==-1){D.tareas[idx].estado='aceptada';D.tareas[idx].aceptado_en=new Date().toISOString();}
+    closeModal('tarea-recibida');
+    _tareaRecibidaId=null;
+    showToast('Tarea aceptada','success');
+    if(document.getElementById('screen-tareas').classList.contains('active'))buildTareas();
   });
 }
 
@@ -2760,7 +2825,7 @@ function openAsignarDesdePerfilModal(userId){
   document.getElementById('asignar-desc').value='';
   // Show element picker - list pisos and elements
   var html='<div style="padding:12px 14px;font-size:12px;color:var(--text2)">Selecciona el elemento a asignar:</div>';
-  D.edificios.filter(function(ed){return ed.proyecto_id===curProjId;}).forEach(function(ed){
+  D.edificios.forEach(function(ed){
     getPisos(ed.id).forEach(function(p){
       var els=getEls(p.id).filter(function(el){return el.instalado!==true;});
       if(!els.length)return;

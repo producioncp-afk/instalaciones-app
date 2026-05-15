@@ -1499,15 +1499,25 @@ function renderDetalleContent(elId){
       '</div>'+
       '<div class="det-row"><div class="det-row-label">Actualizado por</div><div class="det-row-value">'+( el.actualizado_por||'—')+'</div></div>'+
       '<div class="det-row"><div class="det-row-label">Última actualización</div><div class="det-row-value">'+(el.actualizado_en?formatDate(el.actualizado_en):'—')+'</div></div>'+
-      '<div class="det-row"><div class="det-row-label">🖌 Pintado</div>'+
+      '<div class="det-row"><div class="det-row-label">Pintado</div>'+
         (canEdit()
-          ?'<button class="toggle '+(el.pintado===true?'on':'')+'" onclick="toggleField('+el.id+',\'pintado\','+el.pintado+')"></button>'
-          :'<div class="det-row-value">'+(el.pintado===true?'Sí':'No')+'</div>')+
+          ?'<div class="det-qty-ctrl">'+
+            '<button class="qty-btn" onclick="changeSubCant('+el.id+',\'cantidad_pintado\',-1)">−</button>'+
+            '<div class="qty-val" id="qp-'+el.id+'">'+(el.cantidad_pintado||0)+'</div>'+
+            '<button class="qty-btn" onclick="changeSubCant('+el.id+',\'cantidad_pintado\',1)">+</button>'+
+            '<span style="font-size:11px;color:var(--text3);margin-left:4px;">/ '+el.cantidad+'</span>'+
+          '</div>'
+          :'<div class="det-row-value">'+(el.cantidad_pintado||0)+' / '+el.cantidad+'</div>')+
       '</div>'+
-      '<div class="det-row"><div class="det-row-label">✓ Retocado</div>'+
+      '<div class="det-row"><div class="det-row-label">Retocado</div>'+
         (canEdit()
-          ?'<button class="toggle '+(el.retocado===true?'on':'')+'" onclick="toggleField('+el.id+',\'retocado\','+el.retocado+')"></button>'
-          :'<div class="det-row-value">'+(el.retocado===true?'Sí':'No')+'</div>')+
+          ?'<div class="det-qty-ctrl">'+
+            '<button class="qty-btn" onclick="changeSubCant('+el.id+',\'cantidad_retocado\',-1)">−</button>'+
+            '<div class="qty-val" id="qr-'+el.id+'">'+(el.cantidad_retocado||0)+'</div>'+
+            '<button class="qty-btn" onclick="changeSubCant('+el.id+',\'cantidad_retocado\',1)">+</button>'+
+            '<span style="font-size:11px;color:var(--text3);margin-left:4px;">/ '+el.cantidad+'</span>'+
+          '</div>'
+          :'<div class="det-row-value">'+(el.cantidad_retocado||0)+' / '+el.cantidad+'</div>')+
       '</div>'+
     '</div>'+
 
@@ -1855,6 +1865,28 @@ function sendFCMPush(token, titulo, mensaje){
     if(r.ok)console.log('Push enviado');
     else console.log('Push error:',r.status);
   }).catch(function(e){console.log('Push fetch error:',e);});
+}
+
+function changeSubCant(elId, campo, delta){
+  var el=D.elementos.find(function(x){return x.id===elId;});
+  if(!el)return;
+  var prefix=campo==='cantidad_pintado'?'qp-':'qr-';
+  var cur=el[campo]||0;
+  var newVal=Math.max(0,Math.min(el.cantidad,cur+delta));
+  if(newVal===cur)return;
+  el[campo]=newVal;
+  var valEl=document.getElementById(prefix+elId);
+  if(valEl)valEl.textContent=newVal;
+  // Auto-toggle pintado/retocado boolean based on quantity
+  var boolCampo=campo==='cantidad_pintado'?'pintado':'retocado';
+  var update={};
+  update[campo]=newVal;
+  update[boolCampo]=newVal>=el.cantidad;
+  sb.from('elementos').update(update).eq('id',elId).then(function(r){
+    if(r.error){showToast('Error al guardar','error');return;}
+    Object.assign(el,update);
+    showToast(campo==='cantidad_pintado'?'Pintado actualizado':'Retocado actualizado','success');
+  });
 }
 
 function saveDetalle(elId){

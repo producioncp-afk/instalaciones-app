@@ -1505,31 +1505,10 @@ function buildEdificios(projId,push){
   curProjId=projId;
   if(push)navStack.push('home');
   var proj=D.proyectos.find(function(p){return p.id===projId;});
-  var eds=getProjEds(projId),all=[];
-  eds.forEach(function(ed){getPisos(ed.id).forEach(function(p){all=all.concat(getEls(p.id));});});
-  var s=calcStats(all);
   setTopbar(false,proj.nombre);
   document.getElementById('back-btn').classList.remove('hidden');
-  // Default to Resumen tab
-  switchProjTab('resumen-proj');
-  document.getElementById('ed-stats').innerHTML=
-    '<div class="stat-card"><div class="stat-lbl">Instalados</div><div class="stat-num g">'+s.inst+'</div></div>'+
-    '<div class="stat-card"><div class="stat-lbl">Pendientes</div><div class="stat-num r">'+s.pend+'</div></div>'+
-    '<div class="stat-card"><div class="stat-lbl">Total</div><div class="stat-num b">'+s.total+'</div></div>'+
-    '<div class="stat-card"><div class="stat-lbl">Progreso</div><div class="stat-num b">'+s.pct+'%</div></div>';
-  var html='';
-  eds.forEach(function(ed){
-    var edEls=[];getPisos(ed.id).forEach(function(p){edEls=edEls.concat(getEls(p.id));});
-    var es=calcStats(edEls),c=getColor(es.pct);
-    html+='<div class="ed-card" onclick="buildPisos(\''+ed.id+'\')"><div class="ed-top">';
-    html+='<div class="ed-ico">'+ed.icon+'</div>';
-    html+='<div><div class="ed-nm">'+ed.nombre+'</div><div class="ed-sb">'+getPisos(ed.id).length+' pisos · '+edEls.length+' elementos</div></div>';
-    html+='<div class="ed-arr">›</div></div>';
-    html+='<div class="prog"><div class="pb"><div class="pbf" style="width:'+es.pct+'%;background:'+c+'"></div></div>';
-    html+='<div class="pct-lbl" style="color:'+c+'">'+es.pct+'%</div></div></div>';
-  });
-  document.getElementById('ed-list').innerHTML=html||'<div style="text-align:center;padding:2rem;color:var(--text2);font-size:14px">No hay edificios.</div>';
   showScreen('edificios');
+  switchProjTab('resumen-proj');
 }
 
 function buildPisos(edId,push){

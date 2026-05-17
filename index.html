@@ -482,22 +482,37 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
 
   <!-- PROYECTOS -->
   <div class="screen active" id="screen-home">
-    <div class="pad">
-      <div class="hello" id="hello-txt">Hola</div>
-      <div class="hello-sub" id="hello-sub">Cargando...</div>
-      <div style="font-size:11px;color:var(--text3);margin-top:2px" id="last-login"></div>
-
-      <div class="sec-title">Proyectos</div>
+    <!-- Greeting section -->
+    <div style="background:white;padding:16px 16px 12px;border-bottom:1px solid var(--border);">
+      <div style="font-size:21px;font-weight:700;color:var(--text);letter-spacing:-0.02em;" id="hello-txt">Hola</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:2px;" id="hello-sub">Cargando...</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:1px;" id="last-login"></div>
+    </div>
+    <!-- Alerta tareas -->
+    <div id="tarea-alert" style="display:none;margin:12px 16px 0;background:#ebf0ff;border-radius:12px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;border:1px solid #bfcfff;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--text);" id="tarea-alert-txt">tareas pendientes</div>
+          <div style="font-size:11px;color:var(--blue);margin-top:1px;">Toca para ver tus tickets</div>
+        </div>
+      </div>
+      <div onclick="switchTab('tareas')" style="background:var(--blue);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;color:white;cursor:pointer;">Ver</div>
+    </div>
+    <!-- Cards -->
+    <div class="pad" style="padding-top:14px;">
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Proyectos</div>
       <div id="proj-list"><div class="spin-wrap"><div class="spin"></div></div></div>
-      <div id="add-proj-btn" class="add-btn hidden" onclick="openModal('proj')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Nuevo proyecto</div>
-
-      <div class="sec-title" style="margin-top:8px">Equipo</div>
+      <div id="add-proj-btn" class="add-btn hidden" onclick="openModal('proj')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Nuevo proyecto
+      </div>
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin:14px 0 8px;">Equipo</div>
       <div id="equipo-home-list"></div>
-
-      <div class="sec-title" style="margin-top:8px">Reportes</div>
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin:14px 0 8px;">Reportes</div>
       <div id="reportes-home-card"></div>
-
-      <div class="sec-title" style="margin-top:8px" id="usuarios-home-title" style="display:none">Usuarios</div>
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin:14px 0 8px;display:none;" id="usuarios-home-title">Usuarios</div>
       <div id="usuarios-home-card"></div>
     </div>
   </div>
@@ -509,8 +524,14 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
 
   <!-- USUARIOS SCREEN desde inicio -->
   <div class="screen" id="screen-usuarios-home">
-    <div class="pad">
-      <div class="sec-title">Usuarios del sistema</div>
+    <!-- Search bar -->
+    <div style="padding:10px 16px;background:white;border-bottom:1px solid var(--border);">
+      <div style="background:#f4f5f7;border:1px solid var(--border);border-radius:8px;padding:8px 12px;display:flex;align-items:center;gap:8px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9aa3b2" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Buscar miembro..." oninput="filterUsuarios(this.value)" style="border:none;background:none;outline:none;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;width:100%;">
+      </div>
+    </div>
+    <div class="pad" style="padding-top:12px;">
       <div id="user-list-home"></div>
       <div class="add-btn" onclick="openModal('user')" style="margin-top:4px">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -527,16 +548,26 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
   <!-- EDIFICIOS -->
   <div class="screen" id="screen-edificios">
     <div class="proj-tabs" id="proj-tabs">
-      <div class="proj-tab active" id="tab-edificios" onclick="switchProjTab('edificios')">Edificios</div>
+      <div class="proj-tab active" id="tab-resumen-proj" onclick="switchProjTab('resumen-proj')">Resumen</div>
+      <div class="proj-tab" id="tab-edificios" onclick="switchProjTab('edificios')">Edificios</div>
       <div class="proj-tab" id="tab-equipo" onclick="switchProjTab('equipo')">Equipo</div>
     </div>
-    <div id="tab-edificios-content">
+
+    <!-- RESUMEN DEL PROYECTO -->
+    <div id="tab-resumen-proj-content">
+      <div class="pad" style="padding-top:12px;" id="proj-resumen-content"></div>
+    </div>
+
+    <!-- EDIFICIOS -->
+    <div id="tab-edificios-content" style="display:none">
       <div class="pad" style="padding-top:0">
         <div class="stats-grid" id="ed-stats"></div>
         <div class="sec-title">Edificios</div>
         <div id="ed-list"></div>
       </div>
     </div>
+
+    <!-- EQUIPO -->
     <div id="tab-equipo-content" style="display:none">
       <div class="pad" style="padding-top:0" id="equipo-list"></div>
     </div>
@@ -607,8 +638,8 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
   </div>
 
   <!-- HISTORIAL -->
-  <div class="screen" id="screen-historial" style="background:var(--white);padding-bottom:calc(var(--nb) + var(--sab))">
-    <div id="hist-list"><div class="spin-wrap"><div class="spin"></div></div></div>
+  <div class="screen" id="screen-historial" style="background:white;padding-top:0;margin-top:0;">
+    <div id="hist-list" style="padding-top:0;margin-top:0;"></div>
   </div>
 
   <!-- RESUMEN -->
@@ -1236,8 +1267,17 @@ function switchTab(tab){
   else if(tab==='historial'){
     setTopbar(false,'Historial');
     showScreen('historial');
-    // Build immediately with cached data — no spinner
-    buildHistorial();
+    document.getElementById('screen-historial').scrollTop=0;
+    // Show filters + spinner immediately
+    document.getElementById('hist-list').innerHTML=
+      '<div style="display:flex;gap:6px;overflow-x:auto;padding:12px 16px 8px;background:white;border-bottom:1px solid var(--border);scrollbar-width:none;" id="hist-filter-bar">'+
+        '<div class="seg-pill active" onclick="loadHistorial(\'hoy\',this)">Hoy</div>'+
+        '<div class="seg-pill" onclick="loadHistorial(\'semana\',this)">Esta semana</div>'+
+        '<div class="seg-pill" onclick="loadHistorial(\'mes\',this)">Este mes</div>'+
+        '<div class="seg-pill" onclick="loadHistorial(\'todo\',this)">Todo</div>'+
+      '</div>'+
+      '<div id="hist-rows"><div class="spin-wrap"><div class="spin"></div></div></div>';
+    loadHistorial('hoy',null);
   }
   else if(tab==='tareas'){setTopbar(false,'Mis tareas');showScreen('tareas');buildTareas();}
 }
@@ -1262,34 +1302,98 @@ function buildHome(){
   document.getElementById('hello-sub').textContent=D.proyectos.length+' proyecto'+(D.proyectos.length!==1?'s':'')+' activo'+(D.proyectos.length!==1?'s':'');
   var lastLogin=localStorage.getItem('last_login_'+U.id);
   var lastEl=document.getElementById('last-login');
-  if(lastEl&&lastLogin){lastEl.textContent='Última conexión: '+lastLogin;}
-  // Save current login time
+  if(lastEl&&lastLogin)lastEl.textContent='Última conexión: '+lastLogin;
   var now=new Date().toLocaleDateString('es-DO',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+new Date().toLocaleTimeString('es-DO',{hour:'2-digit',minute:'2-digit'});
-  localStorage.setItem('last_login_'+U.id, now);
+  localStorage.setItem('last_login_'+U.id,now);
+
+  // Tarea alert
+  var misTareas=isAdmin()?D.tareas:D.tareas.filter(function(t){return t.usuario_id===U.id;});
+  var pendCount=misTareas.filter(function(t){return t.estado==='pendiente';}).length;
+  var alertEl=document.getElementById('tarea-alert');
+  if(alertEl){
+    if(pendCount>0){
+      alertEl.style.display='flex';
+      document.getElementById('tarea-alert-txt').textContent=pendCount+' tarea'+(pendCount!==1?'s':'')+' pendiente'+(pendCount!==1?'s':'');
+    }else{alertEl.style.display='none';}
+  }
 
   // ── PROYECTOS ──
   var html='';
-  if(!D.proyectos.length){
-    html='<div style="text-align:center;padding:2rem;color:var(--text2);font-size:14px">No hay proyectos todavía.</div>';
-  }else{
-    D.proyectos.forEach(function(proj){
-      var eds=getProjEds(proj.id),all=[];
-      eds.forEach(function(ed){getPisos(ed.id).forEach(function(p){all=all.concat(getEls(p.id));});});
-      var s=calcStats(all);
-      html+='<div class="proj-card" onclick="buildEdificios('+proj.id+')">';
-      html+='<div class="proj-banner" style="background:'+proj.color+'">';
-      html+='<div class="proj-icon">'+proj.icon+'</div>';
-      html+='<div style="flex:1"><div class="proj-name">'+proj.nombre+'</div><div class="proj-loc">📍 '+proj.ubicacion+'</div></div>';
-      html+='<div class="proj-arr">›</div></div>';
-      html+='<div class="proj-footer"><div class="proj-stats">';
-      html+='<div class="proj-stat"><b>'+eds.length+'</b> edif.</div>';
-      html+='<div class="proj-stat"><b>'+s.inst+'</b> inst.</div>';
-      html+='<div class="proj-stat"><b>'+s.pend+'</b> pend.</div>';
-      html+='</div><div class="prog"><div class="pb"><div class="pbf" style="width:'+s.pct+'%;background:'+proj.color+'"></div></div>';
-      html+='<div class="pct-lbl" style="color:'+proj.color+'">'+s.pct+'%</div></div></div></div>';
-    });
+
+  // Tabs edificios
+  var allEds=[];
+  D.proyectos.forEach(function(proj){allEds=allEds.concat(getProjEds(proj.id));});
+  var tabsHtml='<div style="display:flex;gap:6px;overflow-x:auto;padding:0 0 10px;scrollbar-width:none;">';
+  tabsHtml+='<div style="flex-shrink:0;padding:6px 14px;background:#1a56db;border-radius:20px;font-size:12px;font-weight:700;color:white;">Todos</div>';
+  allEds.slice(0,6).forEach(function(ed){
+    tabsHtml+='<div style="flex-shrink:0;padding:6px 14px;background:#fff;border-radius:20px;font-size:12px;font-weight:600;color:#4a5568;border:1px solid #e1e4e8;">'+ed.nombre.replace('Edificio ','Edif. ')+'</div>';
+  });
+  tabsHtml+='</div>';
+  html+=tabsHtml;
+
+  // Urgency banner - edificio with least progress
+  var edStats=[];
+  allEds.forEach(function(ed){
+    var edEls=[];getPisos(ed.id).forEach(function(p){edEls=edEls.concat(getEls(p.id));});
+    var es=calcStats(edEls);
+    edStats.push({ed:ed,s:es});
+  });
+  edStats.sort(function(a,b){return a.s.pct-b.s.pct;});
+  if(edStats.length>0){
+    var worst=edStats[0];
+    html+='<div style="background:#fff;border-radius:12px;overflow:hidden;border:1px solid #fecaca;margin-bottom:10px;">';
+    html+='<div style="background:#fee2e2;padding:8px 14px;display:flex;justify-content:space-between;align-items:center;">';
+    html+='<div style="font-size:10px;font-weight:700;color:#991b1b;text-transform:uppercase;letter-spacing:0.08em;">Menos avance · Urgente</div>';
+    html+='<div style="font-size:10px;color:#dc2626;font-weight:600;">'+worst.ed.nombre+'</div></div>';
+    html+='<div style="padding:14px;">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
+    html+='<div style="font-size:24px;font-weight:700;color:#1a1f2e;">'+worst.s.pct+'%</div>';
+    html+='<div style="font-size:13px;color:#c0392b;font-weight:700;">'+worst.s.pend+' pendientes</div></div>';
+    html+='<div style="height:5px;background:#fee2e2;border-radius:3px;overflow:hidden;">';
+    html+='<div style="height:100%;width:'+worst.s.pct+'%;background:#ef4444;border-radius:3px;"></div></div>';
+    html+='<div style="font-size:11px;color:#9aa3b2;margin-top:6px;">'+worst.s.inst+' instalados de '+worst.s.total+' elementos</div>';
+    html+='</div></div>';
   }
-  document.getElementById('proj-list').innerHTML=html;
+
+  // Scoreboard cards per edificio
+  edStats.forEach(function(item,i){
+    var ed=item.ed; var s=item.s;
+    var col=getColor(s.pct);
+    html+='<div style="background:#fff;border-radius:12px;border:1px solid #e1e4e8;overflow:hidden;margin-bottom:10px;">';
+    html+='<div style="height:3px;background:linear-gradient(90deg,'+col+' '+s.pct+'%,#e1e4e8 '+s.pct+'%);"></div>';
+    html+='<div style="padding:12px 14px;cursor:pointer;" onclick="buildEdificios('+D.proyectos[0].id+')">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
+    html+='<div style="font-size:11px;color:#4a5568;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">'+ed.nombre+'</div>';
+    html+='<div style="font-size:11px;color:'+col+';font-weight:700;background:#e8f5ee;padding:2px 8px;border-radius:10px;">'+s.pct+'%</div></div>';
+    html+='<div style="display:flex;align-items:baseline;justify-content:space-between;">';
+    html+='<div><div style="font-size:28px;font-weight:700;color:#1a1f2e;letter-spacing:-0.03em;">'+s.inst+'</div><div style="font-size:11px;color:#9aa3b2;">Instalados</div></div>';
+    html+='<div style="font-size:20px;color:#e1e4e8;font-weight:300;">/</div>';
+    html+='<div style="text-align:right;"><div style="font-size:28px;font-weight:700;color:#9aa3b2;letter-spacing:-0.03em;">'+s.total+'</div><div style="font-size:11px;color:#9aa3b2;">Total</div></div>';
+    html+='</div></div></div>';
+  });
+
+  // Comparativa top 2
+  if(edStats.length>=2){
+    var top=edStats[edStats.length-1]; var bot=edStats[edStats.length-2];
+    html+='<div style="background:#fff;border-radius:12px;border:1px solid #e1e4e8;overflow:hidden;margin-bottom:10px;">';
+    html+='<div style="background:#f4f5f7;padding:6px 14px;display:flex;align-items:center;gap:6px;border-bottom:1px solid #e1e4e8;">';
+    html+='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>';
+    html+='<div style="font-size:10px;font-weight:700;color:#b45309;text-transform:uppercase;letter-spacing:0.08em;">Comparativa</div></div>';
+    html+='<div style="padding:12px 14px;display:flex;align-items:center;gap:8px;">';
+    html+='<div style="flex:1;"><div style="font-size:11px;color:#9aa3b2;margin-bottom:4px;">'+top.ed.nombre+'</div>';
+    html+='<div style="font-size:22px;font-weight:700;color:#0d7a3d;">'+top.s.pct+'%</div>';
+    html+='<div style="font-size:10px;color:#9aa3b2;margin-top:2px;">'+top.s.inst+' inst.</div></div>';
+    html+='<div style="font-size:16px;color:#e1e4e8;">vs</div>';
+    html+='<div style="flex:1;text-align:right;"><div style="font-size:11px;color:#9aa3b2;margin-bottom:4px;">'+bot.ed.nombre+'</div>';
+    html+='<div style="font-size:22px;font-weight:700;color:#c0392b;">'+bot.s.pct+'%</div>';
+    html+='<div style="font-size:10px;color:#9aa3b2;margin-top:2px;">'+bot.s.inst+' inst.</div></div></div>';
+    var pct1=top.s.pct+bot.s.pct>0?Math.round(top.s.pct/(top.s.pct+bot.s.pct)*100):50;
+    html+='<div style="margin:0 14px 12px;display:flex;height:5px;border-radius:3px;overflow:hidden;">';
+    html+='<div style="width:'+pct1+'%;background:#0d7a3d;"></div>';
+    html+='<div style="width:'+(100-pct1)+'%;background:#ef4444;"></div></div></div>';
+  }
+
+  document.getElementById('proj-list').innerHTML=html||'<div style="text-align:center;padding:2rem;color:var(--text2)">No hay proyectos.</div>';
 
   // ── EQUIPO ──
   var equipo=D.usuarios.filter(function(u){return u.activo;});
@@ -1298,47 +1402,46 @@ function buildHome(){
   var tareasComp=D.tareas.filter(function(t){return t.estado==='completada';}).length;
   var rolCounts={};
   equipo.forEach(function(u){rolCounts[u.rol]=(rolCounts[u.rol]||0)+1;});
-  var rolDesc=Object.keys(rolCounts).map(function(r){
-    var l={admin:'Admin',supervisor:'Supervisor',trabajador:'Técnico'}[r]||r;
-    return rolCounts[r]+' '+l;
-  }).join(' · ');
-
-  var eHtml='<div class="proj-card" onclick="openEquipoScreen()">';
-  eHtml+='<div class="proj-banner" style="background:#111827">';
-  eHtml+='<div class="proj-ed-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>';
-  eHtml+='<div style="flex:1"><div class="proj-name">Equipo de obra</div><div class="proj-loc">'+rolDesc+'</div></div>';
-  eHtml+='<div class="proj-arr">›</div></div>';
-  eHtml+='<div class="proj-footer"><div class="proj-stats">';
-  eHtml+='<div class="proj-stat"><b>'+activos+'</b> miembros</div>';
-  eHtml+='<div class="proj-stat"><b>'+tareasPend+'</b> pend.</div>';
-  eHtml+='<div class="proj-stat"><b>'+tareasComp+'</b> completadas</div>';
-  eHtml+='</div></div></div>';
-
+  var rolDesc=Object.keys(rolCounts).map(function(r){return rolCounts[r]+' '+({admin:'Admin',supervisor:'Supervisor',trabajador:'Técnico'}[r]||r);}).join(' · ');
+  var eHtml='<div style="background:white;border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:10px;cursor:pointer;" onclick="openEquipoScreen()">';
+  eHtml+='<div style="background:#111827;padding:14px 16px;display:flex;align-items:center;gap:12px;">';
+  eHtml+='<div style="width:38px;height:38px;border-radius:9px;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>';
+  eHtml+='<div style="flex:1"><div style="font-size:16px;font-weight:700;color:white;">Equipo de obra</div><div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:1px;">'+rolDesc+'</div></div>';
+  eHtml+='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>';
+  eHtml+='<div style="padding:12px 16px;display:flex;gap:14px;">';
+  eHtml+='<div style="font-size:12px;color:var(--text2);"><b style="color:var(--text)">'+activos+'</b> miembros</div>';
+  eHtml+='<div style="font-size:12px;color:var(--text2);"><b style="color:var(--red)">'+tareasPend+'</b> pend.</div>';
+  eHtml+='<div style="font-size:12px;color:var(--text2);"><b style="color:var(--green)">'+tareasComp+'</b> completadas</div>';
+  eHtml+='</div></div>';
   document.getElementById('equipo-home-list').innerHTML=eHtml;
 
-  // ── REPORTES card ──
-  var rHtml='<div class="proj-card" onclick="openReportesScreen()">';
-  rHtml+='<div class="proj-banner" style="background:#0d7a3d">';
-  rHtml+='<div class="proj-ed-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>';
-  rHtml+='<div style="flex:1"><div class="proj-name">Reportes</div><div class="proj-loc">PDF · Excel · Resumen · Seguimiento diario</div></div>';
-  rHtml+='<div class="proj-arr">›</div></div></div>';
+  // ── REPORTES ──
+  var rHtml='<div style="background:white;border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:10px;cursor:pointer;" onclick="openReportesScreen()">';
+  rHtml+='<div style="background:#0d7a3d;padding:14px 16px;display:flex;align-items:center;gap:12px;">';
+  rHtml+='<div style="width:38px;height:38px;border-radius:9px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg></div>';
+  rHtml+='<div style="flex:1"><div style="font-size:16px;font-weight:700;color:white;">Reportes</div><div style="font-size:12px;color:rgba(255,255,255,0.65);margin-top:1px;">PDF · Excel · Resumen · Diario</div></div>';
+  rHtml+='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div></div>';
   document.getElementById('reportes-home-card').innerHTML=rHtml;
 
-  // ── USUARIOS card (admin only) ──
+  // ── USUARIOS ──
   var uCard=document.getElementById('usuarios-home-card');
   var uTitle=document.getElementById('usuarios-home-title');
   if(isAdmin()&&uCard){
     var totalU=D.usuarios.filter(function(u){return u.activo;}).length;
-    var uHtml='<div class="proj-card" onclick="openUsuariosScreen()">';
-    uHtml+='<div class="proj-banner" style="background:#6d28d9">';
-    uHtml+='<div class="proj-ed-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>';
-    uHtml+='<div style="flex:1"><div class="proj-name">Usuarios</div><div class="proj-loc">'+totalU+' usuario'+(totalU!==1?'s':'')+' activo'+(totalU!==1?'s':'')+' en el sistema</div></div>';
-    uHtml+='<div class="proj-arr">›</div></div></div>';
+    var uHtml='<div style="background:white;border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:10px;cursor:pointer;" onclick="openUsuariosScreen()">';
+    uHtml+='<div style="background:#6d28d9;padding:14px 16px;display:flex;align-items:center;gap:12px;">';
+    uHtml+='<div style="width:38px;height:38px;border-radius:9px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>';
+    uHtml+='<div style="flex:1"><div style="font-size:16px;font-weight:700;color:white;">Usuarios</div><div style="font-size:12px;color:rgba(255,255,255,0.65);margin-top:1px;">'+totalU+' usuario'+(totalU!==1?'s':'')+' activo'+(totalU!==1?'s':'')+' en el sistema</div></div>';
+    uHtml+='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div></div>';
     uCard.innerHTML=uHtml;
     if(uTitle)uTitle.style.display='block';
-  }else if(uCard){
-    uCard.innerHTML='';
-  }
+  }else if(uCard){uCard.innerHTML='';}
+}
+
+function getColorBg(pct){
+  if(pct>=80)return '#e8f5ee';
+  if(pct>=50)return '#fef9e7';
+  return '#fdf0ef';
 }
 
 function buildEdificios(projId,push){
@@ -1349,8 +1452,14 @@ function buildEdificios(projId,push){
   var eds=getProjEds(projId),all=[];
   eds.forEach(function(ed){getPisos(ed.id).forEach(function(p){all=all.concat(getEls(p.id));});});
   var s=calcStats(all);
-  setTopbar(false,proj.nombre);
+  setTopbar(false,proj?proj.nombre:'Proyecto');
   document.getElementById('back-btn').classList.remove('hidden');
+  showScreen('edificios');
+
+  // Default to resumen tab
+  switchProjTab('resumen-proj');
+
+  // Also build edificios list for when user switches tab
   document.getElementById('ed-stats').innerHTML=
     '<div class="stat-card"><div class="stat-lbl">Instalados</div><div class="stat-num g">'+s.inst+'</div></div>'+
     '<div class="stat-card"><div class="stat-lbl">Pendientes</div><div class="stat-num r">'+s.pend+'</div></div>'+
@@ -1368,7 +1477,6 @@ function buildEdificios(projId,push){
     html+='<div class="pct-lbl" style="color:'+c+'">'+es.pct+'%</div></div></div>';
   });
   document.getElementById('ed-list').innerHTML=html||'<div style="text-align:center;padding:2rem;color:var(--text2);font-size:14px">No hay edificios.</div>';
-  showScreen('edificios');
 }
 
 function buildPisos(edId,push){
@@ -3094,11 +3202,96 @@ var curMemberId=null;
 
 function switchProjTab(tab){
   curProjTab=tab;
+  document.getElementById('tab-resumen-proj').classList.toggle('active',tab==='resumen-proj');
   document.getElementById('tab-edificios').classList.toggle('active',tab==='edificios');
   document.getElementById('tab-equipo').classList.toggle('active',tab==='equipo');
+  document.getElementById('tab-resumen-proj-content').style.display=tab==='resumen-proj'?'block':'none';
   document.getElementById('tab-edificios-content').style.display=tab==='edificios'?'block':'none';
   document.getElementById('tab-equipo-content').style.display=tab==='equipo'?'block':'none';
   if(tab==='equipo')buildEquipo(curProjId);
+  if(tab==='resumen-proj')buildProjResumen(curProjId);
+}
+
+function buildProjResumen(projId){
+  var proj=D.proyectos.find(function(p){return p.id===projId;});
+  if(!proj)return;
+  var eds=getProjEds(projId);
+  var html='';
+
+  // Tabs edificios deslizables
+  html+='<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:12px;scrollbar-width:none;">';
+  html+='<div style="flex-shrink:0;padding:6px 14px;background:#1a56db;border-radius:20px;font-size:12px;font-weight:700;color:white;">Todos</div>';
+  eds.forEach(function(ed){
+    html+='<div style="flex-shrink:0;padding:6px 14px;background:#fff;border-radius:20px;font-size:12px;font-weight:600;color:#4a5568;border:1px solid #e1e4e8;cursor:pointer;" onclick="buildPisos(\''+ed.id+'\')">'+ed.nombre.replace('Edificio ','Edif. ')+'</div>';
+  });
+  html+='</div>';
+
+  // Calcular stats por edificio
+  var edStats=[];
+  eds.forEach(function(ed){
+    var edEls=[];
+    getPisos(ed.id).forEach(function(p){edEls=edEls.concat(getEls(p.id));});
+    var es=calcStats(edEls);
+    edStats.push({ed:ed,s:es});
+  });
+
+  // Banner urgente - menor progreso
+  edStats.sort(function(a,b){return a.s.pct-b.s.pct;});
+  if(edStats.length>0){
+    var worst=edStats[0];
+    html+='<div style="background:#fff;border-radius:12px;overflow:hidden;border:1px solid #fecaca;margin-bottom:12px;">';
+    html+='<div style="background:#fee2e2;padding:8px 14px;display:flex;justify-content:space-between;align-items:center;">';
+    html+='<div style="font-size:10px;font-weight:700;color:#991b1b;text-transform:uppercase;letter-spacing:0.08em;">Menos avance · Urgente</div>';
+    html+='<div style="font-size:10px;color:#dc2626;font-weight:600;">'+worst.ed.nombre+'</div></div>';
+    html+='<div style="padding:14px;">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
+    html+='<div style="font-size:24px;font-weight:700;color:#1a1f2e;">'+worst.s.pct+'%</div>';
+    html+='<div style="font-size:13px;color:#c0392b;font-weight:700;">'+worst.s.pend+' pendientes</div></div>';
+    html+='<div style="height:5px;background:#fee2e2;border-radius:3px;overflow:hidden;">';
+    html+='<div style="height:100%;width:'+worst.s.pct+'%;background:#ef4444;border-radius:3px;"></div></div>';
+    html+='<div style="font-size:11px;color:#9aa3b2;margin-top:6px;">'+worst.s.inst+' instalados de '+worst.s.total+' elementos</div>';
+    html+='</div></div>';
+  }
+
+  // Cards marcador por edificio
+  edStats.forEach(function(item){
+    var ed=item.ed; var s=item.s;
+    var col=getColor(s.pct);
+    html+='<div style="background:#fff;border-radius:12px;border:1px solid #e1e4e8;overflow:hidden;margin-bottom:10px;cursor:pointer;" onclick="buildPisos(\''+ed.id+'\')">';
+    html+='<div style="height:3px;background:linear-gradient(90deg,'+col+' '+s.pct+'%,#e1e4e8 '+s.pct+'%);"></div>';
+    html+='<div style="padding:12px 14px;">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
+    html+='<div style="font-size:11px;color:#4a5568;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">'+ed.nombre+'</div>';
+    html+='<div style="font-size:11px;color:'+col+';font-weight:700;background:'+getColorBg(s.pct)+';padding:2px 8px;border-radius:10px;">'+s.pct+'%</div></div>';
+    html+='<div style="display:flex;align-items:baseline;justify-content:space-between;">';
+    html+='<div><div style="font-size:28px;font-weight:700;color:#1a1f2e;letter-spacing:-0.03em;">'+s.inst+'</div><div style="font-size:11px;color:#9aa3b2;">Instalados</div></div>';
+    html+='<div style="font-size:20px;color:#e1e4e8;font-weight:300;">/</div>';
+    html+='<div style="text-align:right;"><div style="font-size:28px;font-weight:700;color:#9aa3b2;letter-spacing:-0.03em;">'+s.total+'</div><div style="font-size:11px;color:#9aa3b2;">Total</div></div>';
+    html+='</div></div></div>';
+  });
+
+  // Comparativa top vs bottom
+  if(edStats.length>=2){
+    var top=edStats[edStats.length-1]; var bot=edStats[0];
+    html+='<div style="background:#fff;border-radius:12px;border:1px solid #e1e4e8;overflow:hidden;margin-bottom:10px;">';
+    html+='<div style="background:#f4f5f7;padding:6px 14px;display:flex;align-items:center;gap:6px;border-bottom:1px solid #e1e4e8;">';
+    html+='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>';
+    html+='<div style="font-size:10px;font-weight:700;color:#b45309;text-transform:uppercase;letter-spacing:0.08em;">Comparativa</div></div>';
+    html+='<div style="padding:12px 14px;display:flex;align-items:center;gap:8px;">';
+    html+='<div style="flex:1;"><div style="font-size:11px;color:#9aa3b2;margin-bottom:4px;">'+top.ed.nombre+'</div>';
+    html+='<div style="font-size:22px;font-weight:700;color:#0d7a3d;">'+top.s.pct+'%</div>';
+    html+='<div style="font-size:10px;color:#9aa3b2;margin-top:2px;">'+top.s.inst+' inst.</div></div>';
+    html+='<div style="font-size:16px;color:#e1e4e8;">vs</div>';
+    html+='<div style="flex:1;text-align:right;"><div style="font-size:11px;color:#9aa3b2;margin-bottom:4px;">'+bot.ed.nombre+'</div>';
+    html+='<div style="font-size:22px;font-weight:700;color:#c0392b;">'+bot.s.pct+'%</div>';
+    html+='<div style="font-size:10px;color:#9aa3b2;margin-top:2px;">'+bot.s.inst+' inst.</div></div></div>';
+    var pct1=top.s.pct+bot.s.pct>0?Math.round(top.s.pct/(top.s.pct+bot.s.pct)*100):50;
+    html+='<div style="margin:0 14px 12px;display:flex;height:5px;border-radius:3px;overflow:hidden;">';
+    html+='<div style="width:'+pct1+'%;background:#0d7a3d;"></div>';
+    html+='<div style="width:'+(100-pct1)+'%;background:#ef4444;"></div></div></div>';
+  }
+
+  document.getElementById('proj-resumen-content').innerHTML=html;
 }
 
 function getMemberStats(userId){
@@ -3214,25 +3407,64 @@ function openUsuariosScreen(){
   buildUsuariosHome();
 }
 
+function filterUsuarios(query){
+  var q=query.toLowerCase().trim();
+  var cards=document.querySelectorAll('#user-list-home [data-username]');
+  cards.forEach(function(card){
+    var name=card.getAttribute('data-username')||'';
+    card.style.display=(!q||name.includes(q))?'flex':'none';
+  });
+}
+
 function buildUsuariosHome(){
-  var rolColors2={admin:'var(--blue)',supervisor:'var(--purple)',trabajador:'var(--green)'};
+  var totalU=D.usuarios.filter(function(u){return u.activo;}).length;
+  var tareasPend=D.tareas.filter(function(t){return t.estado==='pendiente';}).length;
   var html='';
+
+  // Stats strip
+  html+='<div style="display:flex;background:white;border-bottom:1px solid var(--border);margin-bottom:12px;">';
+  html+='<div style="flex:1;padding:12px 8px;text-align:center;border-right:1px solid var(--border);"><div style="font-size:20px;font-weight:700;color:var(--text)">'+D.usuarios.length+'</div><div style="font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-top:2px;">Miembros</div></div>';
+  html+='<div style="flex:1;padding:12px 8px;text-align:center;border-right:1px solid var(--border);"><div style="font-size:20px;font-weight:700;color:var(--red)">'+tareasPend+'</div><div style="font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-top:2px;">Tareas pend.</div></div>';
+  html+='<div style="flex:1;padding:12px 8px;text-align:center;"><div style="font-size:20px;font-weight:700;color:var(--green)">'+totalU+'</div><div style="font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-top:2px;">Activos</div></div>';
+  html+='</div>';
+
   D.usuarios.forEach(function(u,i){
-    var proj=u.proyecto_id?D.proyectos.find(function(p){return p.id===u.proyecto_id;}):null;
     var ini=u.nombre.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
-    var c=rolColors2[u.rol]||'var(--text2)';
-    html+='<div class="user-card" style="animation-delay:'+(i*0.04)+'s">';
-    html+='<div class="user-av-big" style="background:'+c+'">'+ini+'</div>';
-    html+='<div class="user-info"><div class="user-name">'+u.nombre+(u.activo?'':' <span style="font-size:11px;color:var(--red)">Inactivo</span>')+'</div>';
-    html+='<div class="user-email">@'+( u.username||'—')+'</div>';
-    html+='<div class="user-proj">'+(proj?'📁 '+proj.nombre:u.rol==='admin'?'Acceso global':'Sin proyecto')+'</div></div>';
-    html+='<div class="user-acts"><div class="role-badge '+u.rol+'">'+u.rol+'</div>';
+    var col=rolColors[u.rol]||'#64748b';
+    var rolLabel={admin:'Administrador',supervisor:'Supervisor',trabajador:'Técnico / Instalador'}[u.rol]||u.rol;
+    var myTareas=D.tareas.filter(function(t){return t.usuario_id===u.id&&t.estado==='pendiente';}).length;
+    var instalados=D.historial.filter(function(h){return h.usuario_nombre===u.nombre&&h.accion==='instalado';}).length;
+    u.tareas_pend=myTareas;
+    var borderStyle=u.activo?(myTareas>0?'2px solid '+col:'1px solid #e1e4e8'):'1px solid #e1e4e8';
+    html+='<div data-username="'+(u.nombre+' '+u.username).toLowerCase()+'" style="background:#fff;border-radius:12px;border:'+borderStyle+';padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;opacity:'+(u.activo?'1':'0.6')+';animation:fadeUp 0.2s ease both;animation-delay:'+(i*0.04)+'s">';
+    // Avatar
+    if(u.foto_perfil){
+      html+='<img src="'+u.foto_perfil+'" style="width:46px;height:46px;border-radius:50%;object-fit:cover;flex-shrink:0;">';
+    }else{
+      html+='<div style="width:46px;height:46px;border-radius:50%;background:'+col+';display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:white;flex-shrink:0;">'+ini+'</div>';
+    }
+    // Info
+    html+='<div style="flex:1;min-width:0;">';
+    html+='<div style="font-size:14px;font-weight:700;color:var(--text);">'+u.nombre+'</div>';
+    html+='<div style="font-size:12px;color:var(--text2);margin-top:1px;">@'+u.username+(u.cargo?' · '+u.cargo:'')+'</div>';
+    html+='<div style="display:flex;gap:6px;margin-top:6px;">';
+    html+='<span style="background:var(--blue-light);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;color:var(--blue);">'+rolLabel+'</span>';
+    html+='<span style="background:'+(u.activo?'var(--green-light)':'var(--red-light)')+';border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;color:'+(u.activo?'var(--green)':'var(--red)')+';">'+(u.activo?'● Activo':'● Inactivo')+'</span>';
+    if(myTareas>0)html+='<span style="background:var(--blue-light);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;color:var(--blue);">'+myTareas+' tarea'+(myTareas!==1?'s':'')+'</span>';
+    html+='</div></div>';
+    // Stats + actions
+    html+='<div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">';
+    html+='<div style="text-align:right;"><div style="font-size:20px;font-weight:700;color:'+col+';">'+instalados+'</div><div style="font-size:10px;color:var(--text2);">instalados</div></div>';
     if(u.id!==U.id){
-      html+='<div class="icon-btn" onclick="toggleUserActive('+u.id+','+u.activo+')" title="'+(u.activo?'Desactivar':'Activar')+'">'+(u.activo?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>')+'</div>';
-      html+='<div class="icon-btn" onclick="deleteUser('+u.id+')" title="Eliminar" style="color:var(--red);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div>';
+      html+='<div style="display:flex;gap:6px;">';
+      html+='<div onclick="openPerfil('+u.id+')" style="width:28px;height:28px;border-radius:50%;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Ver perfil"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>';
+      html+='<div onclick="toggleUserActive('+u.id+','+u.activo+')" style="width:28px;height:28px;border-radius:50%;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;" title="'+(u.activo?'Desactivar':'Activar')+'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 '+(u.activo?'10 0':'9.9-1')+'v4"/></svg></div>';
+      html+='<div onclick="deleteUser('+u.id+')" style="width:28px;height:28px;border-radius:50%;background:var(--red-light);border:1px solid #fecaca;display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Eliminar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div>';
+      html+='</div>';
     }
     html+='</div></div>';
   });
+
   var el=document.getElementById('user-list-home');
   if(el)el.innerHTML=html||'<div style="text-align:center;padding:2rem;color:var(--text2)">No hay usuarios.</div>';
 }
@@ -3536,52 +3768,110 @@ function deleteUser(userId){
   });
 }
 
+function loadHistorial(filtro, btn){
+  // Update active pill
+  if(btn){
+    document.querySelectorAll('#hist-filter-bar .seg-pill').forEach(function(p){p.classList.remove('active');});
+    btn.classList.add('active');
+  }
+  var rows=document.getElementById('hist-rows');
+  if(rows)rows.innerHTML='<div class="spin-wrap"><div class="spin"></div></div>';
+
+  var query=sb.from('historial').select('*').order('creado_en',{ascending:false});
+  var now=new Date();
+
+  if(filtro==='hoy'){
+    var start=new Date(now.getFullYear(),now.getMonth(),now.getDate()).toISOString();
+    query=query.gte('creado_en',start).limit(500);
+  }else if(filtro==='semana'){
+    var s7=new Date(now.getTime()-7*24*60*60*1000).toISOString();
+    query=query.gte('creado_en',s7).limit(500);
+  }else if(filtro==='mes'){
+    var s30=new Date(now.getTime()-30*24*60*60*1000).toISOString();
+    query=query.gte('creado_en',s30).limit(1000);
+  }else{
+    query=query.limit(2000);
+  }
+
+  query.then(function(r){
+    if(r.data)D.historial=r.data;
+    buildHistorial();
+  });
+}
+
 function buildHistorial(){
-  var container=document.getElementById('hist-list');
+  var container=document.getElementById('hist-rows')||document.getElementById('hist-list');
   if(!container)return;
-  
+
   if(!D.historial||!D.historial.length){
-    container.innerHTML='<div style="text-align:center;padding:3rem;color:var(--text2);font-size:13px">Sin cambios registrados.</div>';
+    container.innerHTML='<div style="text-align:center;padding:3rem;color:var(--text2);font-size:13px">Sin cambios en este período.</div>';
     return;
   }
 
-  var accionLabels={
-    'instalado':'Instalado','pendiente':'Marcado pendiente',
-    'pintado':'Pintado','retocado':'Retocado',
-    'foto':'Foto agregada','nota':'Nota agregada'
-  };
-  var accionColors={
-    'instalado':'var(--green)','pendiente':'var(--red)',
-    'pintado':'var(--yellow)','retocado':'var(--purple)',
-    'foto':'var(--blue)','nota':'var(--blue)'
-  };
+  var accionLabels={instalado:'Instalado',pendiente:'Pendiente',pintado:'Pintado',retocado:'Retocado',foto:'Foto',nota:'Nota'};
+  var accionColors={instalado:'var(--green)',pendiente:'var(--red)',pintado:'var(--yellow)',retocado:'var(--purple)',foto:'var(--blue)',nota:'var(--blue)'};
+  var accionBg={instalado:'var(--green-light)',pendiente:'var(--red-light)',pintado:'var(--yellow-light)',retocado:'var(--purple-light)',foto:'var(--blue-light)',nota:'var(--blue-light)'};
+  var avatarColors={instalado:'var(--green)',pendiente:'var(--red)',pintado:'var(--yellow)',retocado:'var(--purple)'};
 
-  var html='<div style="padding:10px 14px 6px;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border);">'+D.historial.length+' registros</div>';
-  
-  D.historial.forEach(function(h,i){
-    var el=D.elementos.find(function(e){return e.id===h.elemento_id;});
-    var elNom=el?el.nombre:'Elemento #'+h.elemento_id;
-    var piso=el?D.pisos.find(function(p){return p.id===el.piso_id;}):null;
-    var ed=piso?D.edificios.find(function(e){return e.id===piso.edificio_id;}):null;
-    var ubicacion=(ed?ed.nombre:'')+(piso?' · '+piso.nombre:'');
-    var accion=h.accion||'instalado';
-    var label=accionLabels[accion]||accion;
-    var color=accionColors[accion]||'var(--text2)';
-    var ini=(h.usuario_nombre||'?').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
-    html+='<div class="hist-row" style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);">';
-    html+='<div style="width:32px;height:32px;border-radius:50%;background:var(--blue);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">'+ini+'</div>';
-    html+='<div style="flex:1;min-width:0;">';
-    html+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">';
-    html+='<div style="font-size:13px;font-weight:600;">'+h.usuario_nombre+'</div>';
-    html+='<div style="font-size:11px;color:var(--text3);white-space:nowrap;flex-shrink:0;">'+formatDate(h.creado_en)+'</div>';
-    html+='</div>';
-    html+='<div style="font-size:12px;margin-top:2px;"><span style="color:'+color+';font-weight:600;">'+label+'</span> · '+elNom+'</div>';
-    if(ubicacion)html+='<div style="font-size:11px;color:var(--text3);margin-top:2px;">'+ubicacion+'</div>';
-    if(h.nota)html+='<div style="font-size:12px;color:var(--blue);margin-top:2px;font-style:italic;">'+h.nota+'</div>';
-    html+='</div></div>';
+  // Stats
+  var inst=D.historial.filter(function(h){return h.accion==='instalado';}).length;
+  var pend=D.historial.filter(function(h){return h.accion==='pendiente';}).length;
+  var html='<div style="display:flex;background:white;border-bottom:1px solid var(--border);">';
+  html+='<div style="flex:1;padding:12px 8px;text-align:center;border-right:1px solid var(--border);"><div style="font-size:20px;font-weight:700;color:var(--green)">'+inst+'</div><div style="font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-top:2px;">Instalados</div></div>';
+  html+='<div style="flex:1;padding:12px 8px;text-align:center;border-right:1px solid var(--border);"><div style="font-size:20px;font-weight:700;color:var(--red)">'+pend+'</div><div style="font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-top:2px;">Pendientes</div></div>';
+  html+='<div style="flex:1;padding:12px 8px;text-align:center;"><div style="font-size:20px;font-weight:700;color:var(--text)">'+D.historial.length+'</div><div style="font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-top:2px;">Registros</div></div>';
+  html+='</div>';
+
+  // Group by date
+  var byDate={};
+  D.historial.forEach(function(h){
+    var d=h.creado_en?h.creado_en.split('T')[0]:'hoy';
+    if(!byDate[d])byDate[d]=[];
+    byDate[d].push(h);
   });
-  
+
+  Object.keys(byDate).sort(function(a,b){return b.localeCompare(a);}).forEach(function(fecha){
+    var rows=byDate[fecha];
+    var fechaObj=new Date(fecha+'T12:00:00');
+    var hoy=new Date();
+    var ayer=new Date(hoy);ayer.setDate(ayer.getDate()-1);
+    var fechaStr;
+    if(fechaObj.toDateString()===hoy.toDateString())fechaStr='Hoy · '+fechaObj.toLocaleDateString('es-DO',{day:'2-digit',month:'long'});
+    else if(fechaObj.toDateString()===ayer.toDateString())fechaStr='Ayer · '+fechaObj.toLocaleDateString('es-DO',{day:'2-digit',month:'long'});
+    else fechaStr=fechaObj.toLocaleDateString('es-DO',{weekday:'long',day:'2-digit',month:'long'});
+
+    html+='<div style="padding:8px 16px;background:var(--bg);border-bottom:1px solid var(--border);border-top:1px solid var(--border);">';
+    html+='<div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;">'+fechaStr+'</div></div>';
+
+    rows.forEach(function(h){
+      var el=D.elementos.find(function(e){return e.id===h.elemento_id;});
+      var elNom=el?el.nombre:'Elemento #'+h.elemento_id;
+      var piso=el?D.pisos.find(function(p){return p.id===el.piso_id;}):null;
+      var ed=piso?D.edificios.find(function(e){return e.id===piso.edificio_id;}):null;
+      var ubicacion=(ed?ed.nombre:'')+(piso?' · '+piso.nombre:'');
+      var accion=h.accion||'instalado';
+      var label=accionLabels[accion]||accion;
+      var color=accionColors[accion]||'var(--text2)';
+      var bg=accionBg[accion]||'var(--bg)';
+      var aCol=avatarColors[accion]||'var(--blue)';
+      var ini=(h.usuario_nombre||'?').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+      var hora=h.creado_en?new Date(h.creado_en).toLocaleTimeString('es-DO',{hour:'2-digit',minute:'2-digit'}):'';
+
+      html+='<div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px;">';
+      html+='<div style="width:36px;height:36px;border-radius:50%;background:'+bg+';border:1.5px solid '+color+';display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:'+color+';flex-shrink:0;">'+ini+'</div>';
+      html+='<div style="flex:1;min-width:0;">';
+      html+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:3px;">';
+      html+='<div style="font-size:13px;font-weight:700;color:var(--text);">'+h.usuario_nombre+'</div>';
+      html+='<div style="font-size:11px;color:var(--text3);white-space:nowrap;flex-shrink:0;">'+hora+'</div></div>';
+      html+='<div style="font-size:12px;margin-bottom:3px;"><span style="color:'+color+';font-weight:700;">'+label+'</span> <span style="color:var(--text2);">· '+elNom+'</span></div>';
+      if(ubicacion)html+='<div style="font-size:11px;color:var(--text3);">'+ubicacion+'</div>';
+      if(h.nota)html+='<div style="font-size:11px;color:var(--purple);margin-top:3px;font-style:italic;">'+h.nota+'</div>';
+      html+='</div></div>';
+    });
+  });
+
   container.innerHTML=html;
+  document.getElementById('screen-historial').scrollTop=0;
 }
 
 function saveProject(){

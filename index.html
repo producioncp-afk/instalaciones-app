@@ -1342,6 +1342,11 @@ function buildHome(){
   }
 }
 
+function navToEdificio(edId){
+  navStack.push('edificios');
+  buildPisos(edId);
+}
+
 function buildProjResumen(projId){
   var cont=document.getElementById('proj-resumen-content');
   if(!cont)return;
@@ -1410,7 +1415,7 @@ function renderResumenContent(projId,edId){
   edStats.forEach(function(item){
     var ed=item.ed; var s=item.s;
     var barColor=s.pct>=70?'#0d7a3d':s.pct>=30?'#b45309':'#ef4444';
-    html+='<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;margin-bottom:8px;cursor:pointer;" onclick="buildPisos("+ed.id+")">';
+    html+='<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;margin-bottom:8px;cursor:pointer;" onclick="navToEdificio("+ed.id+")">';
     html+='<div style="height:3px;background:linear-gradient(90deg,'+barColor+' '+s.pct+'%,#e1e4e8 '+s.pct+'%);"></div>';
     html+='<div style="padding:10px 14px;">';
     html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
@@ -1487,27 +1492,28 @@ function renderEdList(projId){
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">'+
     '<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;">'+
     '<div style="height:3px;background:#0d7a3d;"></div>'+
-    '<div style="padding:12px 14px;"><div style="font-size:9px;font-weight:700;color:#9aa3b2;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Instalados</div>'+
-    '<div style="font-size:26px;font-weight:700;color:#0d7a3d;letter-spacing:-0.02em;">'+s.inst+'</div></div></div>'+
+    '<div style="padding:12px 14px;"><div style="font-size:10px;font-weight:700;color:#9aa3b2;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Instalados</div>'+
+    '<div style="font-size:24px;font-weight:700;color:#0d7a3d;letter-spacing:-0.02em;">'+s.inst+'</div></div></div>'+
     '<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;">'+
     '<div style="height:3px;background:#c0392b;"></div>'+
-    '<div style="padding:12px 14px;"><div style="font-size:9px;font-weight:700;color:#9aa3b2;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Pendientes</div>'+
-    '<div style="font-size:26px;font-weight:700;color:#c0392b;letter-spacing:-0.02em;">'+s.pend+'</div></div></div>'+
+    '<div style="padding:12px 14px;"><div style="font-size:10px;font-weight:700;color:#9aa3b2;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Pendientes</div>'+
+    '<div style="font-size:24px;font-weight:700;color:#c0392b;letter-spacing:-0.02em;">'+s.pend+'</div></div></div>'+
     '<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;">'+
     '<div style="height:3px;background:#1a56db;"></div>'+
-    '<div style="padding:12px 14px;"><div style="font-size:9px;font-weight:700;color:#9aa3b2;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Total</div>'+
-    '<div style="font-size:26px;font-weight:700;color:#1a56db;letter-spacing:-0.02em;">'+s.total+'</div></div></div>'+
+    '<div style="padding:12px 14px;"><div style="font-size:10px;font-weight:700;color:#9aa3b2;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Total</div>'+
+    '<div style="font-size:24px;font-weight:700;color:#1a56db;letter-spacing:-0.02em;">'+s.total+'</div></div></div>'+
     '<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;">'+
     '<div style="height:3px;background:'+getColor(s.pct)+';"></div>'+
-    '<div style="padding:12px 14px;"><div style="font-size:9px;font-weight:700;color:#9aa3b2;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Progreso</div>'+
-    '<div style="font-size:26px;font-weight:700;color:'+getColor(s.pct)+';letter-spacing:-0.02em;">'+s.pct+'%</div></div></div>'+
+    '<div style="padding:12px 14px;"><div style="font-size:10px;font-weight:700;color:#9aa3b2;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Progreso</div>'+
+    '<div style="font-size:24px;font-weight:700;color:'+getColor(s.pct)+';letter-spacing:-0.02em;">'+s.pct+'%</div></div></div>'+
     '</div>';
+
   var html='';
   eds.forEach(function(ed){
     var edEls=[];getPisos(ed.id).forEach(function(p){edEls=edEls.concat(getEls(p.id));});
     var es=calcStats(edEls),c=getColor(es.pct);
     var _ebc=es.pct>=70?'#0d7a3d':es.pct>=30?'#b45309':'#ef4444';
-    html+='<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;margin-bottom:8px;cursor:pointer;" onclick="buildPisos('+ed.id+')">';
+    html+='<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;margin-bottom:8px;cursor:pointer;" onclick="navToEdificio('+ed.id+')">';
     html+='<div style="height:3px;background:linear-gradient(90deg,'+_ebc+' '+es.pct+'%,#e1e4e8 '+es.pct+'%);"></div>';
     html+='<div style="padding:10px 14px;">';
     html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
@@ -1547,21 +1553,22 @@ function buildPisos(edId,push){
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">'+
     '<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;">'+
     '<div style="height:3px;background:#0d7a3d;"></div>'+
-    '<div style="padding:12px 14px;"><div style="font-size:9px;font-weight:700;color:#9aa3b2;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Instalados</div>'+
-    '<div style="font-size:26px;font-weight:700;color:#0d7a3d;letter-spacing:-0.02em;">'+s.inst+'</div></div></div>'+
+    '<div style="padding:12px 14px;"><div style="font-size:10px;font-weight:700;color:#9aa3b2;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Instalados</div>'+
+    '<div style="font-size:24px;font-weight:700;color:#0d7a3d;letter-spacing:-0.02em;">'+s.inst+'</div></div></div>'+
     '<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;">'+
     '<div style="height:3px;background:#c0392b;"></div>'+
-    '<div style="padding:12px 14px;"><div style="font-size:9px;font-weight:700;color:#9aa3b2;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Pendientes</div>'+
-    '<div style="font-size:26px;font-weight:700;color:#c0392b;letter-spacing:-0.02em;">'+s.pend+'</div></div></div>'+
+    '<div style="padding:12px 14px;"><div style="font-size:10px;font-weight:700;color:#9aa3b2;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Pendientes</div>'+
+    '<div style="font-size:24px;font-weight:700;color:#c0392b;letter-spacing:-0.02em;">'+s.pend+'</div></div></div>'+
     '<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;">'+
     '<div style="height:3px;background:#1a56db;"></div>'+
-    '<div style="padding:12px 14px;"><div style="font-size:9px;font-weight:700;color:#9aa3b2;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Total</div>'+
-    '<div style="font-size:26px;font-weight:700;color:#1a56db;letter-spacing:-0.02em;">'+s.total+'</div></div></div>'+
+    '<div style="padding:12px 14px;"><div style="font-size:10px;font-weight:700;color:#9aa3b2;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Total</div>'+
+    '<div style="font-size:24px;font-weight:700;color:#1a56db;letter-spacing:-0.02em;">'+s.total+'</div></div></div>'+
     '<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;">'+
     '<div style="height:3px;background:'+getColor(s.pct)+';"></div>'+
-    '<div style="padding:12px 14px;"><div style="font-size:9px;font-weight:700;color:#9aa3b2;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Progreso</div>'+
-    '<div style="font-size:26px;font-weight:700;color:'+getColor(s.pct)+';letter-spacing:-0.02em;">'+s.pct+'%</div></div></div>'+
+    '<div style="padding:12px 14px;"><div style="font-size:10px;font-weight:700;color:#9aa3b2;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Progreso</div>'+
+    '<div style="font-size:24px;font-weight:700;color:'+getColor(s.pct)+';letter-spacing:-0.02em;">'+s.pct+'%</div></div></div>'+
     '</div>';
+
   var html='';
   pisos.forEach(function(p,i){
     var ps=calcStats(getEls(p.id)),c=getColor(ps.pct);

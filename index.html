@@ -563,9 +563,12 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
   <!-- ELEMENTOS -->
   <div class="screen" id="screen-elementos">
     <div class="el-sum" id="el-sum"></div>
-    <div class="el-prog">
-      <div class="el-prog-lbl">Progreso de instalación</div>
-      <div class="el-prog-row"><div class="pb" style="height:6px"><div class="pbf" id="el-pbar"></div></div><div class="pct-lbl" id="el-pct">0%</div></div>
+    <div style="background:white;margin:0 14px 10px;border-radius:8px;padding:10px 12px;border:0.5px solid var(--border);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">Progreso de instalación</div>
+        <div style="font-size:11px;font-weight:700;" id="el-pct">0%</div>
+      </div>
+      <div style="height:4px;background:#f0f0f0;border-radius:2px;overflow:hidden;"><div class="pbf" id="el-pbar" style="height:100%;border-radius:2px;transition:width 0.5s;"></div></div>
     </div>
     <!-- Filter pills -->
     <div style="display:flex;gap:8px;overflow-x:auto;padding:0 14px 12px;scrollbar-width:none;" id="el-filters">
@@ -1678,9 +1681,15 @@ function renderEls(){
   if(!curPisoId)return;
   var items=getEls(curPisoId),s=calcStats(items);
   document.getElementById('el-sum').innerHTML=
-    '<div class="el-sum-card"><div class="el-sum-lbl">Total</div><div class="el-sum-val">'+items.length+'</div></div>'+
-    '<div class="el-sum-card"><div class="el-sum-lbl">Instalados</div><div class="el-sum-val g">'+s.inst+'</div></div>'+
-    '<div class="el-sum-card"><div class="el-sum-lbl">Pendientes</div><div class="el-sum-val r">'+s.pend+'</div></div>';
+    '<div style="background:var(--bg);border-radius:8px;padding:10px;text-align:center;">'+
+    '<div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px;">Total</div>'+
+    '<div style="font-size:22px;font-weight:700;color:var(--text);">'+items.length+'</div></div>'+
+    '<div style="background:#EAF3DE;border-radius:8px;padding:10px;text-align:center;">'+
+    '<div style="font-size:11px;font-weight:600;color:#3B6D11;margin-bottom:4px;">Instalados</div>'+
+    '<div style="font-size:22px;font-weight:700;color:#27500A;">'+s.inst+'</div></div>'+
+    '<div style="background:#FCEBEB;border-radius:8px;padding:10px;text-align:center;">'+
+    '<div style="font-size:11px;font-weight:600;color:#A32D2D;margin-bottom:4px;">Pendientes</div>'+
+    '<div style="font-size:22px;font-weight:700;color:#791F1F;">'+s.pend+'</div></div>';
   var fill=document.getElementById('el-pbar');
   fill.style.width=s.pct+'%';fill.style.background=getColor(s.pct);
   document.getElementById('el-pct').textContent=s.pct+'%';

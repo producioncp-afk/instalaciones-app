@@ -1275,17 +1275,19 @@ function buildHome(){
       var eds=getProjEds(proj.id),all=[];
       eds.forEach(function(ed){getPisos(ed.id).forEach(function(p){all=all.concat(getEls(p.id));});});
       var s=calcStats(all);
-      html+='<div class="proj-card" onclick="buildEdificios('+proj.id+')">';
-      html+='<div class="proj-banner" style="background:'+proj.color+'">';
-      html+='<div class="proj-icon">'+proj.icon+'</div>';
-      html+='<div style="flex:1"><div class="proj-name">'+proj.nombre+'</div><div class="proj-loc">📍 '+proj.ubicacion+'</div></div>';
-      html+='<div class="proj-arr">›</div></div>';
-      html+='<div class="proj-footer"><div class="proj-stats">';
-      html+='<div class="proj-stat"><b>'+eds.length+'</b> edif.</div>';
-      html+='<div class="proj-stat"><b>'+s.inst+'</b> inst.</div>';
-      html+='<div class="proj-stat"><b>'+s.pend+'</b> pend.</div>';
-      html+='</div><div class="prog"><div class="pb"><div class="pbf" style="width:'+s.pct+'%;background:'+proj.color+'"></div></div>';
-      html+='<div class="pct-lbl" style="color:'+proj.color+'">'+s.pct+'%</div></div></div></div>';
+      var _pbc=s.pct>=70?'#0d7a3d':s.pct>=30?'#b45309':'#ef4444';
+      html+='<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;margin-bottom:8px;cursor:pointer;" onclick="buildEdificios('+proj.id+')">';
+      html+='<div style="height:3px;background:linear-gradient(90deg,'+proj.color+' '+s.pct+'%,#e1e4e8 '+s.pct+'%);"></div>';
+      html+='<div style="padding:10px 14px;">';
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">';
+      html+='<div style="display:flex;align-items:center;gap:6px;"><span style="font-size:16px;">'+proj.icon+'</span><div style="font-size:12px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">'+proj.nombre+'</div></div>';
+      html+='<div style="font-size:11px;font-weight:700;color:'+proj.color+';">'+s.pct+'%</div></div>';
+      html+='<div style="font-size:11px;color:var(--text3);margin-bottom:8px;">📍 '+proj.ubicacion+' · '+eds.length+' edificios</div>';
+      html+='<div style="display:flex;align-items:baseline;justify-content:space-between;">';
+      html+='<div><div style="font-size:26px;font-weight:700;color:#1a1f2e;letter-spacing:-0.02em;">'+s.inst+'</div><div style="font-size:11px;color:#9aa3b2;">Instalados</div></div>';
+      html+='<div style="font-size:18px;color:#e1e4e8;">/</div>';
+      html+='<div style="text-align:right;"><div style="font-size:26px;font-weight:700;color:#9aa3b2;letter-spacing:-0.02em;">'+s.total+'</div><div style="font-size:11px;color:#9aa3b2;">Total</div></div>';
+      html+='</div></div></div>';
     });
   }
   document.getElementById('proj-list').innerHTML=html;
@@ -1490,12 +1492,18 @@ function renderEdList(projId){
   eds.forEach(function(ed){
     var edEls=[];getPisos(ed.id).forEach(function(p){edEls=edEls.concat(getEls(p.id));});
     var es=calcStats(edEls),c=getColor(es.pct);
-    html+='<div class="ed-card" onclick="buildPisos("+ed.id+")"><div class="ed-top">';
-    html+='<div class="ed-ico">'+ed.icon+'</div>';
-    html+='<div><div class="ed-nm">'+ed.nombre+'</div><div class="ed-sb">'+getPisos(ed.id).length+' pisos · '+edEls.length+' elementos</div></div>';
-    html+='<div class="ed-arr">›</div></div>';
-    html+='<div class="prog"><div class="pb"><div class="pbf" style="width:'+es.pct+'%;background:'+c+'"></div></div>';
-    html+='<div class="pct-lbl" style="color:'+c+'">'+es.pct+'%</div></div></div>';
+    var _ebc=es.pct>=70?'#0d7a3d':es.pct>=30?'#b45309':'#ef4444';
+    html+='<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;margin-bottom:8px;cursor:pointer;" onclick="buildPisos('+ed.id+')">';
+    html+='<div style="height:3px;background:linear-gradient(90deg,'+_ebc+' '+es.pct+'%,#e1e4e8 '+es.pct+'%);"></div>';
+    html+='<div style="padding:10px 14px;">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
+    html+='<div style="font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">'+ed.nombre+'</div>';
+    html+='<div style="font-size:11px;font-weight:700;color:'+_ebc+';">'+es.pct+'%</div></div>';
+    html+='<div style="display:flex;align-items:baseline;justify-content:space-between;">';
+    html+='<div><div style="font-size:26px;font-weight:700;color:#1a1f2e;letter-spacing:-0.02em;">'+es.inst+'</div><div style="font-size:11px;color:#9aa3b2;">Instalados</div></div>';
+    html+='<div style="font-size:18px;color:#e1e4e8;">/</div>';
+    html+='<div style="text-align:right;"><div style="font-size:26px;font-weight:700;color:#9aa3b2;letter-spacing:-0.02em;">'+edEls.length+'</div><div style="font-size:11px;color:#9aa3b2;">Total</div></div>';
+    html+='</div></div></div>';
   });
   document.getElementById('ed-list').innerHTML=html||'<div style="text-align:center;padding:2rem;color:var(--text2);font-size:14px">No hay edificios.</div>';
 }
@@ -1529,10 +1537,18 @@ function buildPisos(edId,push){
   var html='';
   pisos.forEach(function(p,i){
     var ps=calcStats(getEls(p.id)),c=getColor(ps.pct);
-    html+='<div class="piso-card" onclick="buildEls('+p.id+')">';
-    html+='<div class="piso-badge">P'+(i+1)+'</div>';
-    html+='<div class="piso-info"><div class="piso-name">'+p.nombre+'</div><div class="piso-detail">'+ps.inst+' inst · '+ps.pend+' pend · '+ps.total+' total</div></div>';
-    html+='<div class="piso-right"><div class="piso-pct" style="color:'+c+'">'+ps.pct+'%</div><div class="piso-arr">›</div></div></div>';
+    var _pbc2=ps.pct>=70?'#0d7a3d':ps.pct>=30?'#b45309':'#ef4444';
+    html+='<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;margin-bottom:8px;cursor:pointer;" onclick="buildEls('+p.id+')">';
+    html+='<div style="height:3px;background:linear-gradient(90deg,'+_pbc2+' '+ps.pct+'%,#e1e4e8 '+ps.pct+'%);"></div>';
+    html+='<div style="padding:10px 14px;">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
+    html+='<div style="font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">'+p.nombre+'</div>';
+    html+='<div style="font-size:11px;font-weight:700;color:'+_pbc2+';">'+ps.pct+'%</div></div>';
+    html+='<div style="display:flex;align-items:baseline;justify-content:space-between;">';
+    html+='<div><div style="font-size:26px;font-weight:700;color:#1a1f2e;letter-spacing:-0.02em;">'+ps.inst+'</div><div style="font-size:11px;color:#9aa3b2;">Instalados</div></div>';
+    html+='<div style="font-size:18px;color:#e1e4e8;">/</div>';
+    html+='<div style="text-align:right;"><div style="font-size:26px;font-weight:700;color:#9aa3b2;letter-spacing:-0.02em;">'+ps.total+'</div><div style="font-size:11px;color:#9aa3b2;">Total</div></div>';
+    html+='</div></div></div>';
   });
   document.getElementById('piso-list').innerHTML=html;
   showScreen('pisos');

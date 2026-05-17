@@ -708,8 +708,8 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
     <div class="modal-field"><label>Observación (opcional)</label><textarea class="nota-textarea" id="nota-txt" placeholder="Escribe una observación..."></textarea></div>
     <div class="modal-field">
       <label>Foto de evidencia (opcional)</label>
-      <input type="file" id="foto-input" accept="image/*" capture="environment" onchange="previewFoto(event)">
-      <div class="foto-take-btn" onclick="document.getElementById('foto-input').click()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Tomar foto o seleccionar imagen</div>
+      <input type="file" id="foto-input" accept="image/*" onchange="previewFoto(event)">
+      <div class="foto-take-btn" onclick="document.getElementById('foto-input').click()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Foto — cámara o galería</div>
       <img id="foto-preview" class="foto-preview" alt="">
     </div>
     <div class="modal-row">

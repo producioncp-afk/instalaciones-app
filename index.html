@@ -179,6 +179,10 @@ body{font-family:'Inter',sans-serif;color:var(--text);height:100dvh;display:flex
 .el-row{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border);animation:fadeUp 0.2s ease both;cursor:pointer;}
 .el-row:last-child{border-bottom:none;}
 .el-row:active{background:var(--bg);}
+.el-swipe-wrap{position:relative;overflow:hidden;border-bottom:1px solid var(--border);}
+.el-swipe-wrap:last-child{border-bottom:none;}
+.el-delete-bg{position:absolute;right:0;top:0;bottom:0;width:80px;background:#c0392b;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;flex-direction:column;gap:3px;}
+.el-swipe-row{transition:transform 0.2s ease;touch-action:pan-y;}
 .sdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 .sdot.si{background:var(--green);}.sdot.no{background:var(--red);}.sdot.nd{background:#d1d5db;}
 .el-info{flex:1;min-width:0;}
@@ -731,7 +735,7 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
       <button class="mf-close" onclick="closeModal('fotos')">✕</button>
     </div>
     <div class="foto-gallery" id="foto-gallery"></div>
-    <input type="file" id="foto-gallery-input" accept="image/*" capture="environment" onchange="uploadGalleryFoto(event)" style="display:none">
+    <input type="file" id="foto-gallery-input" accept="image/*" onchange="uploadGalleryFoto(event)" style="display:none">
   </div>
 </div>
 
@@ -1254,6 +1258,68 @@ function goBack(){
   else if(prev==='equipo_screen'){setTopbar(false,'Equipo de obra');showScreen('equipo');buildEquipoScreen();navStack.pop();}
 }
 
+var _swipeStartX={},_swipeOpen={};
+
+function swipeStart(e,id){
+  _swipeStartX[id]=e.touches[0].clientX;
+}
+
+function swipeMove(e,id){
+  var dx=e.touches[0].clientX-_swipeStartX[id];
+  var row=document.getElementById('swipe-row-'+id);
+  if(!row)return;
+  if(dx<0){
+    var x=Math.max(-80,dx);
+    row.style.transform='translateX('+x+'px)';
+    row.style.transition='none';
+  }else if(_swipeOpen[id]){
+    var x=Math.min(0,dx-80);
+    row.style.transform='translateX('+x+'px)';
+    row.style.transition='none';
+  }
+}
+
+function swipeEnd(e,id){
+  var row=document.getElementById('swipe-row-'+id);
+  if(!row)return;
+  var currentX=new WebKitCSSMatrix(row.style.transform).m41||0;
+  row.style.transition='transform 0.2s ease';
+  if(currentX<-40){
+    row.style.transform='translateX(-80px)';
+    _swipeOpen[id]=true;
+    row.onclick=null;
+  }else{
+    row.style.transform='translateX(0)';
+    _swipeOpen[id]=false;
+    row.onclick=function(){openDetalle(id);};
+  }
+}
+
+function initSwipeRows(){
+  // Reset all open states when list re-renders
+  _swipeOpen={};
+}
+
+function deleteElemento(elId){
+  if(!isAdmin())return;
+  sb.from('elementos').delete().eq('id',elId).then(function(r){
+    if(r.error){showToast('Error al eliminar','error');return;}
+    D.elementos=D.elementos.filter(function(e){return e.id!==elId;});
+    var wrap=document.getElementById('swipe-wrap-'+elId);
+    if(wrap){
+      wrap.style.transition='all 0.3s ease';
+      wrap.style.maxHeight=wrap.offsetHeight+'px';
+      setTimeout(function(){
+        wrap.style.maxHeight='0';
+        wrap.style.overflow='hidden';
+        wrap.style.borderBottom='none';
+      },10);
+      setTimeout(function(){wrap.remove();},320);
+    }
+    showToast('Elemento eliminado','success');
+  });
+}
+
 function buildHome(){
   if(isAdmin())document.getElementById('add-proj-btn').classList.remove('hidden');
   var firstName=U.nombre.split(' ')[0];
@@ -1645,11 +1711,13 @@ function renderEls(){
     var rightHtml=canEdit()
       ?'<button class="toggle '+(el.instalado===true?'on':'')+'" id="tog-'+el.id+'" onclick="askToggle('+el.id+','+el.instalado+')"></button>'
       :'<div class="sbadge '+cls+'">'+(el.instalado===true?'Instalado':el.instalado===false?'Pendiente':'—')+'</div>';
-    html+='<div class="el-row" style="animation-delay:'+(i*0.02)+'s" onclick="openDetalle('+el.id+')">';
+    html+='<div class="el-swipe-wrap" id="swipe-wrap-'+el.id+'">';
+    html+='<div class="el-delete-bg" onclick="deleteElemento('+el.id+')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Eliminar</span></div>';
+    html+='<div class="el-row el-swipe-row" style="animation-delay:'+(i*0.02)+'s;background:white;" id="swipe-row-'+el.id+'" onclick="openDetalle('+el.id+')" ontouchstart="swipeStart(event,'+el.id+')" ontouchmove="swipeMove(event,'+el.id+')" ontouchend="swipeEnd(event,'+el.id+')">';
     html+=fotoHtml;
     html+='<div class="sdot '+cls+'"></div>';
     html+='<div class="el-info" style="cursor:pointer"><div class="el-name">'+el.nombre+'</div><div class="el-meta">'+meta+'</div>'+(statusBadges?'<div style="margin-top:4px">'+statusBadges+'</div>':'')+'</div>';
-    html+='<div class="el-right" onclick="event.stopPropagation()"><div class="el-qty">'+el.cantidad+'</div>'+rightHtml+'</div></div>';
+    html+='<div class="el-right" onclick="event.stopPropagation()"><div class="el-qty">'+el.cantidad+'</div>'+rightHtml+'</div></div></div>';
   });
   document.getElementById('el-list').innerHTML=html;
 }
@@ -1865,7 +1933,7 @@ function renderDetalleContent(elId){
     '<div class="det-section">'+
       '<div class="det-section-title">Fotos de evidencia ('+fotoCount+'/'+el.cantidad+')</div>'+
       '<div class="det-foto-grid">'+fotosHtml+'</div>'+
-      '<input type="file" id="det-foto-input" accept="image/*" capture="environment" onchange="uploadDetalleFoto(event)" style="display:none">'+
+      '<input type="file" id="det-foto-input" accept="image/*" onchange="uploadDetalleFoto(event)" style="display:none">'+
     '</div>'+
 
     // Sub-elementos

@@ -1295,32 +1295,6 @@ function goBack(){
   else if(prev==='equipo_screen'){setTopbar(false,'Equipo de obra');showScreen('equipo');buildEquipoScreen();navStack.pop();}
 }
 
-function buildSupervisorHome(){
-  var projList=document.getElementById('proj-list');
-  var html='';
-  var allEds=[];
-  D.proyectos.forEach(function(proj){allEds=allEds.concat(getProjEds(proj.id));});
-
-  // Tabs deslizables
-  html+='<div style="display:flex;gap:6px;overflow-x:auto;padding:10px 14px 8px;scrollbar-width:none;border-bottom:1px solid var(--border);background:white;" id="sup-tabs">';
-  html+='<div class="seg-pill active" onclick="setSupervisorFilter(null,this)">Todos</div>';
-  allEds.forEach(function(ed){
-    html+='<div class="seg-pill" onclick="setSupervisorFilter(\''+ed.id+'\',this)">'+ed.nombre.replace('Edificio ','Edif. ')+'</div>';
-  });
-  html+='</div><div id="sup-content" style="padding:12px 14px;"></div>';
-  projList.innerHTML=html;
-
-  // Esconder secciones admin
-  ['equipo-home-list','reportes-home-card','usuarios-home-card'].forEach(function(id){
-    var el=document.getElementById(id);if(el)el.innerHTML='';
-  });
-  var ut=document.getElementById('usuarios-home-title');
-  if(ut)ut.style.display='none';
-
-  renderSupervisorContent(null);
-}
-
-var _supFilter=null;
 
 function setSupervisorFilter(edId,btn){
   _supFilter=edId;
@@ -1329,76 +1303,6 @@ function setSupervisorFilter(edId,btn){
   renderSupervisorContent(edId);
 }
 
-function renderSupervisorContent(edId){
-  var allEds=[];
-  D.proyectos.forEach(function(proj){allEds=allEds.concat(getProjEds(proj.id));});
-  var eds=edId?allEds.filter(function(e){return e.id==edId;}):allEds;
-
-  var edStats=eds.map(function(ed){
-    var edEls=[];
-    getPisos(ed.id).forEach(function(p){edEls=edEls.concat(getEls(p.id));});
-    var es=calcStats(edEls);
-    return{ed:ed,s:es};
-  });
-
-  var html='';
-
-  // Banner urgente
-  var sorted=edStats.slice().sort(function(a,b){return a.s.pct-b.s.pct;});
-  if(sorted.length>0&&!edId){
-    var worst=sorted[0];
-    html+='<div style="background:#fee2e2;border-radius:8px;padding:10px 14px;margin-bottom:10px;border:1px solid #fecaca;">';
-    html+='<div style="display:flex;justify-content:space-between;margin-bottom:4px;">';
-    html+='<div style="font-size:10px;font-weight:700;color:#991b1b;text-transform:uppercase;letter-spacing:0.08em;">Menos avance · Urgente</div>';
-    html+='<div style="font-size:11px;color:#dc2626;font-weight:700;">'+worst.ed.nombre+'</div></div>';
-    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
-    html+='<div style="font-size:22px;font-weight:700;color:#1a1f2e;">'+worst.s.pct+'%</div>';
-    html+='<div style="font-size:13px;color:#c0392b;font-weight:700;">'+worst.s.pend+' pendientes</div></div>';
-    html+='<div style="height:4px;background:#fecaca;border-radius:2px;overflow:hidden;">';
-    html+='<div style="height:100%;width:'+worst.s.pct+'%;background:#ef4444;border-radius:2px;"></div></div>';
-    html+='<div style="font-size:11px;color:#9aa3b2;margin-top:4px;">'+worst.s.inst+' instalados de '+worst.s.total+' elementos</div></div>';
-  }
-
-  // Cards edificios estilo marcador
-  edStats.forEach(function(item){
-    var ed=item.ed; var s=item.s;
-    var barColor=s.pct>=70?'#0d7a3d':s.pct>=30?'#b45309':'#ef4444';
-    html+='<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;margin-bottom:8px;cursor:pointer;" onclick="buildPisos(\''+ed.id+'\')">';
-    html+='<div style="height:3px;background:linear-gradient(90deg,'+barColor+' '+s.pct+'%,#e1e4e8 '+s.pct+'%);"></div>';
-    html+='<div style="padding:10px 14px;">';
-    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
-    html+='<div style="font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">'+ed.nombre+'</div>';
-    html+='<div style="font-size:11px;font-weight:700;color:'+barColor+';">'+s.pct+'%</div></div>';
-    html+='<div style="display:flex;align-items:baseline;justify-content:space-between;">';
-    html+='<div><div style="font-size:26px;font-weight:700;color:#1a1f2e;letter-spacing:-0.02em;">'+s.inst+'</div><div style="font-size:11px;color:#9aa3b2;">Instalados</div></div>';
-    html+='<div style="font-size:18px;color:#e1e4e8;">/</div>';
-    html+='<div style="text-align:right;"><div style="font-size:26px;font-weight:700;color:#9aa3b2;letter-spacing:-0.02em;">'+s.total+'</div><div style="font-size:11px;color:#9aa3b2;">Total</div></div>';
-    html+='</div></div></div>';
-  });
-
-  // Comparativa
-  if(!edId&&sorted.length>=2){
-    var top=sorted[sorted.length-1]; var bot=sorted[0];
-    html+='<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;margin-bottom:8px;">';
-    html+='<div style="background:#f4f5f7;padding:6px 14px;border-bottom:1px solid var(--border);">';
-    html+='<div style="font-size:10px;font-weight:700;color:#b45309;text-transform:uppercase;letter-spacing:0.08em;">🏆 Comparativa</div></div>';
-    html+='<div style="padding:12px 14px;display:flex;align-items:center;gap:8px;">';
-    html+='<div style="flex:1;"><div style="font-size:11px;color:#9aa3b2;margin-bottom:4px;">'+top.ed.nombre+'</div>';
-    html+='<div style="font-size:20px;font-weight:700;color:#0d7a3d;">'+top.s.pct+'%</div>';
-    html+='<div style="font-size:10px;color:#9aa3b2;">'+top.s.inst+' inst.</div></div>';
-    html+='<div style="font-size:14px;color:#e1e4e8;">vs</div>';
-    html+='<div style="flex:1;text-align:right;"><div style="font-size:11px;color:#9aa3b2;margin-bottom:4px;">'+bot.ed.nombre+'</div>';
-    html+='<div style="font-size:20px;font-weight:700;color:#c0392b;">'+bot.s.pct+'%</div>';
-    html+='<div style="font-size:10px;color:#9aa3b2;">'+bot.s.inst+' inst.</div></div></div>';
-    var pct1=top.s.pct+bot.s.pct>0?Math.round(top.s.pct/(top.s.pct+bot.s.pct)*100):50;
-    html+='<div style="margin:0 14px 12px;display:flex;height:4px;border-radius:2px;overflow:hidden;">';
-    html+='<div style="width:'+pct1+'%;background:#0d7a3d;"></div>';
-    html+='<div style="width:'+(100-pct1)+'%;background:#ef4444;"></div></div></div>';
-  }
-
-  var cont=document.getElementById('sup-content');
-  if(cont)cont.innerHTML=html;
-}
 
 function buildHome(){
   if(isAdmin())document.getElementById('add-proj-btn').classList.remove('hidden');
@@ -1420,12 +1324,6 @@ function buildHome(){
       alertEl.style.display='flex';
       document.getElementById('tarea-alert-txt').textContent=pendCount+' tarea'+(pendCount!==1?'s':'')+' pendiente'+(pendCount!==1?'s':'');
     }else{alertEl.style.display='none';}
-  }
-
-  // Supervisor ve dashboard especial
-  if(U.rol==='supervisor'){
-    buildSupervisorHome();
-    return;
   }
 
   var html='';

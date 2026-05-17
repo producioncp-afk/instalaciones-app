@@ -1704,7 +1704,6 @@ function renderEls(){
   filtered.forEach(function(el,i){
     var cls=el.instalado===true?'si':el.instalado===false?'no':'nd';
     var meta=el.actualizado_por?el.actualizado_por+' · '+formatDate(el.actualizado_en):'Sin actualizar';
-    if(el.nota)meta+=' · 📝 '+el.nota.slice(0,25)+(el.nota.length>25?'...':'');
     // Pintado y retocado badges
     var statusBadges='';
     if(el.pintado===true)statusBadges+='<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;background:#fef9c3;color:#854d0e;margin-right:3px;">🖌 Pintado</span>';
@@ -1730,7 +1729,9 @@ function renderEls(){
     html+='<div class="el-row el-swipe-row" style="animation-delay:'+(i*0.02)+'s;background:white;" id="swipe-row-'+el.id+'" data-elid="'+el.id+'" onclick="openDetalle('+el.id+')">';
     html+=fotoHtml;
     html+='<div class="sdot '+cls+'"></div>';
-    html+='<div class="el-info" style="cursor:pointer"><div class="el-name">'+el.nombre+'</div><div class="el-meta">'+meta+'</div>'+(statusBadges?'<div style="margin-top:4px">'+statusBadges+'</div>':'')+'</div>';
+    html+='<div class="el-info" style="cursor:pointer"><div class="el-name">'+el.nombre+'</div><div class="el-meta">'+meta+'</div>'+(statusBadges?'<div style="margin-top:4px">'+statusBadges+'</div>':'')+
+    (el.nota?'<div style="font-size:11px;color:var(--text2);font-style:italic;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">💬 '+el.nota.slice(0,40)+(el.nota.length>40?'...':'')+'</div>':'')+
+    '</div>';
     var instVal=el.cantidad_instalada||0;
     var pendVal=el.cantidad-instVal;
     var pct=el.cantidad>0?Math.round(instVal/el.cantidad*100):0;
@@ -1865,13 +1866,27 @@ function renderDetalleContent(elId){
 
   var histHtml='';
   if(elHist.length===0){histHtml='<div style="padding:16px;color:var(--text2);font-size:13px">Sin cambios registrados.</div>';}
-  else{elHist.forEach(function(h){
-    histHtml+='<div class="det-hist-row"><div class="det-hist-top">';
-    histHtml+='<div class="det-hist-who">'+h.usuario_nombre+'</div>';
-    histHtml+='<div class="det-hist-act">→ '+(h.accion==='instalado'?'instalado':'pendiente')+'</div>';
-    histHtml+='<div class="det-hist-time">'+formatDate(h.creado_en)+'</div></div>';
-    if(h.nota)histHtml+='<div class="det-hist-nota">💬 '+h.nota+'</div>';
+  else{elHist.forEach(function(h,hi){
+    var isInst=h.accion==='instalado';
+    var avColor=isInst?'#EAF3DE':'#FCEBEB';
+    var avText=isInst?'#27500A':'#791F1F';
+    var ini=(h.usuario_nombre||'?').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+    var isLast=hi===elHist.length-1;
+    histHtml+='<div style="display:flex;gap:10px;padding:12px 14px;'+(isLast?'':'border-bottom:0.5px solid var(--border);')+'">';
+    histHtml+='<div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">';
+    histHtml+='<div style="width:32px;height:32px;border-radius:50%;background:'+avColor+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:'+avText+';">'+ini+'</div>';
+    if(!isLast)histHtml+='<div style="width:1.5px;background:var(--border);flex:1;margin-top:4px;min-height:16px;"></div>';
     histHtml+='</div>';
+    histHtml+='<div style="flex:1;min-width:0;padding-bottom:4px;">';
+    histHtml+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">';
+    histHtml+='<div style="font-size:13px;font-weight:600;color:var(--text);">'+h.usuario_nombre+'</div>';
+    histHtml+='<div style="font-size:11px;color:var(--text3);">'+formatDate(h.creado_en)+'</div></div>';
+    histHtml+='<div style="display:inline-flex;align-items:center;gap:4px;background:'+avColor+';padding:3px 10px;border-radius:20px;'+(h.nota?'margin-bottom:6px;':'')+'">'+
+      '<span style="font-size:13px;color:'+(isInst?'#3B6D11':'#A32D2D');
+    histHtml+=';">'+(isInst?'✓':'✗')+'</span>';
+    histHtml+='<span style="font-size:11px;font-weight:600;color:'+(isInst?'#3B6D11':'#A32D2D')+';">'+(isInst?'Instalado':'Marcado pendiente')+'</span></div>';
+    if(h.nota)histHtml+='<div style="font-size:12px;color:var(--text2);font-style:italic;background:var(--bg);padding:6px 10px;border-radius:6px;border-left:2px solid var(--border);">'+h.nota+'</div>';
+    histHtml+='</div></div>';
   });}
 
   var canEditQty=isAdmin();

@@ -181,8 +181,9 @@ body{font-family:'Inter',sans-serif;color:var(--text);height:100dvh;display:flex
 .el-row:active{background:var(--bg);}
 .el-swipe-wrap{position:relative;overflow:hidden;border-bottom:1px solid var(--border);}
 .el-swipe-wrap:last-child{border-bottom:none;}
-.el-delete-bg{position:absolute;right:0;top:0;bottom:0;width:80px;background:#c0392b;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;flex-direction:column;gap:3px;}
-.el-swipe-row{transition:transform 0.2s ease;touch-action:pan-y;}
+.el-delete-bg{position:absolute;right:0;top:0;bottom:0;width:80px;background:#c0392b;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;flex-direction:column;gap:3px;cursor:pointer;}
+.el-swipe-row{transition:transform 0.3s cubic-bezier(.25,.46,.45,.94);will-change:transform;}
+.el-swipe-row.swiped{transform:translateX(-80px);}
 .sdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 .sdot.si{background:var(--green);}.sdot.no{background:var(--red);}.sdot.nd{background:#d1d5db;}
 .el-info{flex:1;min-width:0;}
@@ -1258,46 +1259,44 @@ function goBack(){
   else if(prev==='equipo_screen'){setTopbar(false,'Equipo de obra');showScreen('equipo');buildEquipoScreen();navStack.pop();}
 }
 
-var _swipeStartX={},_swipeStartY={},_swipeOpen={},_swipeLocked={};
+var _swipeStartX={},_swipeStartY={},_swipeOpen={};
 
 function initSwipeRows(){
   if(!isAdmin())return;
   document.querySelectorAll('.el-swipe-row').forEach(function(row){
-    var id=row.dataset.elid;
-    if(!id)return;
+    var id=parseInt(row.dataset.elid);
+    var startX,startY,moved=false;
+
     row.addEventListener('touchstart',function(e){
-      _swipeStartX[id]=e.touches[0].clientX;
-      _swipeStartY[id]=e.touches[0].clientY;
-      _swipeLocked[id]=null;
-      row.style.transition='none';
+      startX=e.touches[0].clientX;
+      startY=e.touches[0].clientY;
+      moved=false;
     },{passive:true});
+
     row.addEventListener('touchmove',function(e){
-      var dx=e.touches[0].clientX-_swipeStartX[id];
-      var dy=e.touches[0].clientY-_swipeStartY[id];
-      if(_swipeLocked[id]===null){
-        _swipeLocked[id]=Math.abs(dx)>Math.abs(dy)?'h':'v';
-      }
-      if(_swipeLocked[id]==='v')return;
-      e.preventDefault();
-      if(dx<0){
-        row.style.transform='translateX('+Math.max(-80,dx)+'px)';
-      }else if(_swipeOpen[id]){
-        row.style.transform='translateX('+Math.min(0,dx-80)+'px)';
+      var dx=e.touches[0].clientX-startX;
+      var dy=e.touches[0].clientY-startY;
+      // Only handle horizontal swipe
+      if(!moved&&Math.abs(dy)>Math.abs(dx))return;
+      if(Math.abs(dx)>5){
+        moved=true;
+        e.preventDefault();
+        var x=_swipeOpen[id]?Math.min(0,dx-80):Math.max(-80,Math.min(0,dx));
+        row.style.transition='none';
+        row.style.transform='translateX('+x+'px)';
       }
     },{passive:false});
+
     row.addEventListener('touchend',function(e){
-      if(_swipeLocked[id]==='v')return;
-      row.style.transition='transform 0.25s ease';
+      if(!moved)return;
       var mat=new WebKitCSSMatrix(getComputedStyle(row).transform);
-      var currentX=mat.m41;
-      if(currentX<-40){
+      row.style.transition='transform 0.3s cubic-bezier(.25,.46,.45,.94)';
+      if(mat.m41<-40){
         row.style.transform='translateX(-80px)';
         _swipeOpen[id]=true;
-        row.onclick=null;
       }else{
         row.style.transform='translateX(0)';
         _swipeOpen[id]=false;
-        (function(eid){row.onclick=function(){openDetalle(eid);};})(parseInt(id));
       }
     },{passive:true});
   });
@@ -1305,6 +1304,7 @@ function initSwipeRows(){
 
 function deleteElemento(elId){
   if(!isAdmin())return;
+  if(!confirm('¿Eliminar este elemento?'))return;
   sb.from('elementos').delete().eq('id',elId).then(function(r){
     if(r.error){showToast('Error al eliminar','error');return;}
     D.elementos=D.elementos.filter(function(e){return e.id!==elId;});
@@ -1312,7 +1312,7 @@ function deleteElemento(elId){
     if(wrap){
       wrap.style.maxHeight=wrap.offsetHeight+'px';
       wrap.style.overflow='hidden';
-      wrap.style.transition='max-height 0.3s ease, opacity 0.3s ease';
+      wrap.style.transition='max-height 0.3s ease,opacity 0.3s ease';
       setTimeout(function(){wrap.style.maxHeight='0';wrap.style.opacity='0';},10);
       setTimeout(function(){wrap.remove();},320);
     }

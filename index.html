@@ -2059,11 +2059,11 @@ function saveNuevoElemento(){
     instalado:false,
     pintado:false,
     retocado:false,
+    cantidad_instalada:0,
     cantidad_pintado:0,
-    cantidad_retocado:0,
-    creado_por:U.nombre
+    cantidad_retocado:0
   }]).select().then(function(r){
-    if(r.error){showToast('Error al crear','error');return;}
+    if(r.error){showToast('Error: '+r.error.message,'error');return;}
     if(r.data&&r.data.length>0)D.elementos.push(r.data[0]);
     closeModal('nuevo-el');
     renderEls();

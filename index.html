@@ -709,7 +709,7 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
     <div class="modal-field">
       <label>Foto de evidencia (opcional)</label>
       <input type="file" id="foto-input" accept="image/*" onchange="previewFoto(event)">
-      <div class="foto-take-btn" onclick="document.getElementById('foto-input').click()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Foto — cámara o galería</div>
+      <div class="foto-take-btn" onclick="openFotoChooser(function(f){var dt=new DataTransfer();dt.items.add(f);document.getElementById('foto-input').files=dt.files;previewFoto({target:document.getElementById('foto-input')});})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Foto — cámara o galería</div>
       <img id="foto-preview" class="foto-preview" alt="">
     </div>
     <div class="modal-row">
@@ -1784,7 +1784,7 @@ function renderGallery(elId,cantidad){
     html+='</div>';
   });
   if(fotos.length<cantidad&&canEdit()){
-    html+='<div class="foto-add-tile" onclick="document.getElementById(\'foto-gallery-input\').click()">';
+    html+='<div class="foto-add-tile" onclick="openFotoChooser(uploadGalleryFotoFile)">';
     html+='<span style="font-size:24px">Foto</span><span>Agregar</span></div>';
   }
   var gallery=document.getElementById('foto-gallery');
@@ -1860,7 +1860,7 @@ function renderDetalleContent(elId){
     fotosHtml+='</div>';
   });
   if(canEdit()&&fotoCount<el.cantidad){
-    fotosHtml+='<div class="det-add-foto" onclick="document.getElementById(\'det-foto-input\').click()"><span style="font-size:22px">Foto</span><span>Agregar</span></div>';
+    fotosHtml+='<div class="det-add-foto" onclick="openFotoChooser(uploadDetalleFotoFile)"><span style="font-size:22px">Foto</span><span>Agregar</span></div>';
   }
 
   var histHtml='';
@@ -2513,6 +2513,51 @@ function deleteFotoDetalle(fotoId,path,elId){
     renderDetalleContent(elId);
     renderEls();
     showToast('Foto eliminada','success');
+  });
+}
+
+function uploadGalleryFotoFile(file){
+  if(!file||!curElId)return;
+  var el=D.elementos.find(function(x){return x.id===curElId;});
+  var fotos=D.fotos.filter(function(f){return f.elemento_id===curElId;});
+  if(fotos.length>=el.cantidad){showToast('Ya tienes el máximo de fotos','error');return;}
+  showToast('Subiendo foto...','');
+  var path='el-'+curElId+'-'+Date.now()+'.jpg';
+  sb.storage.from('fotos').upload(path,file,{contentType:file.type,upsert:false}).then(function(res){
+    if(res.error){showToast('Error al subir foto','error');return;}
+    var url=sb.storage.from('fotos').getPublicUrl(path).data.publicUrl;
+    sb.from('fotos').insert([{elemento_id:curElId,url:url,path:path,subida_por:U.nombre}]).select().then(function(r){
+      if(r.error){showToast('Error al guardar','error');return;}
+      if(r.data&&r.data.length>0){var exists=D.fotos.find(function(f){return f.id===r.data[0].id;});if(!exists)D.fotos.push(r.data[0]);}
+      renderGallery(curElId,el.cantidad);
+      renderEls();
+      if(document.getElementById('screen-detalle').classList.contains('active'))renderDetalleContent(curElId);
+      showToast('Foto guardada','success');
+    });
+  });
+}
+
+function uploadDetalleFotoFile(file){
+  if(!file||!curElId)return;
+  var el=D.elementos.find(function(x){return x.id===curElId;});
+  var fotos=D.fotos.filter(function(f){return f.elemento_id===curElId;});
+  if(fotos.length>=el.cantidad){showToast('Ya tienes el máximo de fotos','error');return;}
+  showToast('Subiendo foto...','');
+  var notaActual=document.getElementById('det-nota-input');
+  var notaGuardada=notaActual?notaActual.value:'';
+  var path='el-'+curElId+'-'+Date.now()+'.jpg';
+  sb.storage.from('fotos').upload(path,file,{contentType:file.type,upsert:false}).then(function(res){
+    if(res.error){showToast('Error al subir','error');return;}
+    var url=sb.storage.from('fotos').getPublicUrl(path).data.publicUrl;
+    sb.from('fotos').insert([{elemento_id:curElId,url:url,path:path,subida_por:U.nombre}]).select().then(function(r){
+      if(r.error){showToast('Error al guardar','error');return;}
+      if(r.data&&r.data.length>0){var exists=D.fotos.find(function(f){return f.id===r.data[0].id;});if(!exists)D.fotos.push(r.data[0]);}
+      renderDetalleContent(curElId);
+      renderEls();
+      var notaEl=document.getElementById('det-nota-input');
+      if(notaEl&&notaGuardada)notaEl.value=notaGuardada;
+      showToast('Foto guardada','success');
+    });
   });
 }
 
@@ -4307,6 +4352,22 @@ function uploadPlano(e,pisoId){
   });
 }
 
+var _fotoChooserCallback=null;
+
+function openFotoChooser(callback){
+  _fotoChooserCallback=callback;
+  document.getElementById('fc-camera').value='';
+  document.getElementById('fc-gallery').value='';
+  openModal('foto-chooser');
+}
+
+function fotoChooserDone(e){
+  closeModal('foto-chooser');
+  var file=e.target.files[0];
+  if(!file||!_fotoChooserCallback)return;
+  _fotoChooserCallback(file);
+}
+
 
 
 </script>
@@ -4325,6 +4386,27 @@ function uploadPlano(e,pisoId){
       <button onclick="planoZoom(1.3)" style="background:rgba(255,255,255,0.15);border:none;color:white;width:44px;height:44px;border-radius:50%;font-size:22px;cursor:pointer;">+</button>
       <button onclick="planoReset()" style="background:rgba(255,255,255,0.15);border:none;color:white;width:44px;height:44px;border-radius:50%;font-size:13px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">1:1</button>
       <button onclick="planoZoom(0.7)" style="background:rgba(255,255,255,0.15);border:none;color:white;width:44px;height:44px;border-radius:50%;font-size:22px;cursor:pointer;">−</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- MODAL FOTO CHOOSER -->
+<div class="modal-overlay hidden" id="modal-foto-chooser" onclick="closeOv(event,'modal-foto-chooser')">
+  <div class="modal" onclick="event.stopPropagation()" style="padding-bottom:calc(16px + var(--sab));">
+    <div class="modal-title">Agregar foto</div>
+    <input type="file" id="fc-camera" accept="image/*" capture="environment" style="display:none" onchange="fotoChooserDone(event)">
+    <input type="file" id="fc-gallery" accept="image/*" style="display:none" onchange="fotoChooserDone(event)">
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <button onclick="document.getElementById('fc-camera').click()" style="display:flex;align-items:center;gap:12px;padding:16px;background:var(--bg);border:1px solid var(--border);border-radius:10px;font-size:15px;font-weight:600;color:var(--text);cursor:pointer;font-family:'Inter',sans-serif;width:100%;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Tomar foto con cámara
+      </button>
+      <button onclick="document.getElementById('fc-gallery').click()" style="display:flex;align-items:center;gap:12px;padding:16px;background:var(--bg);border:1px solid var(--border);border-radius:10px;font-size:15px;font-weight:600;color:var(--text);cursor:pointer;font-family:'Inter',sans-serif;width:100%;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Elegir de galería
+      </button>
+      <button onclick="closeModal('foto-chooser')" style="padding:14px;background:none;border:1px solid var(--border);border-radius:10px;font-size:14px;font-weight:600;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;">Cancelar</button>
     </div>
   </div>
 </div>

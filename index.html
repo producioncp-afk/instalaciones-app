@@ -529,17 +529,12 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
     <div class="proj-tabs" id="proj-tabs">
       <div class="proj-tab active" id="tab-resumen-proj" onclick="switchProjTab('resumen-proj')">Resumen</div>
       <div class="proj-tab" id="tab-edificios" onclick="switchProjTab('edificios')">Edificios</div>
-      <div class="proj-tab" id="tab-equipo" onclick="switchProjTab('equipo')">Equipo</div>
     </div>
     <div id="tab-resumen-proj-content">
       <div class="pad" style="padding-top:12px;" id="proj-resumen-content"><div class="spin-wrap"><div class="spin"></div></div></div>
     </div>
     <div id="tab-edificios-content" style="display:none">
-      <div class="pad" style="padding-top:0">
-        <div class="stats-grid" id="ed-stats"></div>
-        <div class="sec-title">Edificios</div>
-        <div id="ed-list"></div>
-      </div>
+      <div class="pad" style="padding-top:12px;" id="ed-marcador-content"><div class="spin-wrap"><div class="spin"></div></div></div>
     </div>
     <div id="tab-equipo-content" style="display:none">
       <div class="pad" style="padding-top:0" id="equipo-list"></div>
@@ -1111,8 +1106,8 @@ function loadData(){
 }
 
 function getProjEds(id){return D.edificios.filter(function(e){return e.proyecto_id===id;});}
-function getPisos(id){return D.pisos.filter(function(p){return p.edificio_id===id;});}
-function getEls(id){return D.elementos.filter(function(e){return e.piso_id===id;});}
+function getPisos(id){return D.pisos.filter(function(p){return p.edificio_id==id;});}
+function getEls(id){return D.elementos.filter(function(e){return e.piso_id==id;});}
 
 function setupRealtime(){
   sb.channel('rt-v4')
@@ -1450,6 +1445,36 @@ function renderResumenContent(projId,edId){
   if(c)c.innerHTML=html;
 }
 
+function renderEdMarcador(projId){
+  var cont=document.getElementById('ed-marcador-content');
+  if(!cont)return;
+  var allEds=getProjEds(projId);
+  var edStats=allEds.map(function(ed){
+    var edEls=[];
+    getPisos(ed.id).forEach(function(p){edEls=edEls.concat(getEls(p.id));});
+    var es=calcStats(edEls);
+    return{ed:ed,s:es};
+  });
+
+  var html='';
+  edStats.forEach(function(item){
+    var ed=item.ed; var s=item.s;
+    var barColor=s.pct>=70?'#0d7a3d':s.pct>=30?'#b45309':'#ef4444';
+    html+='<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;margin-bottom:8px;cursor:pointer;" onclick="buildPisos(\''+ed.id+'\')">';
+    html+='<div style="height:3px;background:linear-gradient(90deg,'+barColor+' '+s.pct+'%,#e1e4e8 '+s.pct+'%);"></div>';
+    html+='<div style="padding:10px 14px;">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
+    html+='<div style="font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">'+ed.nombre+'</div>';
+    html+='<div style="font-size:11px;font-weight:700;color:'+barColor+';">'+s.pct+'%</div></div>';
+    html+='<div style="display:flex;align-items:baseline;justify-content:space-between;">';
+    html+='<div><div style="font-size:26px;font-weight:700;color:#1a1f2e;letter-spacing:-0.02em;">'+s.inst+'</div><div style="font-size:11px;color:#9aa3b2;">Instalados</div></div>';
+    html+='<div style="font-size:18px;color:#e1e4e8;">/</div>';
+    html+='<div style="text-align:right;"><div style="font-size:26px;font-weight:700;color:#9aa3b2;letter-spacing:-0.02em;">'+s.total+'</div><div style="font-size:11px;color:#9aa3b2;">Total</div></div>';
+    html+='</div></div></div>';
+  });
+  cont.innerHTML=html;
+}
+
 function renderEdList(projId){
   var proj=D.proyectos.find(function(p){return p.id===projId;});
   var eds=getProjEds(projId);
@@ -1511,7 +1536,7 @@ function buildPisos(edId,push){
   if(push===undefined)push=true;
   curEdId=edId;
   if(push)navStack.push('edificios');
-  var ed=D.edificios.find(function(e){return e.id===edId;});
+  var ed=D.edificios.find(function(e){return e.id==edId;});
   var pisos=getPisos(edId),all=[];
   pisos.forEach(function(p){all=all.concat(getEls(p.id));});
   var s=calcStats(all);
@@ -3232,13 +3257,10 @@ function switchProjTab(tab){
   curProjTab=tab;
   document.getElementById('tab-resumen-proj').classList.toggle('active',tab==='resumen-proj');
   document.getElementById('tab-edificios').classList.toggle('active',tab==='edificios');
-  document.getElementById('tab-equipo').classList.toggle('active',tab==='equipo');
   document.getElementById('tab-resumen-proj-content').style.display=tab==='resumen-proj'?'block':'none';
   document.getElementById('tab-edificios-content').style.display=tab==='edificios'?'block':'none';
-  document.getElementById('tab-equipo-content').style.display=tab==='equipo'?'block':'none';
   if(tab==='resumen-proj')buildProjResumen(curProjId);
-  if(tab==='edificios')renderEdList(curProjId);
-  if(tab==='equipo')buildEquipo(curProjId);
+  if(tab==='edificios')renderEdMarcador(curProjId);
 }
 
 function getMemberStats(userId){

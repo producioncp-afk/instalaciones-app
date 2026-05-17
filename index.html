@@ -1640,24 +1640,25 @@ function buildPisos(edId,push){
 
   var html='';
   pisos.forEach(function(p,i){
-    var ps=calcStats(getEls(p.id)),c=getColor(ps.pct);
+    var pid=p.id,pnombre=p.nombre,pplano=p.plano_url||'';
+    var ps=calcStats(getEls(pid)),c=getColor(ps.pct);
     var _pbc2=ps.pct>=70?'#0d7a3d':ps.pct>=30?'#b45309':'#ef4444';
-    html+='<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;margin-bottom:8px;cursor:pointer;" onclick="buildEls('+p.id+')">';
+    var btnRow='<button onclick="buildEls('+pid+')" style="flex:1;padding:9px;background:none;border:none;font-size:12px;font-weight:600;color:var(--blue);cursor:pointer;font-family:Inter,sans-serif;">📋 Elementos</button>';
+    if(pplano)btnRow+='<div style="width:0.5px;background:#e1e4e8;"></div><button onclick="openPlanoById('+pid+')" style="flex:1;padding:9px;background:none;border:none;font-size:12px;font-weight:600;color:var(--green);cursor:pointer;font-family:Inter,sans-serif;">🗺 Ver plano</button>';
+    if(isAdmin())btnRow+='<div style="width:0.5px;background:#e1e4e8;"></div><label style="flex:1;padding:9px;font-size:12px;font-weight:600;color:#9aa3b2;cursor:pointer;font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;"><input type="file" accept="image/*" style="display:none" onchange="uploadPlano(event,'+pid+')">📤 '+(pplano?'Cambiar':'Plano')+'</label>';
+    html+='<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;margin-bottom:8px;">';
     html+='<div style="height:3px;background:linear-gradient(90deg,'+_pbc2+' '+ps.pct+'%,#e1e4e8 '+ps.pct+'%);"></div>';
     html+='<div style="padding:10px 14px;">';
     html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
-    html+='<div style="font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">'+p.nombre+'</div>';
+    html+='<div style="font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">'+pnombre+'</div>';
     html+='<div style="font-size:11px;font-weight:700;color:'+_pbc2+';">'+ps.pct+'%</div></div>';
     html+='<div style="display:flex;align-items:baseline;justify-content:space-between;">';
     html+='<div><div style="font-size:26px;font-weight:700;color:#1a1f2e;letter-spacing:-0.02em;">'+ps.inst+'</div><div style="font-size:11px;color:#9aa3b2;">Instalados</div></div>';
     html+='<div style="font-size:18px;color:#e1e4e8;">/</div>';
     html+='<div style="text-align:right;"><div style="font-size:26px;font-weight:700;color:#9aa3b2;letter-spacing:-0.02em;">'+ps.total+'</div><div style="font-size:11px;color:#9aa3b2;">Total</div></div>';
     html+='</div>';
-    html+='<div style="display:flex;border-top:1px solid #f0f0f0;">';
-    html+='<button onclick="event.stopPropagation();buildEls('+p.id+')" style="flex:1;padding:9px;background:none;border:none;font-size:12px;font-weight:600;color:var(--blue);cursor:pointer;font-family:Inter,sans-serif;">📋 Elementos</button>';
-    if(p.plano_url){html+='<div style="width:0.5px;background:#e1e4e8;"></div>';html+='<button onclick="event.stopPropagation();openPlanoById('+p.id+')" style="flex:1;padding:9px;background:none;border:none;font-size:12px;font-weight:600;color:var(--green);cursor:pointer;font-family:Inter,sans-serif;">🗺 Ver plano</button>';}
-    if(isAdmin()){html+='<div style="width:0.5px;background:#e1e4e8;"></div>';html+='<label style="flex:1;padding:9px;font-size:12px;font-weight:600;color:#9aa3b2;cursor:pointer;font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;"><input type="file" accept="image/*" style="display:none" onchange="uploadPlano(event,'+p.id+')">📤 '+(p.plano_url?'Cambiar':'Plano')+'</label>';}
-    html+='</div></div>';
+    html+='<div style="display:flex;border-top:1px solid #f0f0f0;">'+btnRow+'</div>';
+    html+='</div>';
   });
   document.getElementById('piso-list').innerHTML=html;
   showScreen('pisos');

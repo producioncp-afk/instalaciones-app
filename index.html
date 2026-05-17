@@ -179,6 +179,11 @@ body{font-family:'Inter',sans-serif;color:var(--text);height:100dvh;display:flex
 .el-row{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border);animation:fadeUp 0.2s ease both;cursor:pointer;}
 .el-row:last-child{border-bottom:none;}
 .el-row:active{background:var(--bg);}
+.el-swipe-wrap{position:relative;overflow:hidden;border-bottom:1px solid var(--border);}
+.el-swipe-wrap:last-child{border-bottom:none;}
+.el-delete-bg{position:absolute;right:0;top:0;bottom:0;width:80px;background:#c0392b;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;flex-direction:column;gap:3px;cursor:pointer;}
+.el-swipe-row{transition:transform 0.3s cubic-bezier(.25,.46,.45,.94);will-change:transform;}
+.el-swipe-row.swiped{transform:translateX(-80px);}
 .sdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 .sdot.si{background:var(--green);}.sdot.no{background:var(--red);}.sdot.nd{background:#d1d5db;}
 .el-info{flex:1;min-width:0;}
@@ -444,7 +449,6 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
 .fase-lbl{font-size:9px;font-weight:600;color:var(--text3);text-align:center;margin-top:3px;white-space:nowrap;}
 .fase-wrap{display:flex;flex-direction:column;align-items:center;}
 </style>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 </head>
 <body>
 
@@ -528,15 +532,14 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
   <!-- EDIFICIOS -->
   <div class="screen" id="screen-edificios">
     <div class="proj-tabs" id="proj-tabs">
-      <div class="proj-tab active" id="tab-edificios" onclick="switchProjTab('edificios')">Edificios</div>
-      <div class="proj-tab" id="tab-equipo" onclick="switchProjTab('equipo')">Equipo</div>
+      <div class="proj-tab active" id="tab-resumen-proj" onclick="switchProjTab('resumen-proj')">Resumen</div>
+      <div class="proj-tab" id="tab-edificios" onclick="switchProjTab('edificios')">Edificios</div>
     </div>
-    <div id="tab-edificios-content">
-      <div class="pad" style="padding-top:0">
-        <div class="stats-grid" id="ed-stats"></div>
-        <div class="sec-title">Edificios</div>
-        <div id="ed-list"></div>
-      </div>
+    <div id="tab-resumen-proj-content">
+      <div class="pad" style="padding-top:12px;" id="proj-resumen-content"><div class="spin-wrap"><div class="spin"></div></div></div>
+    </div>
+    <div id="tab-edificios-content" style="display:none">
+      <div class="pad" style="padding-top:12px;" id="ed-marcador-content"><div class="spin-wrap"><div class="spin"></div></div></div>
     </div>
     <div id="tab-equipo-content" style="display:none">
       <div class="pad" style="padding-top:0" id="equipo-list"></div>
@@ -733,7 +736,7 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
       <button class="mf-close" onclick="closeModal('fotos')">✕</button>
     </div>
     <div class="foto-gallery" id="foto-gallery"></div>
-    <input type="file" id="foto-gallery-input" accept="image/*" capture="environment" onchange="uploadGalleryFoto(event)" style="display:none">
+    <input type="file" id="foto-gallery-input" accept="image/*" onchange="uploadGalleryFoto(event)" style="display:none">
   </div>
 </div>
 
@@ -1108,8 +1111,8 @@ function loadData(){
 }
 
 function getProjEds(id){return D.edificios.filter(function(e){return e.proyecto_id===id;});}
-function getPisos(id){return D.pisos.filter(function(p){return p.edificio_id===id;});}
-function getEls(id){return D.elementos.filter(function(e){return e.piso_id===id;});}
+function getPisos(id){return D.pisos.filter(function(p){return p.edificio_id==id;});}
+function getEls(id){return D.elementos.filter(function(e){return e.piso_id==id;});}
 
 function setupRealtime(){
   sb.channel('rt-v4')
@@ -1256,6 +1259,67 @@ function goBack(){
   else if(prev==='equipo_screen'){setTopbar(false,'Equipo de obra');showScreen('equipo');buildEquipoScreen();navStack.pop();}
 }
 
+var _swipeStartX={},_swipeStartY={},_swipeOpen={};
+
+function initSwipeRows(){
+  if(!isAdmin())return;
+  document.querySelectorAll('.el-swipe-row').forEach(function(row){
+    var id=parseInt(row.dataset.elid);
+    var startX,startY,moved=false;
+
+    row.addEventListener('touchstart',function(e){
+      startX=e.touches[0].clientX;
+      startY=e.touches[0].clientY;
+      moved=false;
+    },{passive:true});
+
+    row.addEventListener('touchmove',function(e){
+      var dx=e.touches[0].clientX-startX;
+      var dy=e.touches[0].clientY-startY;
+      // Only handle horizontal swipe
+      if(!moved&&Math.abs(dy)>Math.abs(dx))return;
+      if(Math.abs(dx)>5){
+        moved=true;
+        e.preventDefault();
+        var x=_swipeOpen[id]?Math.min(0,dx-80):Math.max(-80,Math.min(0,dx));
+        row.style.transition='none';
+        row.style.transform='translateX('+x+'px)';
+      }
+    },{passive:false});
+
+    row.addEventListener('touchend',function(e){
+      if(!moved)return;
+      var mat=new WebKitCSSMatrix(getComputedStyle(row).transform);
+      row.style.transition='transform 0.3s cubic-bezier(.25,.46,.45,.94)';
+      if(mat.m41<-40){
+        row.style.transform='translateX(-80px)';
+        _swipeOpen[id]=true;
+      }else{
+        row.style.transform='translateX(0)';
+        _swipeOpen[id]=false;
+      }
+    },{passive:true});
+  });
+}
+
+function deleteElemento(elId){
+  if(!isAdmin())return;
+  if(!confirm('¿Eliminar este elemento?'))return;
+  sb.from('elementos').delete().eq('id',elId).then(function(r){
+    if(r.error){showToast('Error al eliminar','error');return;}
+    D.elementos=D.elementos.filter(function(e){return e.id!==elId;});
+    var wrap=document.getElementById('swipe-wrap-'+elId);
+    if(wrap){
+      wrap.style.maxHeight=wrap.offsetHeight+'px';
+      wrap.style.overflow='hidden';
+      wrap.style.transition='max-height 0.3s ease,opacity 0.3s ease';
+      setTimeout(function(){wrap.style.maxHeight='0';wrap.style.opacity='0';},10);
+      setTimeout(function(){wrap.remove();},320);
+    }
+    showToast('Elemento eliminado','success');
+  });
+}
+
 function buildHome(){
   if(isAdmin())document.getElementById('add-proj-btn').classList.remove('hidden');
   var firstName=U.nombre.split(' ')[0];
@@ -1277,17 +1341,19 @@ function buildHome(){
       var eds=getProjEds(proj.id),all=[];
       eds.forEach(function(ed){getPisos(ed.id).forEach(function(p){all=all.concat(getEls(p.id));});});
       var s=calcStats(all);
-      html+='<div class="proj-card" onclick="buildEdificios('+proj.id+')">';
-      html+='<div class="proj-banner" style="background:'+proj.color+'">';
-      html+='<div class="proj-icon">'+proj.icon+'</div>';
-      html+='<div style="flex:1"><div class="proj-name">'+proj.nombre+'</div><div class="proj-loc">📍 '+proj.ubicacion+'</div></div>';
-      html+='<div class="proj-arr">›</div></div>';
-      html+='<div class="proj-footer"><div class="proj-stats">';
-      html+='<div class="proj-stat"><b>'+eds.length+'</b> edif.</div>';
-      html+='<div class="proj-stat"><b>'+s.inst+'</b> inst.</div>';
-      html+='<div class="proj-stat"><b>'+s.pend+'</b> pend.</div>';
-      html+='</div><div class="prog"><div class="pb"><div class="pbf" style="width:'+s.pct+'%;background:'+proj.color+'"></div></div>';
-      html+='<div class="pct-lbl" style="color:'+proj.color+'">'+s.pct+'%</div></div></div></div>';
+      var _pbc=s.pct>=70?'#0d7a3d':s.pct>=30?'#b45309':'#ef4444';
+      html+='<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;margin-bottom:8px;cursor:pointer;" onclick="buildEdificios('+proj.id+')">';
+      html+='<div style="height:3px;background:linear-gradient(90deg,'+proj.color+' '+s.pct+'%,#e1e4e8 '+s.pct+'%);"></div>';
+      html+='<div style="padding:10px 14px;">';
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">';
+      html+='<div style="display:flex;align-items:center;gap:6px;"><span style="font-size:16px;">'+proj.icon+'</span><div style="font-size:12px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">'+proj.nombre+'</div></div>';
+      html+='<div style="font-size:11px;font-weight:700;color:'+proj.color+';">'+s.pct+'%</div></div>';
+      html+='<div style="font-size:11px;color:var(--text3);margin-bottom:8px;">📍 '+proj.ubicacion+' · '+eds.length+' edificios</div>';
+      html+='<div style="display:flex;align-items:baseline;justify-content:space-between;">';
+      html+='<div><div style="font-size:26px;font-weight:700;color:#1a1f2e;letter-spacing:-0.02em;">'+s.inst+'</div><div style="font-size:11px;color:#9aa3b2;">Instalados</div></div>';
+      html+='<div style="font-size:18px;color:#e1e4e8;">/</div>';
+      html+='<div style="text-align:right;"><div style="font-size:26px;font-weight:700;color:#9aa3b2;letter-spacing:-0.02em;">'+s.total+'</div><div style="font-size:11px;color:#9aa3b2;">Total</div></div>';
+      html+='</div></div></div>';
     });
   }
   document.getElementById('proj-list').innerHTML=html;
@@ -1342,58 +1408,240 @@ function buildHome(){
   }
 }
 
+function navToEdificio(edId){
+  navStack.push('edificios');
+  buildPisos(edId);
+}
+
+function buildProjResumen(projId){
+  var cont=document.getElementById('proj-resumen-content');
+  if(!cont)return;
+  var proj=D.proyectos.find(function(p){return p.id===projId;});
+  var allEds=getProjEds(projId);
+  var html='';
+
+  // Stats cards
+  var all=[];
+  allEds.forEach(function(ed){getPisos(ed.id).forEach(function(p){all=all.concat(getEls(p.id));});});
+  var s=calcStats(all);
+
+  // Tabs deslizables por edificio
+  html+='<div style="display:flex;gap:6px;overflow-x:auto;padding:0 0 10px;scrollbar-width:none;margin-bottom:10px;" id="resumen-ed-tabs">';
+  html+='<div class="seg-pill active" onclick="setResumenFilter(null,this)">Todos</div>';
+  allEds.forEach(function(ed){
+    html+='<div class="seg-pill" onclick="setResumenFilter('+ed.id+',this)">'+ed.nombre.replace('Edificio ','Edif. ')+'</div>';
+  });
+  html+='</div>';
+
+  html+='<div id="resumen-ed-content"></div>';
+  cont.innerHTML=html;
+  renderResumenContent(projId,null);
+}
+
+var _resumenFilter=null;
+
+function setResumenFilter(edId,btn){
+  _resumenFilter=edId;
+  document.querySelectorAll('#resumen-ed-tabs .seg-pill').forEach(function(p){p.classList.remove('active');});
+  if(btn)btn.classList.add('active');
+  renderResumenContent(curProjId,edId);
+}
+
+function renderResumenContent(projId,edId){
+  var allEds=getProjEds(projId);
+  var eds=edId?allEds.filter(function(e){return e.id==edId;}):allEds;
+
+  var edStats=eds.map(function(ed){
+    var edEls=[];
+    getPisos(ed.id).forEach(function(p){edEls=edEls.concat(getEls(p.id));});
+    var es=calcStats(edEls);
+    return{ed:ed,s:es};
+  });
+
+  var html='';
+
+  // Banner urgente - menor progreso
+  var sorted=edStats.slice().sort(function(a,b){return a.s.pct-b.s.pct;});
+  if(sorted.length>0&&!edId){
+    var worst=sorted[0];
+    html+='<div style="background:#fee2e2;border-radius:8px;padding:10px 14px;margin-bottom:10px;border:1px solid #fecaca;">';
+    html+='<div style="display:flex;justify-content:space-between;margin-bottom:4px;">';
+    html+='<div style="font-size:10px;font-weight:700;color:#991b1b;text-transform:uppercase;letter-spacing:0.08em;">Menos avance · Urgente</div>';
+    html+='<div style="font-size:11px;color:#dc2626;font-weight:700;">'+worst.ed.nombre+'</div></div>';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
+    html+='<div style="font-size:22px;font-weight:700;color:#1a1f2e;">'+worst.s.pct+'%</div>';
+    html+='<div style="font-size:13px;color:#c0392b;font-weight:700;">'+worst.s.pend+' pendientes</div></div>';
+    html+='<div style="height:4px;background:#fecaca;border-radius:2px;overflow:hidden;">';
+    html+='<div style="height:100%;width:'+worst.s.pct+'%;background:#ef4444;border-radius:2px;"></div></div>';
+    html+='<div style="font-size:11px;color:#9aa3b2;margin-top:4px;">'+worst.s.inst+' instalados de '+worst.s.total+' elementos</div>';
+    html+='</div>';
+  }
+
+  // Cards edificios estilo marcador
+  edStats.forEach(function(item){
+    var ed=item.ed; var s=item.s;
+    var barColor=s.pct>=70?'#0d7a3d':s.pct>=30?'#b45309':'#ef4444';
+    html+='<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;margin-bottom:8px;cursor:pointer;" onclick="navToEdificio("+ed.id+")">';
+    html+='<div style="height:3px;background:linear-gradient(90deg,'+barColor+' '+s.pct+'%,#e1e4e8 '+s.pct+'%);"></div>';
+    html+='<div style="padding:10px 14px;">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
+    html+='<div style="font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">'+ed.nombre+'</div>';
+    html+='<div style="font-size:11px;font-weight:700;color:'+barColor+';">'+s.pct+'%</div></div>';
+    html+='<div style="display:flex;align-items:baseline;justify-content:space-between;">';
+    html+='<div><div style="font-size:26px;font-weight:700;color:#1a1f2e;letter-spacing:-0.02em;">'+s.inst+'</div><div style="font-size:11px;color:#9aa3b2;">Instalados</div></div>';
+    html+='<div style="font-size:18px;color:#e1e4e8;">/</div>';
+    html+='<div style="text-align:right;"><div style="font-size:26px;font-weight:700;color:#9aa3b2;letter-spacing:-0.02em;">'+s.total+'</div><div style="font-size:11px;color:#9aa3b2;">Total</div></div>';
+    html+='</div></div></div>';
+  });
+
+  // Comparativa
+  if(!edId&&sorted.length>=2){
+    var top=sorted[sorted.length-1]; var bot=sorted[0];
+    html+='<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;margin-bottom:8px;">';
+    html+='<div style="background:#f4f5f7;padding:6px 14px;border-bottom:1px solid var(--border);">';
+    html+='<div style="font-size:10px;font-weight:700;color:#b45309;text-transform:uppercase;letter-spacing:0.08em;">🏆 Comparativa</div></div>';
+    html+='<div style="padding:12px 14px;display:flex;align-items:center;gap:8px;">';
+    html+='<div style="flex:1;"><div style="font-size:11px;color:#9aa3b2;margin-bottom:4px;">'+top.ed.nombre+'</div>';
+    html+='<div style="font-size:20px;font-weight:700;color:#0d7a3d;">'+top.s.pct+'%</div>';
+    html+='<div style="font-size:10px;color:#9aa3b2;">'+top.s.inst+' inst.</div></div>';
+    html+='<div style="font-size:14px;color:#e1e4e8;">vs</div>';
+    html+='<div style="flex:1;text-align:right;"><div style="font-size:11px;color:#9aa3b2;margin-bottom:4px;">'+bot.ed.nombre+'</div>';
+    html+='<div style="font-size:20px;font-weight:700;color:#c0392b;">'+bot.s.pct+'%</div>';
+    html+='<div style="font-size:10px;color:#9aa3b2;">'+bot.s.inst+' inst.</div></div></div>';
+    var pct1=top.s.pct+bot.s.pct>0?Math.round(top.s.pct/(top.s.pct+bot.s.pct)*100):50;
+    html+='<div style="margin:0 14px 12px;display:flex;height:4px;border-radius:2px;overflow:hidden;">';
+    html+='<div style="width:'+pct1+'%;background:#0d7a3d;"></div>';
+    html+='<div style="width:'+(100-pct1)+'%;background:#ef4444;"></div></div></div>';
+  }
+
+  var c=document.getElementById('resumen-ed-content');
+  if(c)c.innerHTML=html;
+}
+
+function renderEdMarcador(projId){
+  var cont=document.getElementById('ed-marcador-content');
+  if(!cont)return;
+  var allEds=getProjEds(projId);
+  var edStats=allEds.map(function(ed){
+    var edEls=[];
+    getPisos(ed.id).forEach(function(p){edEls=edEls.concat(getEls(p.id));});
+    var es=calcStats(edEls);
+    return{ed:ed,s:es};
+  });
+
+  var html='';
+  edStats.forEach(function(item){
+    var ed=item.ed; var s=item.s;
+    var barColor=s.pct>=70?'#0d7a3d':s.pct>=30?'#b45309':'#ef4444';
+    html+='<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;margin-bottom:8px;cursor:pointer;" onclick="buildPisos(\''+ed.id+'\')">';
+    html+='<div style="height:3px;background:linear-gradient(90deg,'+barColor+' '+s.pct+'%,#e1e4e8 '+s.pct+'%);"></div>';
+    html+='<div style="padding:10px 14px;">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
+    html+='<div style="font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">'+ed.nombre+'</div>';
+    html+='<div style="font-size:11px;font-weight:700;color:'+barColor+';">'+s.pct+'%</div></div>';
+    html+='<div style="display:flex;align-items:baseline;justify-content:space-between;">';
+    html+='<div><div style="font-size:26px;font-weight:700;color:#1a1f2e;letter-spacing:-0.02em;">'+s.inst+'</div><div style="font-size:11px;color:#9aa3b2;">Instalados</div></div>';
+    html+='<div style="font-size:18px;color:#e1e4e8;">/</div>';
+    html+='<div style="text-align:right;"><div style="font-size:26px;font-weight:700;color:#9aa3b2;letter-spacing:-0.02em;">'+s.total+'</div><div style="font-size:11px;color:#9aa3b2;">Total</div></div>';
+    html+='</div></div></div>';
+  });
+  cont.innerHTML=html;
+}
+
+function renderEdList(projId){
+  var proj=D.proyectos.find(function(p){return p.id===projId;});
+  var eds=getProjEds(projId);
+  var all=[];
+  eds.forEach(function(ed){getPisos(ed.id).forEach(function(p){all=all.concat(getEls(p.id));});});
+  var s=calcStats(all);
+  document.getElementById('ed-stats').innerHTML=
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">'+
+    '<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;">'+
+    '<div style="height:3px;background:#0d7a3d;"></div>'+
+    '<div style="padding:12px 14px;"><div style="font-size:10px;font-weight:700;color:#9aa3b2;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Instalados</div>'+
+    '<div style="font-size:24px;font-weight:700;color:#0d7a3d;letter-spacing:-0.02em;">'+s.inst+'</div></div></div>'+
+    '<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;">'+
+    '<div style="height:3px;background:#c0392b;"></div>'+
+    '<div style="padding:12px 14px;"><div style="font-size:10px;font-weight:700;color:#9aa3b2;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Pendientes</div>'+
+    '<div style="font-size:24px;font-weight:700;color:#c0392b;letter-spacing:-0.02em;">'+s.pend+'</div></div></div>'+
+    '<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;">'+
+    '<div style="height:3px;background:#1a56db;"></div>'+
+    '<div style="padding:12px 14px;"><div style="font-size:10px;font-weight:700;color:#9aa3b2;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Total</div>'+
+    '<div style="font-size:24px;font-weight:700;color:#1a56db;letter-spacing:-0.02em;">'+s.total+'</div></div></div>'+
+    '<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;">'+
+    '<div style="height:3px;background:'+getColor(s.pct)+';"></div>'+
+    '<div style="padding:12px 14px;"><div style="font-size:10px;font-weight:700;color:#9aa3b2;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Progreso</div>'+
+    '<div style="font-size:24px;font-weight:700;color:'+getColor(s.pct)+';letter-spacing:-0.02em;">'+s.pct+'%</div></div></div>'+
+    '</div>';
+
+  var html='';
+  eds.forEach(function(ed){
+    var edEls=[];getPisos(ed.id).forEach(function(p){edEls=edEls.concat(getEls(p.id));});
+    var es=calcStats(edEls),c=getColor(es.pct);
+    var _ebc=es.pct>=70?'#0d7a3d':es.pct>=30?'#b45309':'#ef4444';
+    html+='<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;margin-bottom:8px;cursor:pointer;" onclick="navToEdificio('+ed.id+')">';
+    html+='<div style="height:3px;background:linear-gradient(90deg,'+_ebc+' '+es.pct+'%,#e1e4e8 '+es.pct+'%);"></div>';
+    html+='<div style="padding:10px 14px;">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
+    html+='<div style="font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">'+ed.nombre+'</div>';
+    html+='<div style="font-size:11px;font-weight:700;color:'+_ebc+';">'+es.pct+'%</div></div>';
+    html+='<div style="display:flex;align-items:baseline;justify-content:space-between;">';
+    html+='<div><div style="font-size:26px;font-weight:700;color:#1a1f2e;letter-spacing:-0.02em;">'+es.inst+'</div><div style="font-size:11px;color:#9aa3b2;">Instalados</div></div>';
+    html+='<div style="font-size:18px;color:#e1e4e8;">/</div>';
+    html+='<div style="text-align:right;"><div style="font-size:26px;font-weight:700;color:#9aa3b2;letter-spacing:-0.02em;">'+edEls.length+'</div><div style="font-size:11px;color:#9aa3b2;">Total</div></div>';
+    html+='</div></div></div>';
+  });
+  document.getElementById('ed-list').innerHTML=html||'<div style="text-align:center;padding:2rem;color:var(--text2);font-size:14px">No hay edificios.</div>';
+}
+
 function buildEdificios(projId,push){
   if(push===undefined)push=true;
   curProjId=projId;
   if(push)navStack.push('home');
   var proj=D.proyectos.find(function(p){return p.id===projId;});
-  var eds=getProjEds(projId),all=[];
-  eds.forEach(function(ed){getPisos(ed.id).forEach(function(p){all=all.concat(getEls(p.id));});});
-  var s=calcStats(all);
   setTopbar(false,proj.nombre);
   document.getElementById('back-btn').classList.remove('hidden');
-  document.getElementById('ed-stats').innerHTML=
-    '<div class="stat-card"><div class="stat-lbl">Instalados</div><div class="stat-num g">'+s.inst+'</div></div>'+
-    '<div class="stat-card"><div class="stat-lbl">Pendientes</div><div class="stat-num r">'+s.pend+'</div></div>'+
-    '<div class="stat-card"><div class="stat-lbl">Total</div><div class="stat-num b">'+s.total+'</div></div>'+
-    '<div class="stat-card"><div class="stat-lbl">Progreso</div><div class="stat-num b">'+s.pct+'%</div></div>';
-  var html='';
-  eds.forEach(function(ed){
-    var edEls=[];getPisos(ed.id).forEach(function(p){edEls=edEls.concat(getEls(p.id));});
-    var es=calcStats(edEls),c=getColor(es.pct);
-    html+='<div class="ed-card" onclick="buildPisos(\''+ed.id+'\')"><div class="ed-top">';
-    html+='<div class="ed-ico">'+ed.icon+'</div>';
-    html+='<div><div class="ed-nm">'+ed.nombre+'</div><div class="ed-sb">'+getPisos(ed.id).length+' pisos · '+edEls.length+' elementos</div></div>';
-    html+='<div class="ed-arr">›</div></div>';
-    html+='<div class="prog"><div class="pb"><div class="pbf" style="width:'+es.pct+'%;background:'+c+'"></div></div>';
-    html+='<div class="pct-lbl" style="color:'+c+'">'+es.pct+'%</div></div></div>';
-  });
-  document.getElementById('ed-list').innerHTML=html||'<div style="text-align:center;padding:2rem;color:var(--text2);font-size:14px">No hay edificios.</div>';
   showScreen('edificios');
+  switchProjTab('resumen-proj');
 }
 
 function buildPisos(edId,push){
   if(push===undefined)push=true;
   curEdId=edId;
   if(push)navStack.push('edificios');
-  var ed=D.edificios.find(function(e){return e.id===edId;});
+  var ed=D.edificios.find(function(e){return e.id==edId;});
   var pisos=getPisos(edId),all=[];
   pisos.forEach(function(p){all=all.concat(getEls(p.id));});
   var s=calcStats(all);
   setTopbar(false,ed.nombre);
   document.getElementById('back-btn').classList.remove('hidden');
   document.getElementById('piso-stats').innerHTML=
-    '<div class="stat-card"><div class="stat-lbl">Instalados</div><div class="stat-num g">'+s.inst+'</div></div>'+
-    '<div class="stat-card"><div class="stat-lbl">Pendientes</div><div class="stat-num r">'+s.pend+'</div></div>'+
-    '<div class="stat-card"><div class="stat-lbl">Total</div><div class="stat-num b">'+s.total+'</div></div>'+
-    '<div class="stat-card"><div class="stat-lbl">Progreso</div><div class="stat-num b">'+s.pct+'%</div></div>';
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">'+
+    '<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;">'+
+    '<div style="height:3px;background:#0d7a3d;"></div>'+
+    '<div style="padding:12px 14px;"><div style="font-size:10px;font-weight:700;color:#9aa3b2;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Instalados</div>'+
+    '<div style="font-size:24px;font-weight:700;color:#0d7a3d;letter-spacing:-0.02em;">'+s.inst+'</div></div></div>'+
+    '<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;">'+
+    '<div style="height:3px;background:#c0392b;"></div>'+
+    '<div style="padding:12px 14px;"><div style="font-size:10px;font-weight:700;color:#9aa3b2;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Pendientes</div>'+
+    '<div style="font-size:24px;font-weight:700;color:#c0392b;letter-spacing:-0.02em;">'+s.pend+'</div></div></div>'+
+    '<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;">'+
+    '<div style="height:3px;background:#1a56db;"></div>'+
+    '<div style="padding:12px 14px;"><div style="font-size:10px;font-weight:700;color:#9aa3b2;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Total</div>'+
+    '<div style="font-size:24px;font-weight:700;color:#1a56db;letter-spacing:-0.02em;">'+s.total+'</div></div></div>'+
+    '<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;">'+
+    '<div style="height:3px;background:'+getColor(s.pct)+';"></div>'+
+    '<div style="padding:12px 14px;"><div style="font-size:10px;font-weight:700;color:#9aa3b2;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Progreso</div>'+
+    '<div style="font-size:24px;font-weight:700;color:'+getColor(s.pct)+';letter-spacing:-0.02em;">'+s.pct+'%</div></div></div>'+
+    '</div>';
+
   var html='';
   pisos.forEach(function(p,i){
     var ps=calcStats(getEls(p.id)),c=getColor(ps.pct);
     var _pbc2=ps.pct>=70?'#0d7a3d':ps.pct>=30?'#b45309':'#ef4444';
-    html+='<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;margin-bottom:8px;">';
+    html+='<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;margin-bottom:8px;cursor:pointer;" onclick="buildEls('+p.id+')">';
     html+='<div style="height:3px;background:linear-gradient(90deg,'+_pbc2+' '+ps.pct+'%,#e1e4e8 '+ps.pct+'%);"></div>';
-    html+='<div style="padding:10px 14px;cursor:pointer;" onclick="buildEls('+p.id+')">';
+    html+='<div style="padding:10px 14px;">';
     html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
     html+='<div style="font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">'+p.nombre+'</div>';
     html+='<div style="font-size:11px;font-weight:700;color:'+_pbc2+';">'+ps.pct+'%</div></div>';
@@ -1401,11 +1649,11 @@ function buildPisos(edId,push){
     html+='<div><div style="font-size:26px;font-weight:700;color:#1a1f2e;letter-spacing:-0.02em;">'+ps.inst+'</div><div style="font-size:11px;color:#9aa3b2;">Instalados</div></div>';
     html+='<div style="font-size:18px;color:#e1e4e8;">/</div>';
     html+='<div style="text-align:right;"><div style="font-size:26px;font-weight:700;color:#9aa3b2;letter-spacing:-0.02em;">'+ps.total+'</div><div style="font-size:11px;color:#9aa3b2;">Total</div></div>';
-    html+='</div></div>';
+    html+='</div>';
     html+='<div style="display:flex;border-top:1px solid #f0f0f0;">';
-    html+='<button onclick="event.stopPropagation();buildEls('+p.id+')" style="flex:1;padding:9px;background:none;border:none;font-size:12px;font-weight:600;color:var(--blue);cursor:pointer;font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;"><i class="ti ti-layout-grid" style="font-size:14px;"></i> Elementos</button>';
-    if(p.plano_url){html+='<div style="width:1px;background:#f0f0f0;"></div>';html+='<button onclick="event.stopPropagation();openPlanoById('+p.id+')" style="flex:1;padding:9px;background:none;border:none;font-size:12px;font-weight:600;color:var(--green);cursor:pointer;font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;"><i class="ti ti-map" style="font-size:14px;"></i> Ver plano</button>';}
-    if(isAdmin()){html+='<div style="width:1px;background:#f0f0f0;"></div>';html+='<label style="flex:1;padding:9px;font-size:12px;font-weight:600;color:#9aa3b2;cursor:pointer;font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;"><input type="file" accept="image/*" style="display:none" onchange="uploadPlano(event,'+p.id+')"><i class="ti ti-upload" style="font-size:14px;"></i> '+(p.plano_url?'Cambiar':'Subir')+'</label>';}
+    html+='<button onclick="event.stopPropagation();buildEls('+p.id+')" style="flex:1;padding:9px;background:none;border:none;font-size:12px;font-weight:600;color:var(--blue);cursor:pointer;font-family:Inter,sans-serif;">📋 Elementos</button>';
+    if(p.plano_url){html+='<div style="width:0.5px;background:#e1e4e8;"></div>';html+='<button onclick="event.stopPropagation();openPlanoById('+p.id+')" style="flex:1;padding:9px;background:none;border:none;font-size:12px;font-weight:600;color:var(--green);cursor:pointer;font-family:Inter,sans-serif;">🗺 Ver plano</button>';}
+    if(isAdmin()){html+='<div style="width:0.5px;background:#e1e4e8;"></div>';html+='<label style="flex:1;padding:9px;font-size:12px;font-weight:600;color:#9aa3b2;cursor:pointer;font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;"><input type="file" accept="image/*" style="display:none" onchange="uploadPlano(event,'+p.id+')">📤 '+(p.plano_url?'Cambiar':'Plano')+'</label>';}
     html+='</div></div>';
   });
   document.getElementById('piso-list').innerHTML=html;
@@ -1468,39 +1716,29 @@ function renderEls(){
     var rightHtml=canEdit()
       ?'<button class="toggle '+(el.instalado===true?'on':'')+'" id="tog-'+el.id+'" onclick="askToggle('+el.id+','+el.instalado+')"></button>'
       :'<div class="sbadge '+cls+'">'+(el.instalado===true?'Instalado':el.instalado===false?'Pendiente':'—')+'</div>';
+    html+='<div class="el-swipe-wrap" id="swipe-wrap-'+el.id+'">';
+    html+='<div class="el-delete-bg" onclick="deleteElemento('+el.id+')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Eliminar</span></div>';
+    html+='<div class="el-row el-swipe-row" style="animation-delay:'+(i*0.02)+'s;background:white;" id="swipe-row-'+el.id+'" data-elid="'+el.id+'" onclick="openDetalle('+el.id+')">';
+    html+=fotoHtml;
+    html+='<div class="sdot '+cls+'"></div>';
+    html+='<div class="el-info" style="cursor:pointer"><div class="el-name">'+el.nombre+'</div><div class="el-meta">'+meta+'</div>'+(statusBadges?'<div style="margin-top:4px">'+statusBadges+'</div>':'')+'</div>';
     var instVal=el.cantidad_instalada||0;
     var pendVal=el.cantidad-instVal;
     var pct=el.cantidad>0?Math.round(instVal/el.cantidad*100):0;
-    var icoColor=instVal===el.cantidad?'#EAF3DE':instVal===0?'#FCEBEB':'#FAEEDA';
-    var icoText=instVal===el.cantidad?'#3B6D11':instVal===0?'#A32D2D':'#854F0B';
-    var icoContent=instVal===el.cantidad?'<i class="ti ti-check" style="font-size:16px;color:#3B6D11;"></i>':(instVal+'/'+el.cantidad);
-    html+='<div style="background:white;border-radius:12px;border:0.5px solid #e1e4e8;overflow:hidden;cursor:pointer;margin-bottom:8px;animation:fadeUp 0.2s ease both;animation-delay:'+(i*0.02)+'s" onclick="openDetalle('+el.id+')">';
-    html+='<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;">';
-    html+='<div style="width:36px;height:36px;border-radius:8px;background:'+icoColor+';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:600;color:'+icoText+';">'+icoContent+'</div>';
-    html+='<div style="flex:1;min-width:0;">';
-    html+='<div style="font-size:13px;font-weight:500;color:#1a1f2e;margin-bottom:2px;">'+el.nombre+'</div>';
-    html+='<div style="font-size:11px;color:#9aa3b2;">'+meta+'</div>';
-    if(statusBadges)html+='<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">'+statusBadges+'</div>';
-    html+='</div>';
     html+='<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;" onclick="event.stopPropagation()">';
     html+='<div style="display:flex;align-items:center;gap:3px;background:#EAF3DE;padding:3px 8px;border-radius:6px;">';
-    html+='<i class="ti ti-check" style="font-size:11px;color:#3B6D11;"></i>';
-    html+='<span style="font-size:11px;font-weight:500;color:#3B6D11;">'+instVal+' inst.</span></div>';
+    html+='<span style="font-size:13px;color:#3B6D11;">✓</span>';
+    html+='<span style="font-size:11px;font-weight:600;color:#3B6D11;">'+instVal+' inst.</span></div>';
     html+='<div style="display:flex;align-items:center;gap:3px;background:'+(pendVal===0?'#EAF3DE':'#FCEBEB')+';padding:3px 8px;border-radius:6px;">';
-    html+=(pendVal===0?'<i class="ti ti-check" style="font-size:11px;color:#3B6D11;"></i>':'<i class="ti ti-clock" style="font-size:11px;color:#A32D2D;"></i>');
-    html+='<span style="font-size:11px;font-weight:500;color:'+(pendVal===0?'#3B6D11':'#A32D2D')+';">'+pendVal+' pend.</span></div>';
+    html+=(pendVal===0?'<span style="font-size:13px;color:#3B6D11;">✓</span>':'<span style="font-size:13px;color:#A32D2D;">✗</span>');
+    html+='<span style="font-size:11px;font-weight:600;color:'+(pendVal===0?'#3B6D11':'#A32D2D')+';">'+pendVal+' pend.</span></div>';
     html+=rightHtml;
-    html+='</div></div>';
-    if(pct>0&&pct<100){
-      html+='<div style="padding:0 14px 10px;">';
-      html+='<div style="height:3px;background:#e1e4e8;border-radius:2px;overflow:hidden;">';
-      html+='<div style="height:100%;width:'+pct+'%;background:#1D9E75;border-radius:2px;"></div></div>';
-      html+='<div style="font-size:10px;color:#9aa3b2;margin-top:3px;">'+pct+'% completado</div></div>';
-    }
     html+='</div>';
-    if(fotoCount>0){html+='<div style="padding:0 14px 10px;display:flex;gap:4px;align-items:center;">';html+='<img src="'+elFotos[elFotos.length-1].url+'" style="width:32px;height:32px;border-radius:6px;object-fit:cover;cursor:pointer;" onclick="event.stopPropagation();openFotos('+el.id+',this,'+el.cantidad+')">';html+='<span style="font-size:10px;color:#9aa3b2;">'+fotoCount+' foto'+(fotoCount!==1?'s':'')+'</span></div>';}
+    if(pct>0&&pct<100){html+='<div style="padding:2px 14px 8px;"><div style="height:3px;background:#e1e4e8;border-radius:2px;overflow:hidden;"><div style="height:100%;width:'+pct+'%;background:#1D9E75;border-radius:2px;"></div></div></div>';}
+    html+='</div></div>';
   });
   document.getElementById('el-list').innerHTML=html;
+  setTimeout(initSwipeRows,50);
 }
 
 function previewFoto(e){
@@ -1714,7 +1952,7 @@ function renderDetalleContent(elId){
     '<div class="det-section">'+
       '<div class="det-section-title">Fotos de evidencia ('+fotoCount+'/'+el.cantidad+')</div>'+
       '<div class="det-foto-grid">'+fotosHtml+'</div>'+
-      '<input type="file" id="det-foto-input" accept="image/*" capture="environment" onchange="uploadDetalleFoto(event)" style="display:none">'+
+      '<input type="file" id="det-foto-input" accept="image/*" onchange="uploadDetalleFoto(event)" style="display:none">'+
     '</div>'+
 
     // Sub-elementos
@@ -1908,11 +2146,11 @@ function saveNuevoElemento(){
     instalado:false,
     pintado:false,
     retocado:false,
+    cantidad_instalada:0,
     cantidad_pintado:0,
-    cantidad_retocado:0,
-    creado_por:U.nombre
+    cantidad_retocado:0
   }]).select().then(function(r){
-    if(r.error){showToast('Error al crear','error');return;}
+    if(r.error){showToast('Error: '+r.error.message,'error');return;}
     if(r.data&&r.data.length>0)D.elementos.push(r.data[0]);
     closeModal('nuevo-el');
     renderEls();
@@ -3134,11 +3372,12 @@ var curMemberId=null;
 
 function switchProjTab(tab){
   curProjTab=tab;
+  document.getElementById('tab-resumen-proj').classList.toggle('active',tab==='resumen-proj');
   document.getElementById('tab-edificios').classList.toggle('active',tab==='edificios');
-  document.getElementById('tab-equipo').classList.toggle('active',tab==='equipo');
+  document.getElementById('tab-resumen-proj-content').style.display=tab==='resumen-proj'?'block':'none';
   document.getElementById('tab-edificios-content').style.display=tab==='edificios'?'block':'none';
-  document.getElementById('tab-equipo-content').style.display=tab==='equipo'?'block':'none';
-  if(tab==='equipo')buildEquipo(curProjId);
+  if(tab==='resumen-proj')buildProjResumen(curProjId);
+  if(tab==='edificios')renderEdMarcador(curProjId);
 }
 
 function getMemberStats(userId){
@@ -3974,19 +4213,104 @@ if('serviceWorker' in navigator){
     console.log('SW registrado');
   }).catch(function(e){console.log('SW error:',e);});
 }
+var _planoScale=1,_planoX=0,_planoY=0;
+
+function openPlanoById(pisoId){
+  var p=D.pisos.find(function(x){return x.id===pisoId;});
+  if(p&&p.plano_url)openPlano(p.plano_url,p.nombre);
+}
+
+function openPlano(url,nombre){
+  document.getElementById('plano-title').textContent=nombre||'Plano';
+  var img=document.getElementById('plano-img');
+  img.src=url;
+  _planoScale=1;_planoX=0;_planoY=0;
+  img.style.transform='translate(0px,0px) scale(1)';
+  document.getElementById('modal-plano').classList.remove('hidden');
+  setupPlanoGestures();
+}
+
+function closePlano(){
+  document.getElementById('modal-plano').classList.add('hidden');
+}
+
+function planoZoom(factor){
+  _planoScale=Math.max(0.3,Math.min(8,_planoScale*factor));
+  document.getElementById('plano-img').style.transform='translate('+_planoX+'px,'+_planoY+'px) scale('+_planoScale+')';
+}
+
+function planoReset(){
+  _planoScale=1;_planoX=0;_planoY=0;
+  document.getElementById('plano-img').style.transform='translate(0px,0px) scale(1)';
+}
+
+function setupPlanoGestures(){
+  var img=document.getElementById('plano-img');
+  var lastTouches=null;
+  img.onmousedown=function(e){
+    e.preventDefault();
+    var sx=e.clientX-_planoX,sy=e.clientY-_planoY;
+    img.style.cursor='grabbing';
+    document.onmousemove=function(e){
+      _planoX=e.clientX-sx;_planoY=e.clientY-sy;
+      img.style.transform='translate('+_planoX+'px,'+_planoY+'px) scale('+_planoScale+')';
+    };
+    document.onmouseup=function(){document.onmousemove=null;document.onmouseup=null;img.style.cursor='grab';};
+  };
+  img.ondblclick=function(){planoReset();};
+  img.ontouchstart=function(e){
+    if(e.touches.length===2)lastTouches=e.touches;
+    else{var t=e.touches[0];img._ts={x:t.clientX-_planoX,y:t.clientY-_planoY};lastTouches=null;}
+    e.preventDefault();
+  };
+  img.ontouchmove=function(e){
+    e.preventDefault();
+    if(e.touches.length===1&&img._ts){
+      _planoX=e.touches[0].clientX-img._ts.x;_planoY=e.touches[0].clientY-img._ts.y;
+      img.style.transform='translate('+_planoX+'px,'+_planoY+'px) scale('+_planoScale+')';
+    }else if(e.touches.length===2&&lastTouches){
+      var d1=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+      var d0=Math.hypot(lastTouches[0].clientX-lastTouches[1].clientX,lastTouches[0].clientY-lastTouches[1].clientY);
+      if(d0>0)_planoScale=Math.max(0.3,Math.min(8,_planoScale*(d1/d0)));
+      lastTouches=e.touches;
+      img.style.transform='translate('+_planoX+'px,'+_planoY+'px) scale('+_planoScale+')';
+    }
+  };
+  img.ontouchend=function(){lastTouches=null;img._ts=null;};
+}
+
+function uploadPlano(e,pisoId){
+  var file=e.target.files[0];
+  if(!file)return;
+  showToast('Subiendo plano...','');
+  var path='plano-'+pisoId+'-'+Date.now()+'.jpg';
+  sb.storage.from('fotos').upload(path,file,{contentType:file.type,upsert:true}).then(function(res){
+    e.target.value='';
+    if(res.error){showToast('Error al subir','error');return;}
+    var url=sb.storage.from('fotos').getPublicUrl(path).data.publicUrl;
+    sb.from('pisos').update({plano_url:url}).eq('id',pisoId).then(function(r){
+      if(r.error){showToast('Error al guardar','error');return;}
+      var idx=D.pisos.findIndex(function(p){return p.id===pisoId;});
+      if(idx!==-1)D.pisos[idx].plano_url=url;
+      buildPisos(curEdId,false);
+      showToast('Plano guardado','success');
+    });
+  });
+}
+
 
 
 </script>
 
 <!-- MODAL PLANO -->
 <div class="modal-overlay hidden" id="modal-plano" onclick="closePlano()">
-  <div style="background:#000;width:100%;height:100%;display:flex;flex-direction:column;position:relative;" onclick="event.stopPropagation()">
+  <div style="background:#000;width:100%;height:100%;display:flex;flex-direction:column;" onclick="event.stopPropagation()">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;padding-top:calc(14px + env(safe-area-inset-top,0px));background:#111;flex-shrink:0;">
       <div style="font-size:15px;font-weight:600;color:white;" id="plano-title">Plano</div>
-      <button onclick="closePlano()" style="background:rgba(255,255,255,0.1);border:none;color:white;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+      <button onclick="closePlano()" style="background:rgba(255,255,255,0.1);border:none;color:white;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;">✕</button>
     </div>
-    <div id="plano-viewer" style="flex:1;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;">
-      <img id="plano-img" src="" alt="Plano" style="max-width:none;max-height:none;cursor:grab;user-select:none;touch-action:none;">
+    <div id="plano-viewer" style="flex:1;overflow:hidden;display:flex;align-items:center;justify-content:center;">
+      <img id="plano-img" src="" alt="Plano" style="max-width:none;max-height:none;cursor:grab;user-select:none;touch-action:none;transform-origin:center center;">
     </div>
     <div style="display:flex;justify-content:center;gap:16px;padding:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom,16px));background:#111;flex-shrink:0;">
       <button onclick="planoZoom(1.3)" style="background:rgba(255,255,255,0.15);border:none;color:white;width:44px;height:44px;border-radius:50%;font-size:22px;cursor:pointer;">+</button>

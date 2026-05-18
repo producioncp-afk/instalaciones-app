@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- Build: 2026-05-18 04:08:53 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -1064,7 +1065,8 @@ function startApp(){
     document.getElementById('nav-historial').classList.remove('hidden');
   }
   setTopbar(true);
-  loadData().then(function(){buildHome();setupRealtime();});
+  loadData().then(function(){buildHome();setupRealtime();
+  initPushNotifications();});
   // Init push notifications
   setTimeout(initPush, 2000);
 }
@@ -1194,6 +1196,34 @@ function setupRealtime(){
       if(D.historial)D.historial.unshift(pl.new);
     })
     .subscribe();
+}
+
+
+// ── PUSH NOTIFICATIONS (Capacitor) ──
+function initPushNotifications(){
+  if(!window.Capacitor||!window.Capacitor.isNativePlatform())return;
+  var Push=Capacitor.Plugins.PushNotifications;
+  Push.requestPermissions().then(function(result){
+    if(result.receive==='granted'){
+      Push.register();
+    }
+  });
+  Push.addListener('registration',function(token){
+    // Save token to Supabase for this user
+    if(U&&U.id){
+      sb.from('usuarios').update({push_token:token.value}).eq('id',U.id);
+    }
+  });
+  Push.addListener('pushNotificationReceived',function(notification){
+    showToast(notification.title+': '+notification.body,'success');
+  });
+  Push.addListener('pushNotificationActionPerformed',function(notification){
+    // When user taps notification
+    var data=notification.notification.data;
+    if(data&&data.elemento_id){
+      openDetalle(parseInt(data.elemento_id));
+    }
+  });
 }
 
 function refreshCurrent(){
@@ -1644,7 +1674,7 @@ function buildPisos(edId,push){
     var ps=calcStats(getEls(pid)),c=getColor(ps.pct);
     var _pbc2=ps.pct>=70?'#0d7a3d':ps.pct>=30?'#b45309':'#ef4444';
     var btnRow='<button onclick="buildEls('+pid+')" style="flex:1;padding:9px;background:none;border:none;font-size:12px;font-weight:600;color:var(--blue);cursor:pointer;font-family:Inter,sans-serif;">📋 Elementos</button>';
-    if(pplano)btnRow+='<div style="width:0.5px;background:#e1e4e8;"></div><button onclick="openPlanoById('+pid+')" style="flex:1;padding:9px;background:none;border:none;font-size:12px;font-weight:600;color:var(--green);cursor:pointer;font-family:Inter,sans-serif;">🗺 Ver plano</button>';
+    if(pplano)btnRow+='<div style="width:0.5px;background:#e1e4e8;"></div><button onclick="openPlanoById('+pid+')" style="flex:1;padding:9px;background:none;border:none;font-size:12px;font-weight:600;color:var(--green);cursor:pointer;font-family:Inter,sans-serif;">🗺 Ver plano</button><div style="width:0.5px;background:#e1e4e8;"></div><button onclick="quitarPlano('+pid+')" style="padding:9px 10px;background:none;border:none;font-size:12px;font-weight:600;color:#A32D2D;cursor:pointer;font-family:Inter,sans-serif;">✕</button>';
     if(isAdmin())btnRow+='<div style="width:0.5px;background:#e1e4e8;"></div><label style="flex:1;padding:9px;font-size:12px;font-weight:600;color:#9aa3b2;cursor:pointer;font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;"><input type="file" accept="image/*" style="display:none" onchange="uploadPlano(event,'+pid+')">📤 '+(pplano?'Cambiar':'Plano')+'</label>';
     html+='<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;margin-bottom:8px;">';
     html+='<div style="height:3px;background:linear-gradient(90deg,'+_pbc2+' '+ps.pct+'%,#e1e4e8 '+ps.pct+'%);"></div>';
@@ -4355,6 +4385,17 @@ function setupPlanoGestures(){
     }
   };
   img.ontouchend=function(){lastTouches=null;img._ts=null;};
+}
+
+function quitarPlano(pisoId){
+  if(!confirm('¿Quitar el plano de este piso?'))return;
+  sb.from('pisos').update({plano_url:null}).eq('id',pisoId).then(function(r){
+    if(r.error){showToast('Error al quitar plano','error');return;}
+    var idx=D.pisos.findIndex(function(p){return p.id===pisoId;});
+    if(idx!==-1)D.pisos[idx].plano_url=null;
+    buildPisos(curEdId,false);
+    showToast('Plano eliminado','success');
+  });
 }
 
 function uploadPlano(e,pisoId){

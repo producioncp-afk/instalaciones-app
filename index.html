@@ -1644,7 +1644,7 @@ function buildPisos(edId,push){
     var ps=calcStats(getEls(pid)),c=getColor(ps.pct);
     var _pbc2=ps.pct>=70?'#0d7a3d':ps.pct>=30?'#b45309':'#ef4444';
     var btnRow='<button onclick="buildEls('+pid+')" style="flex:1;padding:9px;background:none;border:none;font-size:12px;font-weight:600;color:var(--blue);cursor:pointer;font-family:Inter,sans-serif;">📋 Elementos</button>';
-    if(pplano)btnRow+='<div style="width:0.5px;background:#e1e4e8;"></div><button onclick="openPlanoById('+pid+')" style="flex:1;padding:9px;background:none;border:none;font-size:12px;font-weight:600;color:var(--green);cursor:pointer;font-family:Inter,sans-serif;">🗺 Ver plano</button><div style="width:0.5px;background:#e1e4e8;"></div><button onclick="quitarPlano('+pid+')" style="padding:9px 10px;background:none;border:none;font-size:12px;font-weight:600;color:#A32D2D;cursor:pointer;font-family:Inter,sans-serif;">✕</button>';
+    if(pplano)btnRow+='<div style="width:0.5px;background:#e1e4e8;"></div><button onclick="openPlanoById('+pid+')" style="flex:1;padding:9px;background:none;border:none;font-size:12px;font-weight:600;color:var(--green);cursor:pointer;font-family:Inter,sans-serif;">🗺 Ver plano</button>';
     if(isAdmin())btnRow+='<div style="width:0.5px;background:#e1e4e8;"></div><label style="flex:1;padding:9px;font-size:12px;font-weight:600;color:#9aa3b2;cursor:pointer;font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;"><input type="file" accept="image/*" style="display:none" onchange="uploadPlano(event,'+pid+')">📤 '+(pplano?'Cambiar':'Plano')+'</label>';
     html+='<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;margin-bottom:8px;">';
     html+='<div style="height:3px;background:linear-gradient(90deg,'+_pbc2+' '+ps.pct+'%,#e1e4e8 '+ps.pct+'%);"></div>';
@@ -4355,17 +4355,6 @@ function setupPlanoGestures(){
     }
   };
   img.ontouchend=function(){lastTouches=null;img._ts=null;};
-}
-
-function quitarPlano(pisoId){
-  if(!confirm('¿Quitar el plano de este piso?'))return;
-  sb.from('pisos').update({plano_url:null}).eq('id',pisoId).then(function(r){
-    if(r.error){showToast('Error al quitar plano','error');return;}
-    var idx=D.pisos.findIndex(function(p){return p.id===pisoId;});
-    if(idx!==-1)D.pisos[idx].plano_url=null;
-    buildPisos(curEdId,false);
-    showToast('Plano eliminado','success');
-  });
 }
 
 function uploadPlano(e,pisoId){

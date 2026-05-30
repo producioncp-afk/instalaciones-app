@@ -1388,6 +1388,7 @@ function getHabitaciones(tipoId){
 function buildHabitaciones(tipoHabId, push){
   if(push===undefined)push=true;
   curTipoHabId=parseInt(tipoHabId);
+  console.log('buildHabitaciones id=',curTipoHabId,'total habs=',D.habitaciones.length,'filtered=',D.habitaciones.filter(function(h){return parseInt(h.tipo_habitacion_id)===curTipoHabId;}).length);
   var tipo=D.tipos_hab.find(function(t){return t.id===tipoHabId;});
   var piso=tipo?D.pisos.find(function(p){return p.id===tipo.piso_id;}):null;
   if(push)navStack.push('pisos');

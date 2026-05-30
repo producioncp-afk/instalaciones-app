@@ -581,6 +581,11 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
     </div><div id="el-list"></div></div>
   </div>
 
+  <!-- HABITACIONES -->
+  <div class="screen" id="screen-habitaciones">
+    <div class="pad" id="habitaciones-content"></div>
+  </div>
+
   <!-- ELEMENTOS HABITACION -->
   <div class="screen" id="screen-elementos-hab">
     <div class="el-sum" id="el-hab-sum"></div>
@@ -966,7 +971,7 @@ fbMsg.onMessage(function(payload){
 var U=null,curProjId=null,curEdId=null,curPisoId=null;
 var navStack=[],pendingToggle=null;
 var selEmoji_='🏗️',selColor_='#2563eb';
-var D={proyectos:[],edificios:[],pisos:[],elementos:[],usuarios:[],historial:[],fotos:[],specs:[],seguimiento:[],notifs:[],tipos_hab:[],elementos_hab:[],tareas:[],sub_elementos:[]};
+var D={proyectos:[],edificios:[],pisos:[],elementos:[],usuarios:[],historial:[],fotos:[],specs:[],seguimiento:[],notifs:[],tipos_hab:[],elementos_hab:[],habitaciones:[],tareas:[],sub_elementos:[]};
 var curElId=null;
 var appCharts={};
 
@@ -1094,6 +1099,7 @@ function loadData(){
     sb.from('proyectos').select('*').eq('activo',true).order('creado_en'),
     sb.from('tipos_habitacion').select('*').order('id'),
     sb.from('elementos_habitacion').select('*').order('id'),
+    sb.from('habitaciones').select('*').order('numero'),
     sb.from('edificios').select('*').order('id'),
     sb.from('pisos').select('*').order('orden'),
     sb.from('elementos').select('*').order('id'),
@@ -1109,21 +1115,22 @@ function loadData(){
   return Promise.all(qs).then(function(r){
     D.tipos_hab=r[1].data||[];
     D.elementos_hab=r[2].data||[];
-    var allP=r[0].data||[],allE=r[3].data||[];
+    D.habitaciones=r[4].data||[];
+    var allP=r[0].data||[],allE=r[4].data||[];
     if(!isAdmin()&&U.proyecto_id){
       D.proyectos=allP.filter(function(p){return p.id===U.proyecto_id;});
       D.edificios=allE.filter(function(e){return e.proyecto_id===U.proyecto_id;});
     }else{D.proyectos=allP;D.edificios=allE;}
-    D.pisos=r[4].data||[];D.elementos=r[5].data||[];
-    D.fotos=r[6].data||[];
-    D.seguimiento=r[7].data||[];
-    D.specs=r[8].data||[];
-    D.historial=r[9].data||[];
-    D.notifs=r[10].data||[];
-    D.usuarios=r[11].data||[];
-    D.contactos=r[12]?r[12].data||[]:[];
-    D.tareas=r[12].data||[];
-    D.sub_elementos=r[13].data||[];
+    D.pisos=r[5].data||[];D.elementos=r[6].data||[];
+    D.fotos=r[7].data||[];
+    D.seguimiento=r[8].data||[];
+    D.specs=r[9].data||[];
+    D.historial=r[10].data||[];
+    D.notifs=r[11].data||[];
+    D.usuarios=r[12].data||[];
+    D.contactos=r[12]?r[13].data||[]:[];
+    D.tareas=r[13].data||[];
+    D.sub_elementos=r[14].data||[];
     setOnline(true);
     updateNotifBadge();
     updateTareasBadge();
@@ -1247,6 +1254,7 @@ function saveNuevoTipoHab(){
 }
 
 function buildElesHab(tipoHabId,push){
+  buildHabitaciones(tipoHabId,push);return;
   if(push===undefined)push=true;
   curTipoHabId=tipoHabId;
   var tipo=D.tipos_hab.find(function(t){return t.id===tipoHabId;});
@@ -1369,6 +1377,164 @@ function openDetalleHab(elId){
   if(!el)return;
   // For now show a simple detail inline
   showToast(el.nombre+' — '+el.cantidad+' unidades','');
+}
+
+var curHabId = null;
+
+function getHabitaciones(tipoId){
+  return D.habitaciones.filter(function(h){return h.tipo_habitacion_id===tipoId;});
+}
+
+function buildHabitaciones(tipoHabId, push){
+  if(push===undefined)push=true;
+  curTipoHabId=tipoHabId;
+  var tipo=D.tipos_hab.find(function(t){return t.id===tipoHabId;});
+  var piso=tipo?D.pisos.find(function(p){return p.id===tipo.piso_id;}):null;
+  if(push)navStack.push('pisos');
+  setTopbar(false,(tipo?tipo.tipo:'Habitaciones')+(piso?' · '+piso.nombre:''));
+  document.getElementById('back-btn').classList.remove('hidden');
+  showScreen('habitaciones');
+  renderHabitaciones();
+}
+
+function renderHabitaciones(){
+  var tipo=D.tipos_hab.find(function(t){return t.id===curTipoHabId;});
+  var habs=getHabitaciones(curTipoHabId);
+  var cont=document.getElementById('habitaciones-content');
+  if(!cont)return;
+
+  // Stats header
+  var totalEls=D.elementos_hab.filter(function(e){return e.tipo_habitacion_id===curTipoHabId;});
+  var s=calcStats(totalEls);
+  var barColor=s.pct>=70?'#0d7a3d':s.pct>=30?'#b45309':'#ef4444';
+
+  var html='';
+  // Info card
+  html+='<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;margin-bottom:12px;">';
+  html+='<div style="height:3px;background:linear-gradient(90deg,'+barColor+' '+s.pct+'%,#e1e4e8 '+s.pct+'%);"></div>';
+  html+='<div style="padding:12px 14px;">';
+  html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
+  html+='<div style="font-size:13px;font-weight:700;color:#1a1f2e;">'+(tipo?tipo.tipo:'')+'</div>';
+  html+='<div style="font-size:12px;font-weight:700;color:'+barColor+';">'+s.pct+'%</div></div>';
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">';
+  html+='<div style="text-align:center;"><div style="font-size:18px;font-weight:700;color:#1a1f2e;">'+habs.length+'</div><div style="font-size:10px;color:#9aa3b2;">Habitaciones</div></div>';
+  html+='<div style="text-align:center;"><div style="font-size:18px;font-weight:700;color:#0d7a3d;">'+s.inst+'</div><div style="font-size:10px;color:#9aa3b2;">Instalados</div></div>';
+  html+='<div style="text-align:center;"><div style="font-size:18px;font-weight:700;color:#c0392b;">'+s.pend+'</div><div style="font-size:10px;color:#9aa3b2;">Pendientes</div></div>';
+  html+='</div></div></div>';
+
+  html+='<div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">'+habs.length+' habitaciones</div>';
+
+  if(!habs.length){
+    html+='<div style="text-align:center;padding:3rem;color:var(--text2);font-size:13px;">No hay habitaciones registradas.</div>';
+  }else{
+    habs.sort(function(a,b){return a.numero.localeCompare(b.numero);});
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    habs.forEach(function(hab){
+      // Get elements for this hab type to show status
+      var els=D.elementos_hab.filter(function(e){return e.tipo_habitacion_id===curTipoHabId;});
+      var s2=calcStats(els);
+      var bColor=s2.pct>=70?'#0d7a3d':s2.pct>=30?'#b45309':'#ef4444';
+      var bBg=s2.pct>=70?'#EAF3DE':s2.pct>=30?'#FAEEDA':'#FCEBEB';
+      html+='<div style="background:white;border-radius:10px;border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:transform 0.1s;active:scale(0.99);" onclick="openHabitacion('+hab.id+')">';
+      html+='<div style="height:3px;background:linear-gradient(90deg,'+bColor+' '+s2.pct+'%,#e1e4e8 '+s2.pct+'%);"></div>';
+      html+='<div style="padding:12px;">';
+      html+='<div style="font-size:20px;font-weight:700;color:#1a1f2e;letter-spacing:-0.02em;margin-bottom:4px;">'+hab.numero+'</div>';
+      html+='<div style="display:flex;align-items:center;justify-content:space-between;">';
+      html+='<div style="font-size:11px;color:#9aa3b2;">'+els.length+' elementos</div>';
+      html+='<div style="font-size:11px;font-weight:700;color:'+bColor+';">'+s2.pct+'%</div>';
+      html+='</div></div></div>';
+    });
+    html+='</div>';
+  }
+
+  // Add habitacion button (admin)
+  if(isAdmin()){
+    html+='<button onclick="openAddHabitacion()" style="display:flex;align-items:center;justify-content:center;gap:8px;background:var(--white);border:1.5px dashed var(--border);border-radius:var(--r);padding:14px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text2);width:100%;margin-top:8px;">+ Agregar habitación</button>';
+  }
+
+  cont.innerHTML=html;
+}
+
+function openHabitacion(habId){
+  curHabId=habId;
+  var hab=D.habitaciones.find(function(h){return h.id===habId;});
+  var tipo=hab?D.tipos_hab.find(function(t){return t.id===hab.tipo_habitacion_id;}):null;
+  navStack.push('habitaciones');
+  setTopbar(false,'Hab. '+(hab?hab.numero:'')+(tipo?' · '+tipo.tipo:''));
+  document.getElementById('back-btn').classList.remove('hidden');
+  var addBtn=document.getElementById('add-el-hab-btn');
+  if(addBtn)addBtn.style.display=isAdmin()?'block':'none';
+  showScreen('elementos-hab');
+  renderElsHabForHabitacion(habId);
+}
+
+function renderElsHabForHabitacion(habId){
+  var hab=D.habitaciones.find(function(h){return h.id===habId;});
+  if(!hab)return;
+  var tipoId=hab.tipo_habitacion_id;
+  var items=D.elementos_hab.filter(function(e){return e.tipo_habitacion_id===tipoId;});
+  var s=calcStats(items);
+
+  document.getElementById('el-hab-sum').innerHTML=
+    '<div style="background:var(--bg);border-radius:8px;padding:10px;text-align:center;">'+
+    '<div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px;">Total</div>'+
+    '<div style="font-size:22px;font-weight:700;color:var(--text);">'+items.length+'</div></div>'+
+    '<div style="background:#EAF3DE;border-radius:8px;padding:10px;text-align:center;">'+
+    '<div style="font-size:11px;font-weight:600;color:#3B6D11;margin-bottom:4px;">Instalados</div>'+
+    '<div style="font-size:22px;font-weight:700;color:#27500A;">'+s.inst+'</div></div>'+
+    '<div style="background:#FCEBEB;border-radius:8px;padding:10px;text-align:center;">'+
+    '<div style="font-size:11px;font-weight:600;color:#A32D2D;margin-bottom:4px;">Pendientes</div>'+
+    '<div style="font-size:22px;font-weight:700;color:#791F1F;">'+s.pend+'</div></div>';
+
+  var fill=document.getElementById('el-hab-pbar');
+  fill.style.width=s.pct+'%';fill.style.background=getColor(s.pct);
+  document.getElementById('el-hab-pct').textContent=s.pct+'%';
+  document.getElementById('el-hab-pct').style.color=getColor(s.pct);
+
+  var hdrSpan=document.getElementById('el-hab-hdr').querySelector('span');
+  if(hdrSpan)hdrSpan.textContent='Hab. '+hab.numero+' ('+items.length+' elementos)';
+
+  var html='';
+  items.forEach(function(el,i){
+    var instVal=el.cantidad_instalada||0;
+    var pendVal=el.cantidad-instVal;
+    var pct=el.cantidad>0?Math.round(instVal/el.cantidad*100):0;
+    var icoColor=instVal===el.cantidad?'#EAF3DE':instVal===0?'#FCEBEB':'#FAEEDA';
+    var icoText=instVal===el.cantidad?'#27500A':instVal===0?'#A32D2D':'#854F0B';
+    var icoContent=instVal===el.cantidad?'<span style="font-size:16px;color:#3B6D11;">✓</span>':(instVal+'/'+el.cantidad);
+    var meta=el.actualizado_por?el.actualizado_por+' · '+formatDate(el.actualizado_en):'Sin actualizar';
+    html+='<div style="background:white;border-radius:12px;border:0.5px solid #e1e4e8;overflow:hidden;margin-bottom:8px;animation:fadeUp 0.2s ease both;animation-delay:'+(i*0.02)+'s;">';
+    html+='<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;">';
+    html+='<div style="width:36px;height:36px;border-radius:8px;background:'+icoColor+';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:600;color:'+icoText+';">'+icoContent+'</div>';
+    html+='<div style="flex:1;min-width:0;">';
+    html+='<div style="font-size:13px;font-weight:500;color:#1a1f2e;margin-bottom:2px;">'+el.nombre+'</div>';
+    html+='<div style="font-size:11px;color:#9aa3b2;">'+meta+'</div>';
+    if(el.nota)html+='<div style="font-size:11px;color:#9aa3b2;font-style:italic;margin-top:2px;">💬 '+el.nota.slice(0,40)+(el.nota.length>40?'...':'')+'</div>';
+    html+='</div>';
+    html+='<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;" onclick="event.stopPropagation()">';
+    html+='<div style="display:flex;align-items:center;gap:3px;background:#EAF3DE;padding:3px 8px;border-radius:6px;"><span style="font-size:13px;color:#3B6D11;">✓</span><span style="font-size:11px;font-weight:500;color:#3B6D11;">'+instVal+' inst.</span></div>';
+    html+='<div style="display:flex;align-items:center;gap:3px;background:'+(pendVal===0?'#EAF3DE':'#FCEBEB')+';padding:3px 8px;border-radius:6px;">'+(pendVal===0?'<span style="font-size:13px;color:#3B6D11;">✓</span>':'<span style="font-size:13px;color:#A32D2D;">✗</span>')+'<span style="font-size:11px;font-weight:500;color:'+(pendVal===0?'#3B6D11':'#A32D2D')+';">'+pendVal+' pend.</span></div>';
+    if(canEdit())html+='<button class="toggle '+(el.instalado===true?'on':'')+'" onclick="event.stopPropagation();toggleElHab('+el.id+','+el.instalado+')"></button>';
+    html+='</div></div>';
+    if(pct>0&&pct<100){html+='<div style="padding:0 14px 8px;"><div style="height:3px;background:#e1e4e8;border-radius:2px;overflow:hidden;"><div style="height:100%;width:'+pct+'%;background:#1D9E75;border-radius:2px;"></div></div></div>';}
+    html+='</div>';
+  });
+
+  if(!items.length){
+    html='<div style="text-align:center;padding:3rem;color:var(--text2);font-size:13px;">No hay elementos para este tipo.</div>';
+  }
+  document.getElementById('el-hab-list').innerHTML=html;
+}
+
+function openAddHabitacion(){
+  var numero=prompt('Número de habitación (ej: 301):');
+  if(!numero||!numero.trim())return;
+  sb.from('habitaciones').insert([{tipo_habitacion_id:curTipoHabId,numero:numero.trim()}]).select().then(function(r){
+    if(r.error){showToast('Error: '+r.error.message,'error');return;}
+    if(r.data&&r.data.length>0)D.habitaciones.push(r.data[0]);
+    renderHabitaciones();
+    showToast('Habitación '+numero+' agregada','success');
+  });
 }
 
 

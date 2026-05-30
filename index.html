@@ -1371,8 +1371,8 @@ function toggleElHab(elId, currentVal){
     if(r.error){showToast('Error','error');return;}
     var idx=D.elementos_hab.findIndex(function(e){return e.id===elId;});
     if(idx!==-1)Object.assign(D.elementos_hab[idx],update);
-    renderElsHab();
-    buildPisos(curEdId,false);
+    if(curHabId)renderElsHabForHabitacion(curHabId);
+    else renderElsHab();
     showToast(newVal?'Instalado':'Pendiente','success');
   });
 }

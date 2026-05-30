@@ -602,6 +602,11 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
     </div><div id="el-hab-list"></div></div>
   </div>
 
+  <!-- DETALLE HAB -->
+  <div class="screen" id="screen-detalle-hab">
+    <div id="detalle-hab-content"></div>
+  </div>
+
   <!-- DETALLE -->
   <div class="screen" id="screen-detalle"><div id="detalle-content"></div></div>
 
@@ -1116,7 +1121,6 @@ function loadData(){
     D.tipos_hab=r[1].data||[];
     D.elementos_hab=r[2].data||[];
     D.habitaciones=r[3].data||[];
-    console.log('loadData habitaciones:',r[3].data?r[3].data.length:'ERROR',r[3].error?r[3].error.message:'ok');
     var allP=r[0].data||[],allE=r[4].data||[];
     if(!isAdmin()&&U.proyecto_id){
       D.proyectos=allP.filter(function(p){return p.id===U.proyecto_id;});
@@ -1376,8 +1380,225 @@ function toggleElHab(elId, currentVal){
 function openDetalleHab(elId){
   var el=D.elementos_hab.find(function(x){return x.id===elId;});
   if(!el)return;
-  // For now show a simple detail inline
-  showToast(el.nombre+' — '+el.cantidad+' unidades','');
+  var hab=D.habitaciones.find(function(h){return h.id===curHabId;});
+  var tipo=D.tipos_hab.find(function(t){return t.id===el.tipo_habitacion_id;});
+  navStack.push('elementos-hab');
+  setTopbar(false,el.nombre);
+  document.getElementById('back-btn').classList.remove('hidden');
+  showScreen('detalle-hab');
+  renderDetalleHab(elId);
+}
+
+function renderDetalleHab(elId){
+  var el=D.elementos_hab.find(function(x){return x.id===elId;});
+  if(!el)return;
+  var hab=D.habitaciones.find(function(h){return h.id===curHabId;});
+  var cls=el.instalado===true?'si':el.instalado===false?'no':'nd';
+  var estadoLabel=el.instalado===true?'Instalado':el.instalado===false?'Pendiente':'Sin definir';
+  var elFotos=D.fotos.filter(function(f){return f.hab_elemento_id===elId;});
+  var fotoCount=elFotos.length;
+
+  var fotosHtml='';
+  elFotos.forEach(function(f){
+    fotosHtml+='<div class="det-foto-wrap">';
+    fotosHtml+='<img class="det-foto-img" src="'+f.url+'" onclick="openLightbox(this.src)">';
+    if(isAdmin()){
+      fotosHtml+='<button class="det-foto-del" onclick="deleteFotoHab('+f.id+',\''+f.path+'\','+elId+')">✕</button>';
+    }
+    fotosHtml+='</div>';
+  });
+  if(canEdit()){
+    fotosHtml+='<div class="det-add-foto" onclick="openFotoChooser(uploadHabFotoFile)"><span style="font-size:22px">📷</span><span>Agregar</span></div>';
+  }
+
+  var histHab=D.historial?D.historial.filter(function(h){return h.hab_elemento_id===elId;}):[];
+  var histHtml='';
+  if(!histHab.length){histHtml='<div style="padding:16px;color:var(--text2);font-size:13px">Sin cambios registrados.</div>';}
+  else{histHab.forEach(function(h,hi){
+    var isInst=h.accion==='instalado';
+    var avColor=isInst?'#EAF3DE':'#FCEBEB';
+    var avText=isInst?'#27500A':'#791F1F';
+    var ini=(h.usuario_nombre||'?').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+    histHtml+='<div style="display:flex;gap:10px;padding:12px 14px;border-bottom:0.5px solid var(--border);">';
+    histHtml+='<div style="width:32px;height:32px;border-radius:50%;background:'+avColor+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:'+avText+';">'+ini+'</div>';
+    histHtml+='<div style="flex:1;"><div style="display:flex;justify-content:space-between;margin-bottom:4px;"><div style="font-size:13px;font-weight:600;">'+h.usuario_nombre+'</div><div style="font-size:11px;color:var(--text3);">'+formatDate(h.creado_en)+'</div></div>';
+    histHtml+='<div style="font-size:12px;color:'+(isInst?'#3B6D11':'#A32D2D');
+    histHtml+=';font-weight:600;">'+(isInst?'✓ Instalado':'✗ Pendiente')+'</div>';
+    if(h.nota)histHtml+='<div style="font-size:12px;color:var(--text2);font-style:italic;margin-top:4px;">'+h.nota+'</div>';
+    histHtml+='</div></div>';
+  });}
+
+  var content=document.getElementById('detalle-hab-content');
+  if(!content)return;
+
+  content.innerHTML=
+    '<div style="padding-bottom:calc(var(--nb) + var(--sab))">'+
+    '<div class="det-header">'+
+      '<div class="det-name">'+el.nombre+'</div>'+
+      '<div class="det-badges">'+
+        '<div class="sbadge '+cls+'">'+estadoLabel+'</div>'+
+        (hab?'<div style="font-size:12px;font-weight:600;color:var(--text2);padding:4px 10px;background:var(--bg);border-radius:20px;">Hab. '+hab.numero+'</div>':'')+
+      '</div>'+
+    '</div>'+
+
+    '<div class="det-section">'+
+      '<div class="det-section-title">Información</div>'+
+      (canEdit()?
+        '<div class="estado-toggle-row">'+
+          '<div class="estado-lbl">Estado instalación</div>'+
+          '<button class="toggle '+(el.instalado===true?'on':'')+'" id="det-hab-toggle" onclick="toggleElHabDetalle('+el.id+','+el.instalado+')"></button>'+
+        '</div>'
+      :'<div class="det-row"><div class="det-row-label">Estado</div><div class="det-row-value">'+estadoLabel+'</div></div>')+
+      '<div class="det-row"><div class="det-row-label">Cantidad total</div><div class="det-row-value">'+el.cantidad+'</div></div>'+
+      '<div class="det-row"><div class="det-row-label">Instalados</div>'+
+        (canEdit()?
+          '<div class="det-qty-ctrl">'+
+            '<button class="qty-btn" onclick="changeHabElCant('+el.id+',\'cantidad_instalada\',-1)">−</button>'+
+            '<div class="qty-val" id="qhi-'+el.id+'">'+(el.cantidad_instalada||0)+'</div>'+
+            '<button class="qty-btn" onclick="changeHabElCant('+el.id+',\'cantidad_instalada\',1)">+</button>'+
+            '<span style="font-size:12px;color:var(--text2);margin-left:6px;font-weight:600;">de '+el.cantidad+'</span>'+
+          '</div>'
+        :'<div class="det-row-value">'+(el.cantidad_instalada||0)+' de '+el.cantidad+'</div>')+
+      '</div>'+
+      '<div class="det-row"><div class="det-row-label">Pintado</div>'+
+        (canEdit()?
+          '<div class="det-qty-ctrl">'+
+            '<button class="qty-btn" onclick="changeHabElCant('+el.id+',\'cantidad_pintado\',-1)">−</button>'+
+            '<div class="qty-val" id="qhp-'+el.id+'">'+(el.cantidad_pintado||0)+'</div>'+
+            '<button class="qty-btn" onclick="changeHabElCant('+el.id+',\'cantidad_pintado\',1)">+</button>'+
+            '<span style="font-size:11px;color:var(--text3);margin-left:4px;">/ '+el.cantidad+'</span>'+
+          '</div>'
+        :'<div class="det-row-value">'+(el.cantidad_pintado||0)+' / '+el.cantidad+'</div>')+
+      '</div>'+
+      '<div class="det-row"><div class="det-row-label">Retocado</div>'+
+        (canEdit()?
+          '<div class="det-qty-ctrl">'+
+            '<button class="qty-btn" onclick="changeHabElCant('+el.id+',\'cantidad_retocado\',-1)">−</button>'+
+            '<div class="qty-val" id="qhr-'+el.id+'">'+(el.cantidad_retocado||0)+'</div>'+
+            '<button class="qty-btn" onclick="changeHabElCant('+el.id+',\'cantidad_retocado\',1)">+</button>'+
+            '<span style="font-size:11px;color:var(--text3);margin-left:4px;">/ '+el.cantidad+'</span>'+
+          '</div>'
+        :'<div class="det-row-value">'+(el.cantidad_retocado||0)+' / '+el.cantidad+'</div>')+
+      '</div>'+
+      '<div class="det-row"><div class="det-row-label">Actualizado por</div><div class="det-row-value">'+(el.actualizado_por||'—')+'</div></div>'+
+      '<div class="det-row"><div class="det-row-label">Última actualización</div><div class="det-row-value">'+(el.actualizado_en?formatDate(el.actualizado_en):'—')+'</div></div>'+
+    '</div>'+
+
+    '<div class="det-section">'+
+      '<div class="det-section-title">Observación</div>'+
+      (canEdit()?
+        '<textarea class="det-nota-input" id="det-hab-nota" placeholder="Escribe una observación...">'+(el.nota||'')+'</textarea>'
+      :'<div style="padding:14px 16px;font-size:14px;color:'+(el.nota?'var(--text)':'var(--text3)')+';">'+(el.nota||'Sin observaciones')+'</div>')+
+    '</div>'+
+
+    (canEdit()?'<button class="det-save-btn" onclick="saveDetalleHab('+el.id+')">Guardar cambios</button>':'')+
+    (isAdmin()?'<button onclick="deleteElHab('+el.id+')" style="display:flex;align-items:center;justify-content:center;gap:6px;background:none;color:#A32D2D;border:1px solid #F7C1C1;border-radius:8px;padding:12px;font-size:14px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;width:calc(100% - 28px);margin:0 14px 10px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Eliminar elemento</button>':'')+
+
+    '<div class="det-section">'+
+      '<div class="det-section-title">Fotos de evidencia</div>'+
+      '<div class="det-foto-grid">'+fotosHtml+'</div>'+
+    '</div>'+
+
+    '<div class="det-section" style="margin-bottom:16px">'+
+      '<div class="det-section-title">Historial</div>'+
+      histHtml+
+    '</div>'+
+    '</div>';
+}
+
+function toggleElHabDetalle(elId, currentVal){
+  if(!canEdit())return;
+  var newVal=currentVal===true?false:true;
+  var update={instalado:newVal,actualizado_por:U.nombre,actualizado_en:new Date().toISOString()};
+  if(newVal)update.cantidad_instalada=D.elementos_hab.find(function(e){return e.id===elId;}).cantidad;
+  else update.cantidad_instalada=0;
+  sb.from('elementos_habitacion').update(update).eq('id',elId).then(function(r){
+    if(r.error){showToast('Error','error');return;}
+    var idx=D.elementos_hab.findIndex(function(e){return e.id===elId;});
+    if(idx!==-1)Object.assign(D.elementos_hab[idx],update);
+    var tog=document.getElementById('det-hab-toggle');
+    if(tog)tog.className='toggle'+(newVal?' on':'');
+    renderElsHabForHabitacion(curHabId);
+    showToast(newVal?'Instalado':'Pendiente','success');
+  });
+}
+
+function changeHabElCant(elId, campo, delta){
+  var el=D.elementos_hab.find(function(x){return x.id===elId;});
+  if(!el)return;
+  var prefixMap={'cantidad_instalada':'qhi-','cantidad_pintado':'qhp-','cantidad_retocado':'qhr-'};
+  var prefix=prefixMap[campo]||'qh-';
+  var cur=el[campo]||0;
+  var newVal=Math.max(0,Math.min(el.cantidad,cur+delta));
+  if(newVal===cur)return;
+  el[campo]=newVal;
+  var valEl=document.getElementById(prefix+elId);
+  if(valEl)valEl.textContent=newVal;
+  var update={};
+  update[campo]=newVal;
+  if(campo==='cantidad_instalada'){update.instalado=newVal>=el.cantidad;el.instalado=update.instalado;var tog=document.getElementById('det-hab-toggle');if(tog)tog.className='toggle'+(update.instalado?' on':'');}
+  else if(campo==='cantidad_pintado'){update.pintado=newVal>=el.cantidad;el.pintado=update.pintado;}
+  else if(campo==='cantidad_retocado'){update.retocado=newVal>=el.cantidad;el.retocado=update.retocado;}
+  update.actualizado_por=U.nombre;update.actualizado_en=new Date().toISOString();
+  sb.from('elementos_habitacion').update(update).eq('id',elId).then(function(r){
+    if(r.error){showToast('Error','error');return;}
+    Object.assign(el,update);
+    showToast(newVal+' de '+el.cantidad,'success');
+  });
+}
+
+function saveDetalleHab(elId){
+  var el=D.elementos_hab.find(function(x){return x.id===elId;});
+  if(!el)return;
+  var nota=document.getElementById('det-hab-nota');
+  var notaVal=nota?nota.value:el.nota;
+  var update={actualizado_por:U.nombre,actualizado_en:new Date().toISOString()};
+  if(notaVal!==undefined)update.nota=notaVal;
+  sb.from('elementos_habitacion').update(update).eq('id',elId).then(function(r){
+    if(r.error){showToast('Error','error');return;}
+    Object.assign(el,update);
+    renderElsHabForHabitacion(curHabId);
+    showToast('Guardado','success');
+  });
+}
+
+function deleteElHab(elId){
+  if(!isAdmin())return;
+  if(!confirm('¿Eliminar este elemento?'))return;
+  sb.from('elementos_habitacion').delete().eq('id',elId).then(function(r){
+    if(r.error){showToast('Error','error');return;}
+    D.elementos_hab=D.elementos_hab.filter(function(e){return e.id!==elId;});
+    goBack();
+    showToast('Elemento eliminado','success');
+  });
+}
+
+function uploadHabFotoFile(file){
+  if(!file||!curHabId)return;
+  showToast('Subiendo foto...','');
+  var elId=parseInt(document.getElementById('detalle-hab-content').dataset.elid)||0;
+  var path='hab-'+curHabId+'-'+Date.now()+'.jpg';
+  sb.storage.from('fotos').upload(path,file,{contentType:file.type,upsert:false}).then(function(res){
+    if(res.error){showToast('Error al subir','error');return;}
+    var url=sb.storage.from('fotos').getPublicUrl(path).data.publicUrl;
+    sb.from('fotos').insert([{hab_elemento_id:elId,url:url,path:path,subida_por:U.nombre}]).select().then(function(r){
+      if(r.error){showToast('Error','error');return;}
+      if(r.data&&r.data.length>0)D.fotos.push(r.data[0]);
+      renderDetalleHab(elId);
+      showToast('Foto guardada','success');
+    });
+  });
+}
+
+function deleteFotoHab(fotoId,path,elId){
+  if(!isAdmin())return;
+  if(!confirm('¿Eliminar esta foto?'))return;
+  sb.storage.from('fotos').remove([path]);
+  sb.from('fotos').delete().eq('id',fotoId).then(function(){
+    D.fotos=D.fotos.filter(function(f){return f.id!==fotoId;});
+    renderDetalleHab(elId);
+    showToast('Foto eliminada','success');
+  });
 }
 
 var curHabId = null;
@@ -1389,7 +1610,6 @@ function getHabitaciones(tipoId){
 function buildHabitaciones(tipoHabId, push){
   if(push===undefined)push=true;
   curTipoHabId=parseInt(tipoHabId);
-  console.log('buildHabitaciones id=',curTipoHabId,'total habs=',D.habitaciones.length,'filtered=',D.habitaciones.filter(function(h){return parseInt(h.tipo_habitacion_id)===curTipoHabId;}).length);
   var tipo=D.tipos_hab.find(function(t){return t.id===tipoHabId;});
   var piso=tipo?D.pisos.find(function(p){return p.id===tipo.piso_id;}):null;
   if(push)navStack.push('pisos');

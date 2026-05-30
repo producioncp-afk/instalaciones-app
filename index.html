@@ -492,6 +492,10 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
       <div class="hello" id="hello-txt">Hola</div>
       <div class="hello-sub" id="hello-sub">Cargando...</div>
       <div style="font-size:11px;color:var(--text3);margin-top:2px" id="last-login"></div>
+      <div style="margin-top:10px;padding:10px 12px;background:white;border-radius:10px;border:0.5px solid var(--border);">
+        <div style="font-size:13px;font-weight:700;color:var(--text);" id="app-empresa-name">Mi Empresa</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px;" id="app-proyecto-name">Seguimiento de Instalaciones</div>
+      </div>
 
       <div class="sec-title">Proyectos</div>
       <div id="proj-list"><div class="spin-wrap"><div class="spin"></div></div></div>
@@ -729,6 +733,9 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
       <button class="modal-btn secondary" onclick="closeModal('menu')">Cerrar</button>
       <button class="modal-btn danger" onclick="doLogout()">Cerrar sesión</button>
     </div>
+    <div id="menu-config-btn" style="display:none;padding:0 0 4px;">
+      <button class="modal-btn" onclick="closeModal('menu');openConfig()" style="width:100%;background:var(--bg);color:var(--text2);border:1px solid var(--border);">⚙️ Configuración de la app</button>
+    </div>
   </div>
 </div>
 
@@ -954,7 +961,7 @@ fbMsg.onMessage(function(payload){
 var U=null,curProjId=null,curEdId=null,curPisoId=null;
 var navStack=[],pendingToggle=null;
 var selEmoji_='🏗️',selColor_='#2563eb';
-var D={proyectos:[],edificios:[],pisos:[],elementos:[],usuarios:[],historial:[],fotos:[],specs:[],seguimiento:[],notifs:[],tareas:[],sub_elementos:[]};
+var D={config:{},proyectos:[],edificios:[],pisos:[],elementos:[],usuarios:[],historial:[],fotos:[],specs:[],seguimiento:[],notifs:[],tareas:[],sub_elementos:[]};
 var curElId=null;
 var appCharts={};
 
@@ -1072,6 +1079,8 @@ function startApp(){
 }
 
 function openUserMenu(){
+  var cfgBtn=document.getElementById('menu-config-btn');
+  if(cfgBtn)cfgBtn.style.display=isAdmin()?'block':'none';
   document.getElementById('menu-name').textContent=U.nombre;
   var roles={admin:'Administrador',supervisor:'Supervisor',trabajador:'Trabajador'};
   document.getElementById('menu-role').textContent=roles[U.rol]||U.rol;
@@ -1099,14 +1108,14 @@ function loadData(){
       D.proyectos=allP.filter(function(p){return p.id===U.proyecto_id;});
       D.edificios=allE.filter(function(e){return e.proyecto_id===U.proyecto_id;});
     }else{D.proyectos=allP;D.edificios=allE;}
-    D.pisos=r[2].data||[];D.elementos=r[3].data||[];
-    D.fotos=r[4].data||[];
-    D.seguimiento=r[5].data||[];
-    D.specs=r[6].data||[];
-    D.historial=r[7].data||[];
-    D.notifs=r[8].data||[];
-    D.usuarios=r[9].data||[];
-    D.contactos=r[10]?r[10].data||[]:[];
+    D.pisos=r[3].data||[];D.elementos=r[4].data||[];
+    D.fotos=r[5].data||[];
+    D.seguimiento=r[6].data||[];
+    D.specs=r[7].data||[];
+    D.historial=r[8].data||[];
+    D.notifs=r[9].data||[];
+    D.usuarios=r[10].data||[];
+    D.contactos=r[10]?r[11].data||[]:[];
     D.tareas=r[10].data||[];
     D.sub_elementos=r[11].data||[];
     setOnline(true);
@@ -1358,6 +1367,11 @@ function buildHome(){
   var firstName=U.nombre.split(' ')[0];
   document.getElementById('hello-txt').textContent='Hola, '+firstName;
   document.getElementById('hello-sub').textContent=D.proyectos.length+' proyecto'+(D.proyectos.length!==1?'s':'')+' activo'+(D.proyectos.length!==1?'s':'');
+  // Show company and project name
+  var empresaEl=document.getElementById('app-empresa-name');
+  var proyectoEl=document.getElementById('app-proyecto-name');
+  if(empresaEl)empresaEl.textContent=D.config.nombre_empresa||'Mi Empresa';
+  if(proyectoEl)proyectoEl.textContent=D.config.nombre_proyecto||'Seguimiento de Instalaciones';
   var lastLogin=localStorage.getItem('last_login_'+U.id);
   var lastEl=document.getElementById('last-login');
   if(lastEl&&lastLogin){lastEl.textContent='Última conexión: '+lastLogin;}
@@ -4433,6 +4447,26 @@ function fotoChooserDone(e){
   _fotoChooserCallback(file);
 }
 
+function openConfig(){
+  document.getElementById('cfg-empresa').value=D.config.nombre_empresa||'';
+  document.getElementById('cfg-proyecto').value=D.config.nombre_proyecto||'';
+  openModal('config');
+}
+
+function saveConfig(){
+  var empresa=document.getElementById('cfg-empresa').value.trim();
+  var proyecto=document.getElementById('cfg-proyecto').value.trim();
+  if(!empresa||!proyecto){showToast('Completa todos los campos','error');return;}
+  sb.from('config').update({nombre_empresa:empresa,nombre_proyecto:proyecto}).eq('id',1).then(function(r){
+    if(r.error){showToast('Error al guardar','error');return;}
+    D.config.nombre_empresa=empresa;
+    D.config.nombre_proyecto=proyecto;
+    closeModal('config');
+    buildHome();
+    showToast('Configuración guardada','success');
+  });
+}
+
 
 
 </script>
@@ -4472,6 +4506,26 @@ function fotoChooserDone(e){
         Elegir de galería
       </button>
       <button onclick="closeModal('foto-chooser')" style="padding:14px;background:none;border:1px solid var(--border);border-radius:10px;font-size:14px;font-weight:600;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- MODAL CONFIG -->
+<div class="modal-overlay hidden" id="modal-config" onclick="closeOv(event,'modal-config')">
+  <div class="modal" onclick="event.stopPropagation()" style="padding-bottom:calc(16px + var(--sab));">
+    <div class="modal-title">Configuración de la app</div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;">Nombre de la empresa</div>
+        <input id="cfg-empresa" type="text" class="modal-input" placeholder="Ej: Ibero Muebles Jamaica">
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;">Nombre del proyecto / hotel</div>
+        <input id="cfg-proyecto" type="text" class="modal-input" placeholder="Ej: Hotel Bahia Principe Grand">
+      </div>
+      <button class="modal-btn primary" onclick="saveConfig()">Guardar cambios</button>
+      <button class="modal-btn" onclick="closeModal('config')">Cancelar</button>
     </div>
   </div>
 </div>

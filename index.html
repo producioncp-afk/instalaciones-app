@@ -1382,12 +1382,12 @@ function openDetalleHab(elId){
 var curHabId = null;
 
 function getHabitaciones(tipoId){
-  return D.habitaciones.filter(function(h){return h.tipo_habitacion_id===tipoId;});
+  return D.habitaciones.filter(function(h){return parseInt(h.tipo_habitacion_id)===parseInt(tipoId);});
 }
 
 function buildHabitaciones(tipoHabId, push){
   if(push===undefined)push=true;
-  curTipoHabId=tipoHabId;
+  curTipoHabId=parseInt(tipoHabId);
   var tipo=D.tipos_hab.find(function(t){return t.id===tipoHabId;});
   var piso=tipo?D.pisos.find(function(p){return p.id===tipo.piso_id;}):null;
   if(push)navStack.push('pisos');
@@ -2010,7 +2010,7 @@ function buildPisos(edId,push){
         var tBg=tStats.pct>=70?'#EAF3DE':tStats.pct>=30?'#FAEEDA':'#FCEBEB';
         var iconMap={'King Standard':'ti-bed','Full Standard':'ti-bed','King Connecting':'ti-door','Full Connecting':'ti-door','Family':'ti-users'};
         var icon=iconMap[t.tipo]||'ti-bed';
-        html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid #f4f5f7;cursor:pointer;" onclick="buildElesHab('+t.id+')">';
+        html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid #f4f5f7;cursor:pointer;" onclick="buildElesHab('+parseInt(t.id)+')">';
         html+='<div style="width:30px;height:30px;border-radius:7px;background:'+tBg+';display:flex;align-items:center;justify-content:center;flex-shrink:0;">';
         html+='<i class="ti '+icon+'" style="font-size:14px;color:'+tColor+';" aria-hidden="true"></i></div>';
         html+='<div style="flex:1;min-width:0;">';

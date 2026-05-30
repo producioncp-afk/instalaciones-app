@@ -1694,7 +1694,7 @@ function renderElsHabForHabitacion(habId){
   var hab=D.habitaciones.find(function(h){return h.id===habId;});
   if(!hab)return;
   var tipoId=hab.tipo_habitacion_id;
-  var items=D.elementos_hab.filter(function(e){return e.tipo_habitacion_id===tipoId;});
+  var items=D.elementos_hab.filter(function(e){return parseInt(e.tipo_habitacion_id)===parseInt(tipoId);});
   var s=calcStats(items);
 
   document.getElementById('el-hab-sum').innerHTML=
@@ -1716,6 +1716,9 @@ function renderElsHabForHabitacion(habId){
   var hdrSpan=document.getElementById('el-hab-hdr').querySelector('span');
   if(hdrSpan)hdrSpan.textContent='Hab. '+hab.numero+' ('+items.length+' elementos)';
 
+  var addBtn=document.getElementById('add-el-hab-btn');
+  if(addBtn)addBtn.style.display=isAdmin()?'block':'none';
+
   var html='';
   items.forEach(function(el,i){
     var instVal=el.cantidad_instalada||0;
@@ -1725,20 +1728,24 @@ function renderElsHabForHabitacion(habId){
     var icoText=instVal===el.cantidad?'#27500A':instVal===0?'#A32D2D':'#854F0B';
     var icoContent=instVal===el.cantidad?'<span style="font-size:16px;color:#3B6D11;">✓</span>':(instVal+'/'+el.cantidad);
     var meta=el.actualizado_por?el.actualizado_por+' · '+formatDate(el.actualizado_en):'Sin actualizar';
-    html+='<div style="background:white;border-radius:12px;border:0.5px solid #e1e4e8;overflow:hidden;margin-bottom:8px;animation:fadeUp 0.2s ease both;animation-delay:'+(i*0.02)+'s;">';
+    var pintadoBadge=el.pintado===true?'<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;background:#fef9c3;color:#854d0e;margin-right:3px;">🖌 Pintado</span>':'';
+    var retocadoBadge=el.retocado===true?'<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;background:#f0fdf4;color:#166534;">✓ Retocado</span>':'';
+
+    html+='<div style="background:white;border-radius:12px;border:0.5px solid #e1e4e8;overflow:hidden;margin-bottom:8px;animation:fadeUp 0.2s ease both;animation-delay:'+(i*0.02)+'s;cursor:pointer;" onclick="openDetalleHab('+el.id+')">';
     html+='<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;">';
     html+='<div style="width:36px;height:36px;border-radius:8px;background:'+icoColor+';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:600;color:'+icoText+';">'+icoContent+'</div>';
     html+='<div style="flex:1;min-width:0;">';
     html+='<div style="font-size:13px;font-weight:500;color:#1a1f2e;margin-bottom:2px;">'+el.nombre+'</div>';
     html+='<div style="font-size:11px;color:#9aa3b2;">'+meta+'</div>';
-    if(el.nota)html+='<div style="font-size:11px;color:#9aa3b2;font-style:italic;margin-top:2px;">💬 '+el.nota.slice(0,40)+(el.nota.length>40?'...':'')+'</div>';
+    if(pintadoBadge||retocadoBadge)html+='<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">'+pintadoBadge+retocadoBadge+'</div>';
+    if(el.nota)html+='<div style="font-size:11px;color:#9aa3b2;font-style:italic;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">💬 '+el.nota.slice(0,40)+(el.nota.length>40?'...':'')+'</div>';
     html+='</div>';
     html+='<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;" onclick="event.stopPropagation()">';
     html+='<div style="display:flex;align-items:center;gap:3px;background:#EAF3DE;padding:3px 8px;border-radius:6px;"><span style="font-size:13px;color:#3B6D11;">✓</span><span style="font-size:11px;font-weight:500;color:#3B6D11;">'+instVal+' inst.</span></div>';
     html+='<div style="display:flex;align-items:center;gap:3px;background:'+(pendVal===0?'#EAF3DE':'#FCEBEB')+';padding:3px 8px;border-radius:6px;">'+(pendVal===0?'<span style="font-size:13px;color:#3B6D11;">✓</span>':'<span style="font-size:13px;color:#A32D2D;">✗</span>')+'<span style="font-size:11px;font-weight:500;color:'+(pendVal===0?'#3B6D11':'#A32D2D')+';">'+pendVal+' pend.</span></div>';
     if(canEdit())html+='<button class="toggle '+(el.instalado===true?'on':'')+'" onclick="event.stopPropagation();toggleElHab('+el.id+','+el.instalado+')"></button>';
     html+='</div></div>';
-    if(pct>0&&pct<100){html+='<div style="padding:0 14px 8px;"><div style="height:3px;background:#e1e4e8;border-radius:2px;overflow:hidden;"><div style="height:100%;width:'+pct+'%;background:#1D9E75;border-radius:2px;"></div></div></div>';}
+    if(pct>0&&pct<100){html+='<div style="padding:0 14px 8px;"><div style="height:3px;background:#e1e4e8;border-radius:2px;overflow:hidden;"><div style="height:100%;width:'+pct+'%;background:#1D9E75;border-radius:2px;"></div></div><div style="font-size:10px;color:#9aa3b2;margin-top:2px;">'+pct+'% completado</div></div>';}
     html+='</div>';
   });
 
@@ -1747,6 +1754,7 @@ function renderElsHabForHabitacion(habId){
   }
   document.getElementById('el-hab-list').innerHTML=html;
 }
+
 
 function openAddHabitacion(){
   var numero=prompt('Número de habitación (ej: 301):');

@@ -1116,6 +1116,7 @@ function loadData(){
     D.tipos_hab=r[1].data||[];
     D.elementos_hab=r[2].data||[];
     D.habitaciones=r[3].data||[];
+    console.log('loadData habitaciones:',r[3].data?r[3].data.length:'ERROR',r[3].error?r[3].error.message:'ok');
     var allP=r[0].data||[],allE=r[4].data||[];
     if(!isAdmin()&&U.proyecto_id){
       D.proyectos=allP.filter(function(p){return p.id===U.proyecto_id;});

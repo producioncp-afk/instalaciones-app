@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- Build: 2026-05-18 04:08:53 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -564,12 +563,9 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
   <!-- ELEMENTOS -->
   <div class="screen" id="screen-elementos">
     <div class="el-sum" id="el-sum"></div>
-    <div style="background:white;margin:0 14px 10px;border-radius:8px;padding:10px 12px;border:0.5px solid var(--border);">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-        <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">Progreso de instalación</div>
-        <div style="font-size:11px;font-weight:700;" id="el-pct">0%</div>
-      </div>
-      <div style="height:4px;background:#f0f0f0;border-radius:2px;overflow:hidden;"><div class="pbf" id="el-pbar" style="height:100%;border-radius:2px;transition:width 0.5s;"></div></div>
+    <div class="el-prog">
+      <div class="el-prog-lbl">Progreso de instalación</div>
+      <div class="el-prog-row"><div class="pb" style="height:6px"><div class="pbf" id="el-pbar"></div></div><div class="pct-lbl" id="el-pct">0%</div></div>
     </div>
     <!-- Filter pills -->
     <div style="display:flex;gap:8px;overflow-x:auto;padding:0 14px 12px;scrollbar-width:none;" id="el-filters">
@@ -583,6 +579,22 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
       <span>Elementos</span>
       <button id="add-el-btn" onclick="openModalNuevoElemento(curPisoId)" style="display:none;background:var(--blue);color:white;border:none;border-radius:6px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">+ Agregar</button>
     </div><div id="el-list"></div></div>
+  </div>
+
+  <!-- ELEMENTOS HABITACION -->
+  <div class="screen" id="screen-elementos-hab">
+    <div class="el-sum" id="el-hab-sum"></div>
+    <div style="background:white;margin:0 14px 10px;border-radius:8px;padding:10px 12px;border:0.5px solid var(--border);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">Progreso</div>
+        <div style="font-size:11px;font-weight:700;" id="el-hab-pct">0%</div>
+      </div>
+      <div style="height:4px;background:#f0f0f0;border-radius:2px;overflow:hidden;"><div class="pbf" id="el-hab-pbar" style="height:100%;border-radius:2px;transition:width 0.5s;"></div></div>
+    </div>
+    <div class="el-wrap"><div class="el-hdr" id="el-hab-hdr" style="display:flex;align-items:center;justify-content:space-between;">
+      <span>Elementos</span>
+      <button id="add-el-hab-btn" onclick="openAddElHab()" style="display:none;background:var(--blue);color:white;border:none;border-radius:6px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">+ Agregar</button>
+    </div><div id="el-hab-list"></div></div>
   </div>
 
   <!-- DETALLE -->
@@ -709,8 +721,8 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
     <div class="modal-field"><label>Observación (opcional)</label><textarea class="nota-textarea" id="nota-txt" placeholder="Escribe una observación..."></textarea></div>
     <div class="modal-field">
       <label>Foto de evidencia (opcional)</label>
-      <input type="file" id="foto-input" accept="image/*" onchange="previewFoto(event)">
-      <div class="foto-take-btn" onclick="openFotoChooser(function(f){var dt=new DataTransfer();dt.items.add(f);document.getElementById('foto-input').files=dt.files;previewFoto({target:document.getElementById('foto-input')});})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Foto — cámara o galería</div>
+      <input type="file" id="foto-input" accept="image/*" capture="environment" onchange="previewFoto(event)">
+      <div class="foto-take-btn" onclick="document.getElementById('foto-input').click()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Tomar foto o seleccionar imagen</div>
       <img id="foto-preview" class="foto-preview" alt="">
     </div>
     <div class="modal-row">
@@ -954,7 +966,7 @@ fbMsg.onMessage(function(payload){
 var U=null,curProjId=null,curEdId=null,curPisoId=null;
 var navStack=[],pendingToggle=null;
 var selEmoji_='🏗️',selColor_='#2563eb';
-var D={proyectos:[],edificios:[],pisos:[],elementos:[],usuarios:[],historial:[],fotos:[],specs:[],seguimiento:[],notifs:[],tareas:[],sub_elementos:[]};
+var D={proyectos:[],edificios:[],pisos:[],elementos:[],usuarios:[],historial:[],fotos:[],specs:[],seguimiento:[],notifs:[],tipos_hab:[],elementos_hab:[],tareas:[],sub_elementos:[]};
 var curElId=null;
 var appCharts={};
 
@@ -1065,8 +1077,7 @@ function startApp(){
     document.getElementById('nav-historial').classList.remove('hidden');
   }
   setTopbar(true);
-  loadData().then(function(){buildHome();setupRealtime();
-  initPushNotifications();});
+  loadData().then(function(){buildHome();setupRealtime();});
   // Init push notifications
   setTimeout(initPush, 2000);
 }
@@ -1081,6 +1092,8 @@ function openUserMenu(){
 function loadData(){
   var qs=[
     sb.from('proyectos').select('*').eq('activo',true).order('creado_en'),
+    sb.from('tipos_habitacion').select('*').order('id'),
+    sb.from('elementos_habitacion').select('*').order('id'),
     sb.from('edificios').select('*').order('id'),
     sb.from('pisos').select('*').order('orden'),
     sb.from('elementos').select('*').order('id'),
@@ -1094,21 +1107,21 @@ function loadData(){
     sb.from('sub_elementos').select('*').order('creado_en')
   ];
   return Promise.all(qs).then(function(r){
-    var allP=r[0].data||[],allE=r[1].data||[];
+    var allP=r[0].data||[],allE=r[3].data||[];
     if(!isAdmin()&&U.proyecto_id){
       D.proyectos=allP.filter(function(p){return p.id===U.proyecto_id;});
       D.edificios=allE.filter(function(e){return e.proyecto_id===U.proyecto_id;});
     }else{D.proyectos=allP;D.edificios=allE;}
-    D.pisos=r[2].data||[];D.elementos=r[3].data||[];
-    D.fotos=r[4].data||[];
-    D.seguimiento=r[5].data||[];
-    D.specs=r[6].data||[];
-    D.historial=r[7].data||[];
-    D.notifs=r[8].data||[];
-    D.usuarios=r[9].data||[];
-    D.contactos=r[10]?r[10].data||[]:[];
+    D.pisos=r[4].data||[];D.elementos=r[5].data||[];
+    D.fotos=r[6].data||[];
+    D.seguimiento=r[7].data||[];
+    D.specs=r[8].data||[];
+    D.historial=r[9].data||[];
+    D.notifs=r[10].data||[];
+    D.usuarios=r[11].data||[];
+    D.contactos=r[10]?r[12].data||[]:[];
     D.tareas=r[10].data||[];
-    D.sub_elementos=r[11].data||[];
+    D.sub_elementos=r[13].data||[];
     setOnline(true);
     updateNotifBadge();
     updateTareasBadge();
@@ -1197,34 +1210,165 @@ function setupRealtime(){
     })
     .subscribe();
 }
+var curTipoHabId = null;
 
+function getTiposHab(pisoId){
+  return D.tipos_hab.filter(function(t){return t.piso_id===pisoId;});
+}
 
-// ── PUSH NOTIFICATIONS (Capacitor) ──
-function initPushNotifications(){
-  if(!window.Capacitor||!window.Capacitor.isNativePlatform())return;
-  var Push=Capacitor.Plugins.PushNotifications;
-  Push.requestPermissions().then(function(result){
-    if(result.receive==='granted'){
-      Push.register();
-    }
-  });
-  Push.addListener('registration',function(token){
-    // Save token to Supabase for this user
-    if(U&&U.id){
-      sb.from('usuarios').update({push_token:token.value}).eq('id',U.id);
-    }
-  });
-  Push.addListener('pushNotificationReceived',function(notification){
-    showToast(notification.title+': '+notification.body,'success');
-  });
-  Push.addListener('pushNotificationActionPerformed',function(notification){
-    // When user taps notification
-    var data=notification.notification.data;
-    if(data&&data.elemento_id){
-      openDetalle(parseInt(data.elemento_id));
-    }
+function getElsHab(tipoId){
+  return D.elementos_hab.filter(function(e){return e.tipo_habitacion_id===tipoId;});
+}
+
+function openAddTipoHab(pisoId){
+  var piso=D.pisos.find(function(p){return p.id===pisoId;});
+  document.getElementById('nth-piso-id').value=pisoId;
+  document.getElementById('nth-piso-nombre').textContent=piso?piso.nombre:'Piso';
+  document.getElementById('nth-cantidad').value='1';
+  openModal('nuevo-tipo-hab');
+}
+
+function saveNuevoTipoHab(){
+  var pisoId=parseInt(document.getElementById('nth-piso-id').value);
+  var tipo=document.getElementById('nth-tipo').value;
+  var cantidad=parseInt(document.getElementById('nth-cantidad').value)||1;
+  var btn=document.querySelector('#modal-nuevo-tipo-hab .modal-btn.primary');
+  if(btn)btn.disabled=true;
+  sb.from('tipos_habitacion').insert([{piso_id:pisoId,tipo:tipo,cantidad_habitaciones:cantidad}]).select().then(function(r){
+    if(btn)btn.disabled=false;
+    if(r.error){showToast('Error: '+r.error.message,'error');return;}
+    if(r.data&&r.data.length>0)D.tipos_hab.push(r.data[0]);
+    closeModal('nuevo-tipo-hab');
+    buildPisos(curEdId,false);
+    showToast('Tipo de habitación agregado','success');
   });
 }
+
+function buildElesHab(tipoHabId,push){
+  if(push===undefined)push=true;
+  curTipoHabId=tipoHabId;
+  var tipo=D.tipos_hab.find(function(t){return t.id===tipoHabId;});
+  var piso=tipo?D.pisos.find(function(p){return p.id===tipo.piso_id;}):null;
+  if(push)navStack.push('pisos');
+  setTopbar(false,(tipo?tipo.tipo:'Habitación')+(piso?' · '+piso.nombre:''));
+  document.getElementById('back-btn').classList.remove('hidden');
+  var addBtn=document.getElementById('add-el-hab-btn');
+  if(addBtn)addBtn.style.display=isAdmin()?'block':'none';
+  showScreen('elementos-hab');
+  renderElsHab();
+}
+
+function renderElsHab(){
+  if(!curTipoHabId)return;
+  var tipo=D.tipos_hab.find(function(t){return t.id===curTipoHabId;});
+  var items=getElsHab(curTipoHabId);
+  var s=calcStats(items);
+
+  document.getElementById('el-hab-sum').innerHTML=
+    '<div style="background:var(--bg);border-radius:8px;padding:10px;text-align:center;">'+
+    '<div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px;">Total</div>'+
+    '<div style="font-size:22px;font-weight:700;color:var(--text);">'+items.length+'</div></div>'+
+    '<div style="background:#EAF3DE;border-radius:8px;padding:10px;text-align:center;">'+
+    '<div style="font-size:11px;font-weight:600;color:#3B6D11;margin-bottom:4px;">Instalados</div>'+
+    '<div style="font-size:22px;font-weight:700;color:#27500A;">'+s.inst+'</div></div>'+
+    '<div style="background:#FCEBEB;border-radius:8px;padding:10px;text-align:center;">'+
+    '<div style="font-size:11px;font-weight:600;color:#A32D2D;margin-bottom:4px;">Pendientes</div>'+
+    '<div style="font-size:22px;font-weight:700;color:#791F1F;">'+s.pend+'</div></div>';
+
+  var fill=document.getElementById('el-hab-pbar');
+  fill.style.width=s.pct+'%';fill.style.background=getColor(s.pct);
+  document.getElementById('el-hab-pct').textContent=s.pct+'%';
+  document.getElementById('el-hab-pct').style.color=getColor(s.pct);
+
+  var hdrSpan=document.getElementById('el-hab-hdr').querySelector('span');
+  if(hdrSpan)hdrSpan.textContent=(tipo?tipo.tipo:'Elementos')+' ('+items.length+')';
+
+  var html='';
+  items.forEach(function(el,i){
+    var instVal=el.cantidad_instalada||0;
+    var pendVal=el.cantidad-instVal;
+    var pct=el.cantidad>0?Math.round(instVal/el.cantidad*100):0;
+    var icoColor=instVal===el.cantidad?'#EAF3DE':instVal===0?'#FCEBEB':'#FAEEDA';
+    var icoText=instVal===el.cantidad?'#27500A':instVal===0?'#A32D2D':'#854F0B';
+    var icoContent=instVal===el.cantidad?'<span style="font-size:16px;color:#3B6D11;">✓</span>':(instVal+'/'+el.cantidad);
+    var meta=el.actualizado_por?el.actualizado_por+' · '+formatDate(el.actualizado_en):'Sin actualizar';
+    html+='<div style="background:white;border-radius:12px;border:0.5px solid #e1e4e8;overflow:hidden;margin-bottom:8px;animation:fadeUp 0.2s ease both;animation-delay:'+(i*0.02)+'s;position:relative;" onclick="openDetalleHab('+el.id+')">';
+    html+='<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;">';
+    html+='<div style="width:36px;height:36px;border-radius:8px;background:'+icoColor+';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:600;color:'+icoText+';">'+icoContent+'</div>';
+    html+='<div style="flex:1;min-width:0;">';
+    html+='<div style="font-size:13px;font-weight:500;color:#1a1f2e;margin-bottom:2px;">'+el.nombre+'</div>';
+    html+='<div style="font-size:11px;color:#9aa3b2;">'+meta+'</div>';
+    if(el.nota)html+='<div style="font-size:11px;color:#9aa3b2;font-style:italic;margin-top:2px;">💬 '+el.nota.slice(0,40)+(el.nota.length>40?'...':'')+'</div>';
+    html+='</div>';
+    html+='<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;" onclick="event.stopPropagation()">';
+    html+='<div style="display:flex;align-items:center;gap:3px;background:#EAF3DE;padding:3px 8px;border-radius:6px;"><span style="font-size:13px;color:#3B6D11;">✓</span><span style="font-size:11px;font-weight:500;color:#3B6D11;">'+instVal+' inst.</span></div>';
+    html+='<div style="display:flex;align-items:center;gap:3px;background:'+(pendVal===0?'#EAF3DE':'#FCEBEB')+';padding:3px 8px;border-radius:6px;">'+(pendVal===0?'<span style="font-size:13px;color:#3B6D11;">✓</span>':'<span style="font-size:13px;color:#A32D2D;">✗</span>')+'<span style="font-size:11px;font-weight:500;color:'+(pendVal===0?'#3B6D11':'#A32D2D')+';">'+pendVal+' pend.</span></div>';
+    if(canEdit())html+='<button class="toggle '+(el.instalado===true?'on':'')+'" onclick="event.stopPropagation();toggleElHab('+el.id+','+el.instalado+')"></button>';
+    html+='</div></div>';
+    if(pct>0&&pct<100){html+='<div style="padding:0 14px 8px;"><div style="height:3px;background:#e1e4e8;border-radius:2px;overflow:hidden;"><div style="height:100%;width:'+pct+'%;background:#1D9E75;border-radius:2px;"></div></div></div>';}
+    html+='</div>';
+  });
+
+  if(!items.length){
+    html='<div style="text-align:center;padding:3rem;color:var(--text2);font-size:13px;">No hay elementos todavía.<br>Toca + Agregar para añadir.</div>';
+  }
+  document.getElementById('el-hab-list').innerHTML=html;
+}
+
+function openAddElHab(){
+  document.getElementById('neh-nombre').value='';
+  document.getElementById('neh-cantidad').value='1';
+  openModal('nuevo-el-hab');
+}
+
+function saveNuevoElHab(){
+  var nombre=document.getElementById('neh-nombre').value.trim().toUpperCase();
+  var cantidad=parseInt(document.getElementById('neh-cantidad').value)||1;
+  var btn=document.querySelector('#modal-nuevo-el-hab .modal-btn.primary');
+  if(btn&&btn.disabled)return;
+  if(btn)btn.disabled=true;
+  if(!nombre){showToast('Escribe el nombre','error');if(btn)btn.disabled=false;return;}
+  sb.from('elementos_habitacion').insert([{
+    tipo_habitacion_id:curTipoHabId,
+    nombre:nombre,
+    cantidad:cantidad,
+    instalado:false,
+    cantidad_instalada:0,
+    pintado:false,
+    retocado:false
+  }]).select().then(function(r){
+    if(btn)btn.disabled=false;
+    if(r.error){showToast('Error: '+r.error.message,'error');return;}
+    if(r.data&&r.data.length>0)D.elementos_hab.push(r.data[0]);
+    closeModal('nuevo-el-hab');
+    renderElsHab();
+    showToast('Elemento agregado','success');
+  });
+}
+
+function toggleElHab(elId, currentVal){
+  if(!canEdit())return;
+  var newVal=currentVal===true?false:true;
+  var update={instalado:newVal,actualizado_por:U.nombre,actualizado_en:new Date().toISOString()};
+  if(newVal)update.cantidad_instalada=D.elementos_hab.find(function(e){return e.id===elId;}).cantidad;
+  else update.cantidad_instalada=0;
+  sb.from('elementos_habitacion').update(update).eq('id',elId).then(function(r){
+    if(r.error){showToast('Error','error');return;}
+    var idx=D.elementos_hab.findIndex(function(e){return e.id===elId;});
+    if(idx!==-1)Object.assign(D.elementos_hab[idx],update);
+    renderElsHab();
+    buildPisos(curEdId,false);
+    showToast(newVal?'Instalado':'Pendiente','success');
+  });
+}
+
+function openDetalleHab(elId){
+  var el=D.elementos_hab.find(function(x){return x.id===elId;});
+  if(!el)return;
+  // For now show a simple detail inline
+  showToast(el.nombre+' — '+el.cantidad+' unidades','');
+}
+
 
 function refreshCurrent(){
   var active=document.querySelector('.screen.active');
@@ -1285,9 +1429,9 @@ function goBack(){
   if(prev==='home'){
     showScreen('home');buildHome();setTopbar(true);
     document.getElementById('back-btn').classList.add('hidden');
-  }else if(prev==='edificios'){buildEdificios(curProjId,false);}
-  else if(prev==='pisos'){buildPisos(curEdId,false);}
-  else if(prev==='elementos'){buildEls(curPisoId,false);}
+  }else if(prev==='edificios'){buildEdificios(curProjId,false);navStack.pop();}
+  else if(prev==='pisos'){buildPisos(curEdId,false);navStack.pop();}
+  else if(prev==='elementos'){buildEls(curPisoId,false);navStack.pop();}
   else if(prev==='equipo'){buildEdificios(curProjId,false);setTimeout(function(){switchProjTab('equipo');},50);navStack.pop();}
   else if(prev==='equipo_screen'){setTopbar(false,'Equipo de obra');showScreen('equipo');buildEquipoScreen();navStack.pop();}
 }
@@ -1669,13 +1813,12 @@ function buildPisos(edId,push){
     '</div>';
 
   var html='';
-  pisos.forEach(function(p,i){
+  pisos.forEach(function(p){
     var pid=p.id,pnombre=p.nombre,pplano=p.plano_url||'';
-    var ps=calcStats(getEls(pid)),c=getColor(ps.pct);
+    var ps=calcStats(getEls(pid));
     var _pbc2=ps.pct>=70?'#0d7a3d':ps.pct>=30?'#b45309':'#ef4444';
-    var btnRow='<button onclick="buildEls('+pid+')" style="flex:1;padding:9px;background:none;border:none;font-size:12px;font-weight:600;color:var(--blue);cursor:pointer;font-family:Inter,sans-serif;">📋 Elementos</button>';
-    if(pplano)btnRow+='<div style="width:0.5px;background:#e1e4e8;"></div><button onclick="openPlanoById('+pid+')" style="flex:1;padding:9px;background:none;border:none;font-size:12px;font-weight:600;color:var(--green);cursor:pointer;font-family:Inter,sans-serif;">🗺 Ver plano</button><div style="width:0.5px;background:#e1e4e8;"></div><button onclick="quitarPlano('+pid+')" style="padding:9px 10px;background:none;border:none;font-size:12px;font-weight:600;color:#A32D2D;cursor:pointer;font-family:Inter,sans-serif;">✕</button>';
-    if(isAdmin())btnRow+='<div style="width:0.5px;background:#e1e4e8;"></div><label style="flex:1;padding:9px;font-size:12px;font-weight:600;color:#9aa3b2;cursor:pointer;font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;"><input type="file" accept="image/*" style="display:none" onchange="uploadPlano(event,'+pid+')">📤 '+(pplano?'Cambiar':'Plano')+'</label>';
+    var tipos=D.tipos_hab.filter(function(t){return t.piso_id===pid;});
+
     html+='<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;margin-bottom:8px;">';
     html+='<div style="height:3px;background:linear-gradient(90deg,'+_pbc2+' '+ps.pct+'%,#e1e4e8 '+ps.pct+'%);"></div>';
     html+='<div style="padding:10px 14px;">';
@@ -1687,12 +1830,50 @@ function buildPisos(edId,push){
     html+='<div style="font-size:18px;color:#e1e4e8;">/</div>';
     html+='<div style="text-align:right;"><div style="font-size:26px;font-weight:700;color:#9aa3b2;letter-spacing:-0.02em;">'+ps.total+'</div><div style="font-size:11px;color:#9aa3b2;">Total</div></div>';
     html+='</div>';
+
+    // Tipos de habitacion
+    if(tipos.length>0){
+      html+='<div style="margin-top:10px;border-top:1px solid #f0f0f0;padding-top:8px;">';
+      html+='<div style="font-size:10px;font-weight:600;color:#9aa3b2;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Tipos de habitación</div>';
+      tipos.forEach(function(t){
+        var tEls=D.elementos_hab.filter(function(e){return e.tipo_habitacion_id===t.id;});
+        var tStats=calcStats(tEls);
+        var tColor=tStats.pct>=70?'#3B6D11':tStats.pct>=30?'#854F0B':'#A32D2D';
+        var tBg=tStats.pct>=70?'#EAF3DE':tStats.pct>=30?'#FAEEDA':'#FCEBEB';
+        var iconMap={'King Standard':'ti-bed','Full Standard':'ti-bed','King Connecting':'ti-door','Full Connecting':'ti-door','Family':'ti-users'};
+        var icon=iconMap[t.tipo]||'ti-bed';
+        html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid #f4f5f7;cursor:pointer;" onclick="buildElesHab('+t.id+')">';
+        html+='<div style="width:30px;height:30px;border-radius:7px;background:'+tBg+';display:flex;align-items:center;justify-content:center;flex-shrink:0;">';
+        html+='<i class="ti '+icon+'" style="font-size:14px;color:'+tColor+';" aria-hidden="true"></i></div>';
+        html+='<div style="flex:1;min-width:0;">';
+        html+='<div style="font-size:12px;font-weight:600;color:#1a1f2e;">'+t.tipo+'</div>';
+        html+='<div style="font-size:10px;color:#9aa3b2;">'+t.cantidad_habitaciones+' hab.</div>';
+        html+='</div>';
+        html+='<div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;">';
+        html+='<div style="font-size:11px;font-weight:700;color:'+tColor+';">'+tStats.pct+'%</div>';
+        html+='<div style="width:44px;height:3px;background:#e1e4e8;border-radius:2px;overflow:hidden;">';
+        html+='<div style="height:100%;width:'+tStats.pct+'%;background:'+tColor+';border-radius:2px;"></div></div>';
+        html+='</div>';
+        html+='<i class="ti ti-chevron-right" style="font-size:14px;color:#9aa3b2;" aria-hidden="true"></i>';
+        html+='</div>';
+      });
+      html+='</div>';
+    }
+    html+='</div>';
+
+    // Botones
+    var btnRow='<button onclick="buildEls('+pid+')" style="flex:1;padding:9px;background:none;border:none;font-size:12px;font-weight:600;color:var(--blue);cursor:pointer;font-family:Inter,sans-serif;">📋 Elementos</button>';
+    btnRow+='<div style="width:0.5px;background:#e1e4e8;"></div>';
+    btnRow+='<button onclick="openAddTipoHab('+pid+')" style="flex:1;padding:9px;background:none;border:none;font-size:12px;font-weight:600;color:#6d28d9;cursor:pointer;font-family:Inter,sans-serif;">🏠 + Tipo</button>';
+    if(pplano)btnRow+='<div style="width:0.5px;background:#e1e4e8;"></div><button onclick="openPlanoById('+pid+')" style="flex:1;padding:9px;background:none;border:none;font-size:12px;font-weight:600;color:var(--green);cursor:pointer;font-family:Inter,sans-serif;">🗺 Ver plano</button><div style="width:0.5px;background:#e1e4e8;"></div><button onclick="quitarPlano('+pid+')" style="padding:9px 10px;background:none;border:none;font-size:12px;font-weight:600;color:#A32D2D;cursor:pointer;font-family:Inter,sans-serif;">✕</button>';
+    if(isAdmin())btnRow+='<div style="width:0.5px;background:#e1e4e8;"></div><label style="flex:1;padding:9px;font-size:12px;font-weight:600;color:#9aa3b2;cursor:pointer;font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;"><input type="file" accept="image/*" style="display:none" onchange="uploadPlano(event,'+pid+')">📤 '+(pplano?'Cambiar':'Plano')+'</label>';
     html+='<div style="display:flex;border-top:1px solid #f0f0f0;">'+btnRow+'</div>';
     html+='</div>';
   });
   document.getElementById('piso-list').innerHTML=html;
   showScreen('pisos');
 }
+
 
 function buildEls(pisoId,push){
   if(push===undefined)push=true;
@@ -1712,15 +1893,9 @@ function renderEls(){
   if(!curPisoId)return;
   var items=getEls(curPisoId),s=calcStats(items);
   document.getElementById('el-sum').innerHTML=
-    '<div style="background:var(--bg);border-radius:8px;padding:10px;text-align:center;">'+
-    '<div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px;">Total</div>'+
-    '<div style="font-size:22px;font-weight:700;color:var(--text);">'+items.length+'</div></div>'+
-    '<div style="background:#EAF3DE;border-radius:8px;padding:10px;text-align:center;">'+
-    '<div style="font-size:11px;font-weight:600;color:#3B6D11;margin-bottom:4px;">Instalados</div>'+
-    '<div style="font-size:22px;font-weight:700;color:#27500A;">'+s.inst+'</div></div>'+
-    '<div style="background:#FCEBEB;border-radius:8px;padding:10px;text-align:center;">'+
-    '<div style="font-size:11px;font-weight:600;color:#A32D2D;margin-bottom:4px;">Pendientes</div>'+
-    '<div style="font-size:22px;font-weight:700;color:#791F1F;">'+s.pend+'</div></div>';
+    '<div class="el-sum-card"><div class="el-sum-lbl">Total</div><div class="el-sum-val">'+items.length+'</div></div>'+
+    '<div class="el-sum-card"><div class="el-sum-lbl">Instalados</div><div class="el-sum-val g">'+s.inst+'</div></div>'+
+    '<div class="el-sum-card"><div class="el-sum-lbl">Pendientes</div><div class="el-sum-val r">'+s.pend+'</div></div>';
   var fill=document.getElementById('el-pbar');
   fill.style.width=s.pct+'%';fill.style.background=getColor(s.pct);
   document.getElementById('el-pct').textContent=s.pct+'%';
@@ -1735,6 +1910,7 @@ function renderEls(){
   filtered.forEach(function(el,i){
     var cls=el.instalado===true?'si':el.instalado===false?'no':'nd';
     var meta=el.actualizado_por?el.actualizado_por+' · '+formatDate(el.actualizado_en):'Sin actualizar';
+    if(el.nota)meta+=' · 📝 '+el.nota.slice(0,25)+(el.nota.length>25?'...':'');
     // Pintado y retocado badges
     var statusBadges='';
     if(el.pintado===true)statusBadges+='<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;background:#fef9c3;color:#854d0e;margin-right:3px;">🖌 Pintado</span>';
@@ -1755,30 +1931,13 @@ function renderEls(){
     var rightHtml=canEdit()
       ?'<button class="toggle '+(el.instalado===true?'on':'')+'" id="tog-'+el.id+'" onclick="askToggle('+el.id+','+el.instalado+')"></button>'
       :'<div class="sbadge '+cls+'">'+(el.instalado===true?'Instalado':el.instalado===false?'Pendiente':'—')+'</div>';
-    var instVal=el.cantidad_instalada||0;
-    var pendVal=el.cantidad-instVal;
-    var pct=el.cantidad>0?Math.round(instVal/el.cantidad*100):0;
-    var icoColor=instVal===el.cantidad?'#EAF3DE':instVal===0?'#FCEBEB':'#FAEEDA';
-    var icoText=instVal===el.cantidad?'#27500A':instVal===0?'#A32D2D':'#854F0B';
-    var icoContent=instVal===el.cantidad?'<span style="font-size:16px;color:#3B6D11;">✓</span>':(instVal+'/'+el.cantidad);
-    html+='<div style="background:white;border-radius:12px;border:0.5px solid #e1e4e8;overflow:hidden;margin-bottom:8px;animation:fadeUp 0.2s ease both;animation-delay:'+(i*0.02)+'s;position:relative;">';
-
-    html+='<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;" onclick="openDetalle('+el.id+')">';
-    html+='<div style="width:36px;height:36px;border-radius:8px;background:'+icoColor+';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:600;color:'+icoText+';">'+icoContent+'</div>';
-    html+='<div style="flex:1;min-width:0;'+(isAdmin()?'padding-right:60px;':'')+'">';
-    html+='<div style="font-size:13px;font-weight:500;color:#1a1f2e;margin-bottom:2px;">'+el.nombre+'</div>';
-    html+='<div style="font-size:11px;color:#9aa3b2;">'+meta+'</div>';
-    if(statusBadges)html+='<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">'+statusBadges+'</div>';
-    if(el.nota)html+='<div style="font-size:11px;color:#9aa3b2;font-style:italic;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">💬 '+el.nota.slice(0,40)+(el.nota.length>40?'...':'')+'</div>';
-    html+='</div>';
-    html+='<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;" onclick="event.stopPropagation()">';
-    html+='<div style="display:flex;align-items:center;gap:3px;background:#EAF3DE;padding:3px 8px;border-radius:6px;"><span style="font-size:13px;color:#3B6D11;">✓</span><span style="font-size:11px;font-weight:500;color:#3B6D11;">'+instVal+' inst.</span></div>';
-    html+='<div style="display:flex;align-items:center;gap:3px;background:'+(pendVal===0?'#EAF3DE':'#FCEBEB')+';padding:3px 8px;border-radius:6px;">'+(pendVal===0?'<span style="font-size:13px;color:#3B6D11;">✓</span>':'<span style="font-size:13px;color:#A32D2D;">✗</span>')+'<span style="font-size:11px;font-weight:500;color:'+(pendVal===0?'#3B6D11':'#A32D2D')+';">'+pendVal+' pend.</span></div>';
-    html+=rightHtml;
-    html+='</div></div>';
-    if(pct>0&&pct<100){html+='<div style="padding:0 14px 8px;"><div style="height:3px;background:#e1e4e8;border-radius:2px;overflow:hidden;"><div style="height:100%;width:'+pct+'%;background:#1D9E75;border-radius:2px;"></div></div><div style="font-size:10px;color:#9aa3b2;margin-top:2px;">'+pct+'% completado</div></div>';}
-    if(fotoCount>0){html+='<div style="padding:0 14px 8px;display:flex;gap:4px;align-items:center;" onclick="event.stopPropagation();openFotos('+el.id+',this,'+el.cantidad+')"><img src="'+elFotos[elFotos.length-1].url+'" style="width:28px;height:28px;border-radius:5px;object-fit:cover;cursor:pointer;"><span style="font-size:10px;color:#9aa3b2;">'+fotoCount+' foto'+(fotoCount!==1?'s':'')+'</span></div>';}
-    html+='</div>';
+    html+='<div class="el-swipe-wrap" id="swipe-wrap-'+el.id+'">';
+    html+='<div class="el-delete-bg" onclick="deleteElemento('+el.id+')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Eliminar</span></div>';
+    html+='<div class="el-row el-swipe-row" style="animation-delay:'+(i*0.02)+'s;background:white;" id="swipe-row-'+el.id+'" data-elid="'+el.id+'" onclick="openDetalle('+el.id+')">';
+    html+=fotoHtml;
+    html+='<div class="sdot '+cls+'"></div>';
+    html+='<div class="el-info" style="cursor:pointer"><div class="el-name">'+el.nombre+'</div><div class="el-meta">'+meta+'</div>'+(statusBadges?'<div style="margin-top:4px">'+statusBadges+'</div>':'')+'</div>';
+    html+='<div class="el-right" onclick="event.stopPropagation()"><div class="el-qty">'+el.cantidad+'</div>'+rightHtml+'</div></div></div>';
   });
   document.getElementById('el-list').innerHTML=html;
   setTimeout(initSwipeRows,50);
@@ -1818,7 +1977,7 @@ function renderGallery(elId,cantidad){
     html+='</div>';
   });
   if(fotos.length<cantidad&&canEdit()){
-    html+='<div class="foto-add-tile" onclick="openFotoChooser(uploadGalleryFotoFile)">';
+    html+='<div class="foto-add-tile" onclick="document.getElementById(\'foto-gallery-input\').click()">';
     html+='<span style="font-size:24px">Foto</span><span>Agregar</span></div>';
   }
   var gallery=document.getElementById('foto-gallery');
@@ -1894,32 +2053,18 @@ function renderDetalleContent(elId){
     fotosHtml+='</div>';
   });
   if(canEdit()&&fotoCount<el.cantidad){
-    fotosHtml+='<div class="det-add-foto" onclick="openFotoChooser(uploadDetalleFotoFile)"><span style="font-size:22px">Foto</span><span>Agregar</span></div>';
+    fotosHtml+='<div class="det-add-foto" onclick="document.getElementById(\'det-foto-input\').click()"><span style="font-size:22px">Foto</span><span>Agregar</span></div>';
   }
 
   var histHtml='';
   if(elHist.length===0){histHtml='<div style="padding:16px;color:var(--text2);font-size:13px">Sin cambios registrados.</div>';}
-  else{elHist.forEach(function(h,hi){
-    var isInst=h.accion==='instalado';
-    var avColor=isInst?'#EAF3DE':'#FCEBEB';
-    var avText=isInst?'#27500A':'#791F1F';
-    var ini=(h.usuario_nombre||'?').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
-    var isLast=hi===elHist.length-1;
-    histHtml+='<div style="display:flex;gap:10px;padding:12px 14px;'+(isLast?'':'border-bottom:0.5px solid var(--border);')+'">';
-    histHtml+='<div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">';
-    histHtml+='<div style="width:32px;height:32px;border-radius:50%;background:'+avColor+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:'+avText+';">'+ini+'</div>';
-    if(!isLast)histHtml+='<div style="width:1.5px;background:var(--border);flex:1;margin-top:4px;min-height:16px;"></div>';
+  else{elHist.forEach(function(h){
+    histHtml+='<div class="det-hist-row"><div class="det-hist-top">';
+    histHtml+='<div class="det-hist-who">'+h.usuario_nombre+'</div>';
+    histHtml+='<div class="det-hist-act">→ '+(h.accion==='instalado'?'instalado':'pendiente')+'</div>';
+    histHtml+='<div class="det-hist-time">'+formatDate(h.creado_en)+'</div></div>';
+    if(h.nota)histHtml+='<div class="det-hist-nota">💬 '+h.nota+'</div>';
     histHtml+='</div>';
-    histHtml+='<div style="flex:1;min-width:0;padding-bottom:4px;">';
-    histHtml+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">';
-    histHtml+='<div style="font-size:13px;font-weight:600;color:var(--text);">'+h.usuario_nombre+'</div>';
-    histHtml+='<div style="font-size:11px;color:var(--text3);">'+formatDate(h.creado_en)+'</div></div>';
-    histHtml+='<div style="display:inline-flex;align-items:center;gap:4px;background:'+avColor+';padding:3px 10px;border-radius:20px;'+(h.nota?'margin-bottom:6px;':'')+'">'+
-      '<span style="font-size:13px;color:'+(isInst?'#3B6D11':'#A32D2D');
-    histHtml+=';">'+(isInst?'✓':'✗')+'</span>';
-    histHtml+='<span style="font-size:11px;font-weight:600;color:'+(isInst?'#3B6D11':'#A32D2D')+';">'+(isInst?'Instalado':'Marcado pendiente')+'</span></div>';
-    if(h.nota)histHtml+='<div style="font-size:12px;color:var(--text2);font-style:italic;background:var(--bg);padding:6px 10px;border-radius:6px;border-left:2px solid var(--border);">'+h.nota+'</div>';
-    histHtml+='</div></div>';
   });}
 
   var canEditQty=isAdmin();
@@ -2002,7 +2147,6 @@ function renderDetalleContent(elId){
     '</div>'+
 
     (canEdit()?'<button class="det-save-btn" onclick="saveDetalle('+el.id+')">Guardar cambios</button>':'')+
-    (isAdmin()?'<button onclick="deleteElemento('+el.id+')" style="display:flex;align-items:center;justify-content:center;gap:6px;background:none;color:#A32D2D;border:1px solid #F7C1C1;border-radius:8px;padding:12px;font-size:14px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;width:calc(100% - 28px);margin:0 14px 10px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Eliminar elemento</button>':'')+
     '<button class="det-wa-btn" onclick="openWAModal('+el.id+')"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>Enviar por WhatsApp</button>'+
     (isAdmin()?'<button class="det-wa-btn" style="background:var(--purple)" onclick="openAsignarModal('+el.id+')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Asignar tarea a contacto</button>':'')+
 
@@ -2193,13 +2337,10 @@ function openModalNuevoElemento(pisoId){
 }
 
 function saveNuevoElemento(){
-  var btn=document.querySelector('#modal-nuevo-el .modal-btn.primary');
-  if(btn&&btn.disabled)return;
-  if(btn)btn.disabled=true;
   var nombre=document.getElementById('ne-nombre').value.trim().toUpperCase();
   var cantidad=parseInt(document.getElementById('ne-cantidad').value)||1;
   var pisoId=parseInt(document.getElementById('ne-piso-id').value);
-  if(!nombre){showToast('Escribe el nombre del elemento','error');if(btn)btn.disabled=false;return;}
+  if(!nombre){showToast('Escribe el nombre del elemento','error');return;}
   sb.from('elementos').insert([{
     piso_id:pisoId,
     nombre:nombre,
@@ -2213,7 +2354,6 @@ function saveNuevoElemento(){
   }]).select().then(function(r){
     if(r.error){showToast('Error: '+r.error.message,'error');return;}
     if(r.data&&r.data.length>0)D.elementos.push(r.data[0]);
-    if(btn)btn.disabled=false;
     closeModal('nuevo-el');
     renderEls();
     showToast('Elemento creado','success');
@@ -2512,8 +2652,7 @@ function saveDetalle(elId){
   if(qtyInput&&qtyInput.value)el.cantidad=Math.max(1,parseInt(qtyInput.value)||el.cantidad);
   var nota=document.getElementById('det-nota-input');
   var notaVal=nota?nota.value:el.nota;
-  var update={cantidad:el.cantidad,actualizado_por:U.nombre,actualizado_en:new Date().toISOString()};
-  if(notaVal!==undefined)update.nota=notaVal;
+  var update={cantidad:el.cantidad,nota:notaVal,actualizado_por:U.nombre,actualizado_en:new Date().toISOString()};
   sb.from('elementos').update(update).eq('id',elId).then(function(res){
     if(res.error){showToast('Error al guardar','error');return;}
     Object.assign(el,update);
@@ -2567,51 +2706,6 @@ function deleteFotoDetalle(fotoId,path,elId){
     renderDetalleContent(elId);
     renderEls();
     showToast('Foto eliminada','success');
-  });
-}
-
-function uploadGalleryFotoFile(file){
-  if(!file||!curElId)return;
-  var el=D.elementos.find(function(x){return x.id===curElId;});
-  var fotos=D.fotos.filter(function(f){return f.elemento_id===curElId;});
-  if(fotos.length>=el.cantidad){showToast('Ya tienes el máximo de fotos','error');return;}
-  showToast('Subiendo foto...','');
-  var path='el-'+curElId+'-'+Date.now()+'.jpg';
-  sb.storage.from('fotos').upload(path,file,{contentType:file.type,upsert:false}).then(function(res){
-    if(res.error){showToast('Error al subir foto','error');return;}
-    var url=sb.storage.from('fotos').getPublicUrl(path).data.publicUrl;
-    sb.from('fotos').insert([{elemento_id:curElId,url:url,path:path,subida_por:U.nombre}]).select().then(function(r){
-      if(r.error){showToast('Error al guardar','error');return;}
-      if(r.data&&r.data.length>0){var exists=D.fotos.find(function(f){return f.id===r.data[0].id;});if(!exists)D.fotos.push(r.data[0]);}
-      renderGallery(curElId,el.cantidad);
-      renderEls();
-      if(document.getElementById('screen-detalle').classList.contains('active'))renderDetalleContent(curElId);
-      showToast('Foto guardada','success');
-    });
-  });
-}
-
-function uploadDetalleFotoFile(file){
-  if(!file||!curElId)return;
-  var el=D.elementos.find(function(x){return x.id===curElId;});
-  var fotos=D.fotos.filter(function(f){return f.elemento_id===curElId;});
-  if(fotos.length>=el.cantidad){showToast('Ya tienes el máximo de fotos','error');return;}
-  showToast('Subiendo foto...','');
-  var notaActual=document.getElementById('det-nota-input');
-  var notaGuardada=notaActual?notaActual.value:'';
-  var path='el-'+curElId+'-'+Date.now()+'.jpg';
-  sb.storage.from('fotos').upload(path,file,{contentType:file.type,upsert:false}).then(function(res){
-    if(res.error){showToast('Error al subir','error');return;}
-    var url=sb.storage.from('fotos').getPublicUrl(path).data.publicUrl;
-    sb.from('fotos').insert([{elemento_id:curElId,url:url,path:path,subida_por:U.nombre}]).select().then(function(r){
-      if(r.error){showToast('Error al guardar','error');return;}
-      if(r.data&&r.data.length>0){var exists=D.fotos.find(function(f){return f.id===r.data[0].id;});if(!exists)D.fotos.push(r.data[0]);}
-      renderDetalleContent(curElId);
-      renderEls();
-      var notaEl=document.getElementById('det-nota-input');
-      if(notaEl&&notaGuardada)notaEl.value=notaGuardada;
-      showToast('Foto guardada','success');
-    });
   });
 }
 
@@ -4321,157 +4415,48 @@ if('serviceWorker' in navigator){
     console.log('SW registrado');
   }).catch(function(e){console.log('SW error:',e);});
 }
-var _planoScale=1,_planoX=0,_planoY=0;
-
-function openPlanoById(pisoId){
-  var p=D.pisos.find(function(x){return x.id===pisoId;});
-  if(p&&p.plano_url)openPlano(p.plano_url,p.nombre);
-}
-
-function openPlano(url,nombre){
-  document.getElementById('plano-title').textContent=nombre||'Plano';
-  var img=document.getElementById('plano-img');
-  img.src=url;
-  _planoScale=1;_planoX=0;_planoY=0;
-  img.style.transform='translate(0px,0px) scale(1)';
-  document.getElementById('modal-plano').classList.remove('hidden');
-  setupPlanoGestures();
-}
-
-function closePlano(){
-  document.getElementById('modal-plano').classList.add('hidden');
-}
-
-function planoZoom(factor){
-  _planoScale=Math.max(0.3,Math.min(8,_planoScale*factor));
-  document.getElementById('plano-img').style.transform='translate('+_planoX+'px,'+_planoY+'px) scale('+_planoScale+')';
-}
-
-function planoReset(){
-  _planoScale=1;_planoX=0;_planoY=0;
-  document.getElementById('plano-img').style.transform='translate(0px,0px) scale(1)';
-}
-
-function setupPlanoGestures(){
-  var img=document.getElementById('plano-img');
-  var lastTouches=null;
-  img.onmousedown=function(e){
-    e.preventDefault();
-    var sx=e.clientX-_planoX,sy=e.clientY-_planoY;
-    img.style.cursor='grabbing';
-    document.onmousemove=function(e){
-      _planoX=e.clientX-sx;_planoY=e.clientY-sy;
-      img.style.transform='translate('+_planoX+'px,'+_planoY+'px) scale('+_planoScale+')';
-    };
-    document.onmouseup=function(){document.onmousemove=null;document.onmouseup=null;img.style.cursor='grab';};
-  };
-  img.ondblclick=function(){planoReset();};
-  img.ontouchstart=function(e){
-    if(e.touches.length===2)lastTouches=e.touches;
-    else{var t=e.touches[0];img._ts={x:t.clientX-_planoX,y:t.clientY-_planoY};lastTouches=null;}
-    e.preventDefault();
-  };
-  img.ontouchmove=function(e){
-    e.preventDefault();
-    if(e.touches.length===1&&img._ts){
-      _planoX=e.touches[0].clientX-img._ts.x;_planoY=e.touches[0].clientY-img._ts.y;
-      img.style.transform='translate('+_planoX+'px,'+_planoY+'px) scale('+_planoScale+')';
-    }else if(e.touches.length===2&&lastTouches){
-      var d1=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
-      var d0=Math.hypot(lastTouches[0].clientX-lastTouches[1].clientX,lastTouches[0].clientY-lastTouches[1].clientY);
-      if(d0>0)_planoScale=Math.max(0.3,Math.min(8,_planoScale*(d1/d0)));
-      lastTouches=e.touches;
-      img.style.transform='translate('+_planoX+'px,'+_planoY+'px) scale('+_planoScale+')';
-    }
-  };
-  img.ontouchend=function(){lastTouches=null;img._ts=null;};
-}
-
-function quitarPlano(pisoId){
-  if(!confirm('¿Quitar el plano de este piso?'))return;
-  sb.from('pisos').update({plano_url:null}).eq('id',pisoId).then(function(r){
-    if(r.error){showToast('Error al quitar plano','error');return;}
-    var idx=D.pisos.findIndex(function(p){return p.id===pisoId;});
-    if(idx!==-1)D.pisos[idx].plano_url=null;
-    buildPisos(curEdId,false);
-    showToast('Plano eliminado','success');
-  });
-}
-
-function uploadPlano(e,pisoId){
-  var file=e.target.files[0];
-  if(!file)return;
-  showToast('Subiendo plano...','');
-  var path='plano-'+pisoId+'-'+Date.now()+'.jpg';
-  sb.storage.from('fotos').upload(path,file,{contentType:file.type,upsert:true}).then(function(res){
-    e.target.value='';
-    if(res.error){showToast('Error al subir','error');return;}
-    var url=sb.storage.from('fotos').getPublicUrl(path).data.publicUrl;
-    sb.from('pisos').update({plano_url:url}).eq('id',pisoId).then(function(r){
-      if(r.error){showToast('Error al guardar','error');return;}
-      var idx=D.pisos.findIndex(function(p){return p.id===pisoId;});
-      if(idx!==-1)D.pisos[idx].plano_url=url;
-      buildPisos(curEdId,false);
-      showToast('Plano guardado','success');
-    });
-  });
-}
-
-var _fotoChooserCallback=null;
-
-function openFotoChooser(callback){
-  _fotoChooserCallback=callback;
-  document.getElementById('fc-camera').value='';
-  document.getElementById('fc-gallery').value='';
-  openModal('foto-chooser');
-}
-
-function fotoChooserDone(e){
-  closeModal('foto-chooser');
-  var file=e.target.files[0];
-  if(!file||!_fotoChooserCallback)return;
-  _fotoChooserCallback(file);
-}
-
 
 
 </script>
 
-<!-- MODAL PLANO -->
-<div class="modal-overlay hidden" id="modal-plano" onclick="closePlano()">
-  <div style="background:#000;width:100%;height:100%;display:flex;flex-direction:column;" onclick="event.stopPropagation()">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;padding-top:calc(14px + env(safe-area-inset-top,0px));background:#111;flex-shrink:0;">
-      <div style="font-size:15px;font-weight:600;color:white;" id="plano-title">Plano</div>
-      <button onclick="closePlano()" style="background:rgba(255,255,255,0.1);border:none;color:white;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;">✕</button>
+<!-- MODAL NUEVO TIPO HABITACION -->
+<div class="modal-overlay hidden" id="modal-nuevo-tipo-hab" onclick="closeOv(event,'modal-nuevo-tipo-hab')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">Agregar tipo de habitación</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:14px;">Piso: <b id="nth-piso-nombre"></b></div>
+    <input type="hidden" id="nth-piso-id">
+    <div class="modal-field"><label>Tipo de habitación</label>
+      <select class="modal-select" id="nth-tipo">
+        <option value="King Standard">King Standard</option>
+        <option value="Full Standard">Full Standard</option>
+        <option value="King Connecting">King Connecting</option>
+        <option value="Full Connecting">Full Connecting</option>
+        <option value="Family">Family</option>
+      </select>
     </div>
-    <div id="plano-viewer" style="flex:1;overflow:hidden;display:flex;align-items:center;justify-content:center;">
-      <img id="plano-img" src="" alt="Plano" style="max-width:none;max-height:none;cursor:grab;user-select:none;touch-action:none;transform-origin:center center;">
+    <div class="modal-field"><label>Cantidad de habitaciones</label>
+      <input class="modal-input" type="number" id="nth-cantidad" placeholder="Ej: 9" min="1">
     </div>
-    <div style="display:flex;justify-content:center;gap:16px;padding:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom,16px));background:#111;flex-shrink:0;">
-      <button onclick="planoZoom(1.3)" style="background:rgba(255,255,255,0.15);border:none;color:white;width:44px;height:44px;border-radius:50%;font-size:22px;cursor:pointer;">+</button>
-      <button onclick="planoReset()" style="background:rgba(255,255,255,0.15);border:none;color:white;width:44px;height:44px;border-radius:50%;font-size:13px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">1:1</button>
-      <button onclick="planoZoom(0.7)" style="background:rgba(255,255,255,0.15);border:none;color:white;width:44px;height:44px;border-radius:50%;font-size:22px;cursor:pointer;">−</button>
+    <div class="modal-row">
+      <button class="modal-btn secondary" onclick="closeModal('nuevo-tipo-hab')">Cancelar</button>
+      <button class="modal-btn primary" onclick="saveNuevoTipoHab()">Agregar</button>
     </div>
   </div>
 </div>
 
-
-<!-- MODAL FOTO CHOOSER -->
-<div class="modal-overlay hidden" id="modal-foto-chooser" onclick="closeOv(event,'modal-foto-chooser')">
-  <div class="modal" onclick="event.stopPropagation()" style="padding-bottom:calc(16px + var(--sab));">
-    <div class="modal-title">Agregar foto</div>
-    <input type="file" id="fc-camera" accept="image/*" capture="environment" style="display:none" onchange="fotoChooserDone(event)">
-    <input type="file" id="fc-gallery" accept="image/*" style="display:none" onchange="fotoChooserDone(event)">
-    <div style="display:flex;flex-direction:column;gap:10px;">
-      <button onclick="document.getElementById('fc-camera').click()" style="display:flex;align-items:center;gap:12px;padding:16px;background:var(--bg);border:1px solid var(--border);border-radius:10px;font-size:15px;font-weight:600;color:var(--text);cursor:pointer;font-family:'Inter',sans-serif;width:100%;">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        Tomar foto con cámara
-      </button>
-      <button onclick="document.getElementById('fc-gallery').click()" style="display:flex;align-items:center;gap:12px;padding:16px;background:var(--bg);border:1px solid var(--border);border-radius:10px;font-size:15px;font-weight:600;color:var(--text);cursor:pointer;font-family:'Inter',sans-serif;width:100%;">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-        Elegir de galería
-      </button>
-      <button onclick="closeModal('foto-chooser')" style="padding:14px;background:none;border:1px solid var(--border);border-radius:10px;font-size:14px;font-weight:600;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;">Cancelar</button>
+<!-- MODAL NUEVO ELEMENTO HABITACION -->
+<div class="modal-overlay hidden" id="modal-nuevo-el-hab" onclick="closeOv(event,'modal-nuevo-el-hab')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">Nuevo elemento</div>
+    <div class="modal-field"><label>Nombre del elemento</label>
+      <input class="modal-input" type="text" id="neh-nombre" placeholder="Ej: CAMA KING" style="text-transform:uppercase">
+    </div>
+    <div class="modal-field"><label>Cantidad</label>
+      <input class="modal-input" type="number" id="neh-cantidad" placeholder="Ej: 1" min="1">
+    </div>
+    <div class="modal-row">
+      <button class="modal-btn secondary" onclick="closeModal('nuevo-el-hab')">Cancelar</button>
+      <button class="modal-btn primary" onclick="saveNuevoElHab()">Crear elemento</button>
     </div>
   </div>
 </div>

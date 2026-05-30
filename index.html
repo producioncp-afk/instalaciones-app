@@ -1259,7 +1259,7 @@ function saveNuevoTipoHab(){
 }
 
 function buildElesHab(tipoHabId,push){
-  buildHabitaciones(tipoHabId,push);return;
+  buildHabitaciones(tipoHabId,false);return;
   if(push===undefined)push=true;
   curTipoHabId=tipoHabId;
   var tipo=D.tipos_hab.find(function(t){return t.id===tipoHabId;});
@@ -1612,7 +1612,7 @@ function buildHabitaciones(tipoHabId, push){
   curTipoHabId=parseInt(tipoHabId);
   var tipo=D.tipos_hab.find(function(t){return t.id===tipoHabId;});
   var piso=tipo?D.pisos.find(function(p){return p.id===tipo.piso_id;}):null;
-  if(push)navStack.push('pisos');
+  navStack.push('pisos');
   setTopbar(false,(tipo?tipo.tipo:'Habitaciones')+(piso?' · '+piso.nombre:''));
   document.getElementById('back-btn').classList.remove('hidden');
   showScreen('habitaciones');
@@ -1832,6 +1832,10 @@ function goBack(){
   else if(prev==='elementos'){buildEls(curPisoId,false);navStack.pop();}
   else if(prev==='equipo'){buildEdificios(curProjId,false);setTimeout(function(){switchProjTab('equipo');},50);navStack.pop();}
   else if(prev==='equipo_screen'){setTopbar(false,'Equipo de obra');showScreen('equipo');buildEquipoScreen();navStack.pop();}
+  else if(prev==='pisos'&&document.getElementById('screen-habitaciones').classList.contains('active')){buildPisos(curEdId,false);}
+  else if(prev==='habitaciones'){buildHabitaciones(curTipoHabId,false);}
+  else if(prev==='elementos-hab'){renderElsHabForHabitacion(curHabId);showScreen('elementos-hab');}
+  else if(prev==='detalle-hab'){renderElsHabForHabitacion(curHabId);showScreen('elementos-hab');}
 }
 
 var _swipeStartX={},_swipeStartY={},_swipeOpen={};

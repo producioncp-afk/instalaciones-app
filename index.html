@@ -2076,10 +2076,9 @@ function saveNuevoPiso(){
   var btn=document.querySelector('#modal-nuevo-piso .modal-btn.primary');
   if(btn)btn.disabled=true;
   sb.from('pisos').insert([{
-    edificio_id:edId,
+    edificio_id:String(edId),
     nombre:nombre,
-    orden:orden,
-    plano_url:null
+    orden:orden
   }]).select().then(function(r){
     if(btn)btn.disabled=false;
     if(r.error){showToast('Error: '+r.error.message,'error');return;}

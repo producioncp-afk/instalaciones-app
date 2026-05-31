@@ -974,7 +974,7 @@ fbMsg.onMessage(function(payload){
 var U=null,curProjId=null,curEdId=null,curPisoId=null;
 var navStack=[],pendingToggle=null;
 var selEmoji_='🏗️',selColor_='#2563eb';
-var D={proyectos:[],edificios:[],pisos:[],elementos:[],usuarios:[],historial:[],fotos:[],specs:[],seguimiento:[],notifs:[],tipos_hab:[],elementos_hab:[],habitaciones:[],tareas:[],sub_elementos:[]};
+var D={proyectos:[],edificios:[],pisos:[],elementos:[],usuarios:[],historial:[],fotos:[],specs:[],seguimiento:[],notifs:[],tipos_hab:[],elementos_hab:[],habitaciones:[],elementos_por_hab:[],tareas:[],sub_elementos:[]};
 var curElId=null;
 var appCharts={};
 
@@ -1103,6 +1103,7 @@ function loadData(){
     sb.from('tipos_habitacion').select('*').order('id'),
     sb.from('elementos_habitacion').select('*').order('id'),
     sb.from('habitaciones').select('*').order('numero'),
+    sb.from('elementos_por_habitacion').select('*').order('id'),
     sb.from('edificios').select('*').order('id'),
     sb.from('pisos').select('*').order('orden'),
     sb.from('elementos').select('*').order('id'),
@@ -1119,21 +1120,22 @@ function loadData(){
     D.tipos_hab=r[1].data||[];
     D.elementos_hab=r[2].data||[];
     D.habitaciones=r[3].data||[];
-    var allP=r[0].data||[],allE=r[4].data||[];
+    D.elementos_por_hab=r[5].data||[];
+    var allP=r[0].data||[],allE=r[5].data||[];
     if(!isAdmin()&&U.proyecto_id){
       D.proyectos=allP.filter(function(p){return p.id===U.proyecto_id;});
       D.edificios=allE.filter(function(e){return e.proyecto_id===U.proyecto_id;});
     }else{D.proyectos=allP;D.edificios=allE;}
-    D.pisos=r[5].data||[];D.elementos=r[6].data||[];
-    D.fotos=r[7].data||[];
-    D.seguimiento=r[8].data||[];
-    D.specs=r[9].data||[];
-    D.historial=r[10].data||[];
-    D.notifs=r[11].data||[];
-    D.usuarios=r[12].data||[];
-    D.contactos=r[12]?r[13].data||[]:[];
-    D.tareas=r[13].data||[];
-    D.sub_elementos=r[14].data||[];
+    D.pisos=r[6].data||[];D.elementos=r[7].data||[];
+    D.fotos=r[8].data||[];
+    D.seguimiento=r[9].data||[];
+    D.specs=r[10].data||[];
+    D.historial=r[11].data||[];
+    D.notifs=r[12].data||[];
+    D.usuarios=r[13].data||[];
+    D.contactos=r[12]?r[14].data||[]:[];
+    D.tareas=r[14].data||[];
+    D.sub_elementos=r[15].data||[];
     setOnline(true);
     updateNotifBadge();
     updateTareasBadge();
@@ -1366,10 +1368,14 @@ function toggleElHab(elId, currentVal){
   var update={instalado:newVal,actualizado_por:U.nombre,actualizado_en:new Date().toISOString()};
   if(newVal)update.cantidad_instalada=D.elementos_hab.find(function(e){return e.id===elId;}).cantidad;
   else update.cantidad_instalada=0;
-  sb.from('elementos_habitacion').update(update).eq('id',elId).then(function(r){
+  // Check if this is a elementos_por_habitacion element
+  var isPorHab = D.elementos_por_hab.find(function(e){return e.id===elId;});
+  var table = isPorHab ? 'elementos_por_habitacion' : 'elementos_habitacion';
+  var dArray = isPorHab ? 'elementos_por_hab' : 'elementos_hab';
+  sb.from(table).update(update).eq('id',elId).then(function(r){
     if(r.error){showToast('Error','error');return;}
-    var idx=D.elementos_hab.findIndex(function(e){return e.id===elId;});
-    if(idx!==-1)Object.assign(D.elementos_hab[idx],update);
+    var idx=D[dArray].findIndex(function(e){return e.id===elId;});
+    if(idx!==-1)Object.assign(D[dArray][idx],update);
     if(curHabId)renderElsHabForHabitacion(curHabId);
     else renderElsHab();
     showToast(newVal?'Instalado':'Pendiente','success');
@@ -1377,10 +1383,10 @@ function toggleElHab(elId, currentVal){
 }
 
 function openDetalleHab(elId){
-  var el=D.elementos_hab.find(function(x){return x.id===elId;});
+  var el=D.elementos_por_hab.find(function(x){return x.id===elId;})||D.elementos_hab.find(function(x){return x.id===elId;});
   if(!el)return;
   var hab=D.habitaciones.find(function(h){return h.id===curHabId;});
-  var tipo=D.tipos_hab.find(function(t){return t.id===el.tipo_habitacion_id;});
+  var tipo=hab?D.tipos_hab.find(function(t){return t.id===hab.tipo_habitacion_id;}):null;
   navStack.push('elementos-hab');
   setTopbar(false,el.nombre);
   document.getElementById('back-btn').classList.remove('hidden');
@@ -1389,7 +1395,7 @@ function openDetalleHab(elId){
 }
 
 function renderDetalleHab(elId){
-  var el=D.elementos_hab.find(function(x){return x.id===elId;});
+  var el=D.elementos_por_hab.find(function(x){return x.id===elId;})||D.elementos_hab.find(function(x){return x.id===elId;});
   if(!el)return;
   var hab=D.habitaciones.find(function(h){return h.id===curHabId;});
   var cls=el.instalado===true?'si':el.instalado===false?'no':'nd';
@@ -1511,10 +1517,13 @@ function toggleElHabDetalle(elId, currentVal){
   var update={instalado:newVal,actualizado_por:U.nombre,actualizado_en:new Date().toISOString()};
   if(newVal)update.cantidad_instalada=D.elementos_hab.find(function(e){return e.id===elId;}).cantidad;
   else update.cantidad_instalada=0;
-  sb.from('elementos_habitacion').update(update).eq('id',elId).then(function(r){
+  var isPH=D.elementos_por_hab.find(function(e){return e.id===elId;});
+  var tbl=isPH?'elementos_por_habitacion':'elementos_habitacion';
+  var dar=isPH?'elementos_por_hab':'elementos_hab';
+  sb.from(tbl).update(update).eq('id',elId).then(function(r){
     if(r.error){showToast('Error','error');return;}
-    var idx=D.elementos_hab.findIndex(function(e){return e.id===elId;});
-    if(idx!==-1)Object.assign(D.elementos_hab[idx],update);
+    var idx=D[dar].findIndex(function(e){return e.id===elId;});
+    if(idx!==-1)Object.assign(D[dar][idx],update);
     var tog=document.getElementById('det-hab-toggle');
     if(tog)tog.className='toggle'+(newVal?' on':'');
     renderElsHabForHabitacion(curHabId);
@@ -1539,9 +1548,13 @@ function changeHabElCant(elId, campo, delta){
   else if(campo==='cantidad_pintado'){update.pintado=newVal>=el.cantidad;el.pintado=update.pintado;}
   else if(campo==='cantidad_retocado'){update.retocado=newVal>=el.cantidad;el.retocado=update.retocado;}
   update.actualizado_por=U.nombre;update.actualizado_en=new Date().toISOString();
-  sb.from('elementos_habitacion').update(update).eq('id',elId).then(function(r){
+  var isPorHab3=D.elementos_por_hab.find(function(e){return e.id===elId;});
+  var table3=isPorHab3?'elementos_por_habitacion':'elementos_habitacion';
+  var darr3=isPorHab3?'elementos_por_hab':'elementos_hab';
+  sb.from(table3).update(update).eq('id',elId).then(function(r){
     if(r.error){showToast('Error','error');return;}
-    Object.assign(el,update);
+    var idx3=D[darr3].findIndex(function(e){return e.id===elId;});
+    if(idx3!==-1)Object.assign(D[darr3][idx3],update);
     showToast(newVal+' de '+el.cantidad,'success');
   });
 }
@@ -1553,9 +1566,14 @@ function saveDetalleHab(elId){
   var notaVal=nota?nota.value:el.nota;
   var update={actualizado_por:U.nombre,actualizado_en:new Date().toISOString()};
   if(notaVal!==undefined)update.nota=notaVal;
-  sb.from('elementos_habitacion').update(update).eq('id',elId).then(function(r){
+  var isPorHab2=D.elementos_por_hab.find(function(e){return e.id===elId;});
+  var table2=isPorHab2?'elementos_por_habitacion':'elementos_habitacion';
+  var darr2=isPorHab2?'elementos_por_hab':'elementos_hab';
+  sb.from(table2).update(update).eq('id',elId).then(function(r){
     if(r.error){showToast('Error','error');return;}
     Object.assign(el,update);
+    var idx2=D[darr2].findIndex(function(e){return e.id===elId;});
+    if(idx2!==-1)Object.assign(D[darr2][idx2],update);
     renderElsHabForHabitacion(curHabId);
     showToast('Guardado','success');
   });
@@ -1692,8 +1710,7 @@ function openHabitacion(habId){
 function renderElsHabForHabitacion(habId){
   var hab=D.habitaciones.find(function(h){return h.id===habId;});
   if(!hab)return;
-  var tipoId=hab.tipo_habitacion_id;
-  var items=D.elementos_hab.filter(function(e){return parseInt(e.tipo_habitacion_id)===parseInt(tipoId);});
+  var items=D.elementos_por_hab.filter(function(e){return parseInt(e.habitacion_id)===parseInt(habId);});
   var s=calcStats(items);
 
   document.getElementById('el-hab-sum').innerHTML=

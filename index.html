@@ -1149,10 +1149,9 @@ function loadData(){
   ];
   return Promise.all(qs).then(function(r){
     D.tipos_hab=r[1].data||[];
-    D.elementos_hab=r[2].data||[];
-    D.plantillas=r[4].data||[];
+    D.plantillas=r[2].data||[];
+    D.elementos_hab=r[3].data||[];
     D.habitaciones=r[4].data||[];
-    D.elementos_por_hab=r[5].data||[];
     var allP=r[0].data||[],allE=r[5].data||[];
     if(!isAdmin()&&U.proyecto_id){
       D.proyectos=allP.filter(function(p){return p.id===U.proyecto_id;});
@@ -1165,7 +1164,7 @@ function loadData(){
     D.historial=r[11].data||[];
     D.notifs=r[12].data||[];
     D.usuarios=r[13].data||[];
-    D.contactos=r[12]?r[14].data||[]:[];
+    D.contactos=r[14]?r[14].data||[]:[];
     D.tareas=r[14].data||[];
     D.sub_elementos=r[15].data||[];
     setOnline(true);

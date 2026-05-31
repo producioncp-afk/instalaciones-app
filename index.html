@@ -1246,15 +1246,63 @@ function saveNuevoTipoHab(){
   var pisoId=parseInt(document.getElementById('nth-piso-id').value);
   var tipo=document.getElementById('nth-tipo').value;
   var cantidad=parseInt(document.getElementById('nth-cantidad').value)||1;
+  var numeros=document.getElementById('nth-numeros').value.trim();
   var btn=document.querySelector('#modal-nuevo-tipo-hab .modal-btn.primary');
-  if(btn)btn.disabled=true;
+  if(btn){btn.disabled=true;btn.textContent='Creando...';}
   sb.from('tipos_habitacion').insert([{piso_id:pisoId,tipo:tipo,cantidad_habitaciones:cantidad}]).select().then(function(r){
-    if(btn)btn.disabled=false;
-    if(r.error){showToast('Error: '+r.error.message,'error');return;}
-    if(r.data&&r.data.length>0)D.tipos_hab.push(r.data[0]);
-    closeModal('nuevo-tipo-hab');
-    buildPisos(curEdId,false);
-    showToast('Tipo de habitación agregado','success');
+    if(r.error){if(btn){btn.disabled=false;btn.textContent='Agregar';}showToast('Error: '+r.error.message,'error');return;}
+    var nuevoTipo=r.data[0];
+    D.tipos_hab.push(nuevoTipo);
+    var tipoId=nuevoTipo.id;
+    // Get template elements for this tipo from elementos_habitacion (any existing tipo with same name)
+    var templateTipo=D.tipos_hab.find(function(t){return t.tipo===tipo&&t.id!==tipoId;});
+    var templateEls=templateTipo?D.elementos_hab.filter(function(e){return parseInt(e.tipo_habitacion_id)===parseInt(templateTipo.id);}):[];
+    // Also insert template elements for this new tipo in elementos_habitacion
+    function insertElsHab(callback){
+      if(!templateEls.length){callback();return;}
+      var inserts=templateEls.map(function(e){return{tipo_habitacion_id:tipoId,nombre:e.nombre,cantidad:e.cantidad,instalado:false,cantidad_instalada:0,pintado:false,retocado:false};});
+      sb.from('elementos_habitacion').insert(inserts).select().then(function(er){
+        if(er.data)D.elementos_hab=D.elementos_hab.concat(er.data);
+        callback(er.data||[]);
+      });
+    }
+    // Parse room numbers
+    var habNums=[];
+    if(numeros){
+      numeros.split(',').forEach(function(n){var t=n.trim();if(t)habNums.push(t);});
+    }else{
+      for(var i=1;i<=cantidad;i++)habNums.push(String(i));
+    }
+    insertElsHab(function(newEls){
+      // Create habitaciones
+      if(!habNums.length){
+        if(btn){btn.disabled=false;btn.textContent='Agregar';}
+        closeModal('nuevo-tipo-hab');
+        buildPisos(curEdId,false);
+        showToast(tipo+' creado','success');
+        return;
+      }
+      var habInserts=habNums.map(function(n){return{tipo_habitacion_id:tipoId,numero:n};});
+      sb.from('habitaciones').insert(habInserts).select().then(function(hr){
+        if(hr.data){
+          D.habitaciones=D.habitaciones.concat(hr.data);
+          // Copy elements to each habitacion
+          if(newEls&&newEls.length&&hr.data.length){
+            var elPorHab=[];
+            hr.data.forEach(function(hab){
+              newEls.forEach(function(el){
+                elPorHab.push({habitacion_id:hab.id,nombre:el.nombre,cantidad:el.cantidad,instalado:false,cantidad_instalada:0,pintado:false,cantidad_pintado:0,retocado:false,cantidad_retocado:0});
+              });
+            });
+            sb.from('elementos_por_habitacion').insert(elPorHab).then(function(){});
+          }
+        }
+        if(btn){btn.disabled=false;btn.textContent='Agregar';}
+        closeModal('nuevo-tipo-hab');
+        buildPisos(curEdId,false);
+        showToast(tipo+' creado con '+habNums.length+' habitaciones','success');
+      });
+    });
   });
 }
 
@@ -1983,6 +2031,68 @@ function saveEditProj(){
   });
 }
 
+function openAddEdificio(){
+  document.getElementById('nae-nombre').value='';
+  document.getElementById('nae-icon').value='🏢';
+  openModal('nuevo-edificio');
+}
+
+function saveNuevoEdificio(){
+  var nombre=document.getElementById('nae-nombre').value.trim();
+  if(!nombre){showToast('Escribe el nombre del edificio','error');return;}
+  var btn=document.querySelector('#modal-nuevo-edificio .modal-btn.primary');
+  if(btn)btn.disabled=true;
+  sb.from('edificios').insert([{
+    proyecto_id:curProjId,
+    nombre:nombre,
+    icon:'🏢',
+    color:'#1a56db'
+  }]).select().then(function(r){
+    if(btn)btn.disabled=false;
+    if(r.error){showToast('Error: '+r.error.message,'error');return;}
+    if(r.data&&r.data.length>0)D.edificios.push(r.data[0]);
+    closeModal('nuevo-edificio');
+    // Now open piso creation for this edificio
+    var newEd=r.data[0];
+    showToast(nombre+' creado','success');
+    buildEdificios(curProjId,false);
+    // Prompt to add piso
+    setTimeout(function(){openAddPiso(newEd.id,nombre);},300);
+  });
+}
+
+function openAddPiso(edId, edNombre){
+  var ed2=D.edificios.find(function(e){return e.id==edId;});
+  document.getElementById('nap-ed-id').value=edId;
+  document.getElementById('nap-ed-nombre').textContent=edNombre||( ed2?ed2.nombre:'Edificio');
+  document.getElementById('nap-nombre').value='';
+  document.getElementById('nap-orden').value='1';
+  openModal('nuevo-piso');
+}
+
+function saveNuevoPiso(){
+  var edId=parseInt(document.getElementById('nap-ed-id').value);
+  var nombre=document.getElementById('nap-nombre').value.trim();
+  var orden=parseInt(document.getElementById('nap-orden').value)||1;
+  if(!nombre){showToast('Escribe el nombre del piso','error');return;}
+  var btn=document.querySelector('#modal-nuevo-piso .modal-btn.primary');
+  if(btn)btn.disabled=true;
+  sb.from('pisos').insert([{
+    edificio_id:edId,
+    nombre:nombre,
+    orden:orden,
+    plano_url:null
+  }]).select().then(function(r){
+    if(btn)btn.disabled=false;
+    if(r.error){showToast('Error: '+r.error.message,'error');return;}
+    if(r.data&&r.data.length>0)D.pisos.push(r.data[0]);
+    closeModal('nuevo-piso');
+    curEdId=edId;
+    buildPisos(edId,false);
+    showToast(nombre+' creado','success');
+  });
+}
+
 var _swipeStartX={},_swipeStartY={},_swipeOpen={};
 
 function initSwipeRows(){
@@ -2240,6 +2350,9 @@ function renderResumenContent(projId,edId){
     html+='<div style="width:'+(100-pct1)+'%;background:#ef4444;"></div></div></div>';
   }
 
+  if(isAdmin()){
+    html+='<button onclick="openAddEdificio()" style="display:flex;align-items:center;justify-content:center;gap:8px;background:var(--white);border:1.5px dashed var(--border);border-radius:var(--r);padding:14px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text2);width:100%;margin-top:4px;">+ Agregar edificio</button>';
+  }
   var c=document.getElementById('resumen-ed-content');
   if(c)c.innerHTML=html;
 }
@@ -2422,6 +2535,12 @@ function buildPisos(edId,push){
     html+='<div style="display:flex;border-top:1px solid #f0f0f0;">'+btnRow+'</div>';
     html+='</div>';
   });
+  if(!pisos.length&&isAdmin()){
+    html='<div style="text-align:center;padding:3rem 1rem;"><div style="font-size:48px;margin-bottom:12px;">🏢</div><div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px;">Sin pisos</div><div style="font-size:13px;color:var(--text2);margin-bottom:20px;">Agrega el primer piso a este edificio</div><button onclick="openAddPiso('+edId+')" style="background:var(--blue);color:white;border:none;border-radius:8px;padding:12px 24px;font-size:14px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">+ Agregar piso</button></div>';
+  }
+  if(isAdmin()){
+    html+='<div class="add-btn" onclick="openAddPiso('+edId+',\''+ed.nombre+'\')">+ Agregar piso</div>';
+  }
   document.getElementById('piso-list').innerHTML=html;
   showScreen('pisos');
 }
@@ -4994,6 +5113,13 @@ if('serviceWorker' in navigator){
     <div class="modal-field"><label>Cantidad de habitaciones</label>
       <input class="modal-input" type="number" id="nth-cantidad" placeholder="Ej: 9" min="1">
     </div>
+    <div class="modal-field"><label>Números de habitación</label>
+      <input class="modal-input" type="text" id="nth-numeros" placeholder="Ej: 301,302,303 (separados por coma)">
+      <div style="font-size:11px;color:var(--text3);margin-top:4px;">Si los dejas vacío se numerarán automáticamente del 1 en adelante.</div>
+    </div>
+    <div style="background:var(--blue-light);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--blue);">
+      <b>Auto-copia:</b> Los elementos del tipo seleccionado se copiarán automáticamente a cada habitación.
+    </div>
     <div class="modal-row">
       <button class="modal-btn secondary" onclick="closeModal('nuevo-tipo-hab')">Cancelar</button>
       <button class="modal-btn primary" onclick="saveNuevoTipoHab()">Agregar</button>
@@ -5071,6 +5197,41 @@ if('serviceWorker' in navigator){
     <div class="modal-row">
       <button class="modal-btn secondary" onclick="closeModal('edit-proj')">Cancelar</button>
       <button class="modal-btn primary" onclick="saveEditProj()">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- MODAL NUEVO EDIFICIO -->
+<div class="modal-overlay hidden" id="modal-nuevo-edificio" onclick="closeOv(event,'modal-nuevo-edificio')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">Nuevo edificio</div>
+    <div class="modal-field"><label>Nombre del edificio</label>
+      <input class="modal-input" type="text" id="nae-nombre" placeholder="Ej: Edificio A, Torre 1, Bloque 22">
+    </div>
+    <input type="hidden" id="nae-icon" value="🏢">
+    <div class="modal-row">
+      <button class="modal-btn secondary" onclick="closeModal('nuevo-edificio')">Cancelar</button>
+      <button class="modal-btn primary" onclick="saveNuevoEdificio()">Crear edificio</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NUEVO PISO -->
+<div class="modal-overlay hidden" id="modal-nuevo-piso" onclick="closeOv(event,'modal-nuevo-piso')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">Agregar piso</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:14px;">Edificio: <b id="nap-ed-nombre"></b></div>
+    <input type="hidden" id="nap-ed-id">
+    <div class="modal-field"><label>Nombre del piso</label>
+      <input class="modal-input" type="text" id="nap-nombre" placeholder="Ej: Piso 1, 2do Piso, Planta Baja">
+    </div>
+    <div class="modal-field"><label>Orden</label>
+      <input class="modal-input" type="number" id="nap-orden" placeholder="1" min="1">
+    </div>
+    <div class="modal-row">
+      <button class="modal-btn secondary" onclick="closeModal('nuevo-piso')">Cancelar</button>
+      <button class="modal-btn primary" onclick="saveNuevoPiso()">Crear piso</button>
     </div>
   </div>
 </div>

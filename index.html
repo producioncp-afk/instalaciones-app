@@ -5226,11 +5226,7 @@ function formatDate(iso){
 
 var toastTimer;
 function showToast(msg,type){
-  // Keep simple toast as fallback for legacy calls
-  var t=document.getElementById('toast-msg');
-  t.textContent=msg;t.className='toast show'+(type?' '+type:'');
-  clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.className='toast';},3000);
-  // Also show professional notification
+  // Only show professional notification
   showNotif(msg,type||'info');
 }
 

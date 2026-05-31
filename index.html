@@ -2044,9 +2044,7 @@ function saveNuevoEdificio(){
   if(btn)btn.disabled=true;
   sb.from('edificios').insert([{
     proyecto_id:curProjId,
-    nombre:nombre,
-    icon:'🏢',
-    color:'#1a56db'
+    nombre:nombre
   }]).select().then(function(r){
     if(btn)btn.disabled=false;
     if(r.error){showToast('Error: '+r.error.message,'error');return;}

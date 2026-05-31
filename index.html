@@ -2071,7 +2071,7 @@ function openAddPiso(edId, edNombre){
 function saveNuevoPiso(){
   var edId=parseInt(document.getElementById('nap-ed-id').value);
   var nombre=document.getElementById('nap-nombre').value.trim();
-  var orden=parseInt(document.getElementById('nap-orden').value)||1;
+  var orden=parseInt(document.getElementById('nap-orden').value)||((D.pisos.filter(function(p){return p.edificio_id==edId;}).length)+1);
   if(!nombre){showToast('Escribe el nombre del piso','error');return;}
   var btn=document.querySelector('#modal-nuevo-piso .modal-btn.primary');
   if(btn)btn.disabled=true;
@@ -5223,9 +5223,7 @@ if('serviceWorker' in navigator){
     <div class="modal-field"><label>Nombre del piso</label>
       <input class="modal-input" type="text" id="nap-nombre" placeholder="Ej: Piso 1, 2do Piso, Planta Baja">
     </div>
-    <div class="modal-field"><label>Orden</label>
-      <input class="modal-input" type="number" id="nap-orden" placeholder="1" min="1">
-    </div>
+    <input type="hidden" id="nap-orden" value="1">
     <div class="modal-row">
       <button class="modal-btn secondary" onclick="closeModal('nuevo-piso')">Cancelar</button>
       <button class="modal-btn primary" onclick="saveNuevoPiso()">Crear piso</button>

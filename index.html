@@ -2533,10 +2533,10 @@ function buildPisos(edId,push){
     html+='</div>';
   });
   if(!pisos.length&&isAdmin()){
-    html='<div style="text-align:center;padding:3rem 1rem;"><div style="font-size:48px;margin-bottom:12px;">🏢</div><div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px;">Sin pisos</div><div style="font-size:13px;color:var(--text2);margin-bottom:20px;">Agrega el primer piso a este edificio</div><button onclick="openAddPiso('+edId+')" style="background:var(--blue);color:white;border:none;border-radius:8px;padding:12px 24px;font-size:14px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">+ Agregar piso</button></div>';
+    html='<div style="text-align:center;padding:3rem 1rem;"><div style="font-size:48px;margin-bottom:12px;">🏢</div><div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px;">Sin pisos</div><div style="font-size:13px;color:var(--text2);margin-bottom:20px;">Agrega el primer piso a este edificio</div><button onclick="openAddPiso(\''+edId+'\')" style="background:var(--blue);color:white;border:none;border-radius:8px;padding:12px 24px;font-size:14px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">+ Agregar piso</button></div>';
   }
   if(isAdmin()){
-    html+='<div class="add-btn" onclick="openAddPiso('+edId+')">+ Agregar piso</div>';
+    html+='<div class="add-btn" onclick="openAddPiso(\''+edId+'\')">+ Agregar piso</div>';
   }
   document.getElementById('piso-list').innerHTML=html;
   showScreen('pisos');

@@ -497,6 +497,9 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
     </div>
     <div class="tb-right">
       <div class="opill" id="online-pill"><svg width="7" height="7" viewBox="0 0 10 10"><circle cx="5" cy="5" r="5" fill="currentColor"/></svg><span>En línea</span></div>
+      <div id="config-btn" class="notif-bell hidden" onclick="openConfig()" title="Configuración">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </div>
       <div class="notif-bell" id="notif-bell" onclick="openNotifs()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         <span class="notif-badge hidden" id="notif-badge">0</span>
@@ -620,6 +623,11 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
       <span>Elementos</span>
       <button id="add-el-hab-btn" onclick="openAddElHab()" style="display:none;background:var(--blue);color:white;border:none;border-radius:6px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">+ Agregar</button>
     </div><div id="el-hab-list"></div></div>
+  </div>
+
+  <!-- CONFIGURACION -->
+  <div class="screen" id="screen-config">
+    <div class="pad" id="config-content"></div>
   </div>
 
   <!-- DETALLE HAB -->
@@ -995,7 +1003,7 @@ fbMsg.onMessage(function(payload){
 var U=null,curProjId=null,curEdId=null,curPisoId=null;
 var navStack=[],pendingToggle=null;
 var selEmoji_='🏗️',selColor_='#2563eb';
-var D={proyectos:[],edificios:[],pisos:[],elementos:[],usuarios:[],historial:[],fotos:[],specs:[],seguimiento:[],notifs:[],tipos_hab:[],elementos_hab:[],habitaciones:[],elementos_por_hab:[],tareas:[],sub_elementos:[]};
+var D={proyectos:[],edificios:[],pisos:[],elementos:[],usuarios:[],historial:[],fotos:[],specs:[],seguimiento:[],notifs:[],tipos_hab:[],elementos_hab:[],habitaciones:[],elementos_por_hab:[],plantillas:[],tareas:[],sub_elementos:[]};
 var curElId=null;
 var appCharts={};
 
@@ -1105,6 +1113,7 @@ function startApp(){
     // historial visible for all in nav
     document.getElementById('nav-historial').classList.remove('hidden');
   }
+  if(isAdmin())document.getElementById('config-btn').classList.remove('hidden');
   setTopbar(true);
   loadData().then(function(){buildHome();setupRealtime();});
   // Init push notifications
@@ -1122,6 +1131,7 @@ function loadData(){
   var qs=[
     sb.from('proyectos').select('*').eq('activo',true).order('creado_en'),
     sb.from('tipos_habitacion').select('*').order('id'),
+    sb.from('plantillas_elementos').select('*').order('tipo_habitacion,nombre'),
     sb.from('elementos_habitacion').select('*').order('id'),
     sb.from('habitaciones').select('*').order('numero'),
     
@@ -1140,23 +1150,24 @@ function loadData(){
   return Promise.all(qs).then(function(r){
     D.tipos_hab=r[1].data||[];
     D.elementos_hab=r[2].data||[];
-    D.habitaciones=r[3].data||[];
-    D.elementos_por_hab=r[4].data||[];
-    var allP=r[0].data||[],allE=r[4].data||[];
+    D.plantillas=r[4].data||[];
+    D.habitaciones=r[4].data||[];
+    D.elementos_por_hab=r[5].data||[];
+    var allP=r[0].data||[],allE=r[5].data||[];
     if(!isAdmin()&&U.proyecto_id){
       D.proyectos=allP.filter(function(p){return p.id===U.proyecto_id;});
       D.edificios=allE.filter(function(e){return e.proyecto_id===U.proyecto_id;});
     }else{D.proyectos=allP;D.edificios=allE;}
-    D.pisos=r[5].data||[];D.elementos=r[6].data||[];
-    D.fotos=r[7].data||[];
-    D.seguimiento=r[8].data||[];
-    D.specs=r[9].data||[];
-    D.historial=r[10].data||[];
-    D.notifs=r[11].data||[];
-    D.usuarios=r[12].data||[];
-    D.contactos=r[12]?r[13].data||[]:[];
-    D.tareas=r[13].data||[];
-    D.sub_elementos=r[14].data||[];
+    D.pisos=r[6].data||[];D.elementos=r[7].data||[];
+    D.fotos=r[8].data||[];
+    D.seguimiento=r[9].data||[];
+    D.specs=r[10].data||[];
+    D.historial=r[11].data||[];
+    D.notifs=r[12].data||[];
+    D.usuarios=r[13].data||[];
+    D.contactos=r[12]?r[14].data||[]:[];
+    D.tareas=r[14].data||[];
+    D.sub_elementos=r[15].data||[];
     setOnline(true);
     updateNotifBadge();
     updateTareasBadge();
@@ -1275,13 +1286,12 @@ function saveNuevoTipoHab(){
     var nuevoTipo=r.data[0];
     D.tipos_hab.push(nuevoTipo);
     var tipoId=nuevoTipo.id;
-    // Get template elements for this tipo from elementos_habitacion (any existing tipo with same name)
-    var templateTipo=D.tipos_hab.find(function(t){return t.tipo===tipo&&t.id!==tipoId;});
-    var templateEls=templateTipo?D.elementos_hab.filter(function(e){return parseInt(e.tipo_habitacion_id)===parseInt(templateTipo.id);}):[];
+    // Get template elements from plantillas
+    var templateEls=D.plantillas.filter(function(p){return p.tipo_habitacion===tipo;});
     // Also insert template elements for this new tipo in elementos_habitacion
     function insertElsHab(callback){
       if(!templateEls.length){callback();return;}
-      var inserts=templateEls.map(function(e){return{tipo_habitacion_id:tipoId,nombre:e.nombre,cantidad:e.cantidad,instalado:false,cantidad_instalada:0,pintado:false,retocado:false};});
+      var inserts=templateEls.map(function(e){return{tipo_habitacion_id:tipoId,nombre:e.nombre,cantidad:e.cantidad||1,instalado:false,cantidad_instalada:0,pintado:false,retocado:false};});
       sb.from('elementos_habitacion').insert(inserts).select().then(function(er){
         if(er.data)D.elementos_hab=D.elementos_hab.concat(er.data);
         callback(er.data||[]);
@@ -2111,6 +2121,116 @@ function saveNuevoPiso(){
     buildPisos(edId,false);
     showToast(nombre+' creado','success');
     });
+  });
+}
+
+function openConfig(){
+  navStack.push(document.querySelector('.screen.active').id.replace('screen-',''));
+  setTopbar(false,'Configuración');
+  document.getElementById('back-btn').classList.remove('hidden');
+  showScreen('config');
+  buildConfig();
+}
+
+var _configTipo='King Standard';
+
+function buildConfig(){
+  var tipos=['King Standard','Full Standard','King Connecting','Full Connecting','Family'];
+  var colorMap={
+    'King Standard':'#1a56db','Full Standard':'#0d7a3d',
+    'King Connecting':'#6d28d9','Full Connecting':'#b45309','Family':'#c0392b'
+  };
+  var bgMap={
+    'King Standard':'#ebf0ff','Full Standard':'#e8f5ee',
+    'King Connecting':'#f3f0ff','Full Connecting':'#fef9e7','Family':'#fdf0ef'
+  };
+  var abrevMap={'King Standard':'KS','Full Standard':'FS','King Connecting':'KC','Full Connecting':'FC','Family':'FM'};
+
+  var html='';
+  // Tipo tabs
+  html+='<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:12px;scrollbar-width:none;margin-bottom:16px;" id="cfg-tabs">';
+  tipos.forEach(function(t,ti){
+    var active=t===_configTipo;
+    var col=colorMap[t]||'#1a56db';
+    var bg=bgMap[t]||'#ebf0ff';
+    var abrev=abrevMap[t]||t.slice(0,2);
+    html+='<div data-idx="'+ti+'" onclick="setConfigIdx('+ti+')" style="display:flex;align-items:center;gap:6px;flex-shrink:0;padding:8px 12px;border-radius:8px;border:1px solid '+(active?col:'var(--border)')+';background:'+(active?bg:'var(--white)')+';cursor:pointer;">';
+    html+='<div style="width:24px;height:24px;border-radius:5px;background:'+(active?col:'var(--bg)')+';display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:'+(active?'white':col)+';">'+abrev+'</div>';
+    html+='<span style="font-size:12px;font-weight:600;color:'+(active?col:'var(--text2)')+';">'+t+'</span>';
+    html+='</div>';
+  });
+  html+='</div>';
+
+html+='</div>';
+
+  // Elements for selected tipo
+  var plantillaTipo=D.plantillas.filter(function(p){return p.tipo_habitacion===_configTipo;});
+  html+='<div style="background:white;border-radius:var(--r);border:1px solid var(--border);overflow:hidden;margin-bottom:12px;">';
+  html+='<div style="padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">';
+  html+='<div style="font-size:13px;font-weight:600;color:var(--text);">'+plantillaTipo.length+' elementos en plantilla</div>';
+  html+='</div>';
+
+  if(!plantillaTipo.length){
+    html+='<div style="padding:24px;text-align:center;color:var(--text2);font-size:13px;">Sin elementos. Agrega el primero.</div>';
+  }else{
+    plantillaTipo.forEach(function(p){
+      html+='<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:0.5px solid var(--border);">';
+      html+='<div style="flex:1;">';
+      html+='<div style="font-size:13px;font-weight:500;color:var(--text);">'+p.nombre+'</div>';
+      html+='<div style="font-size:11px;color:var(--text3);">Cantidad: '+p.cantidad+'</div>';
+      html+='</div>';
+      html+='<button onclick="deletePlantillaEl('+p.id+')" style="width:28px;height:28px;border-radius:50%;background:var(--red-light);border:none;color:var(--red);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;">✕</button>';
+      html+='</div>';
+    });
+  }
+  html+='</div>';
+
+  // Add element form
+  html+='<div style="background:white;border-radius:var(--r);border:1px solid var(--border);padding:14px;">';
+  html+='<div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;">Agregar elemento</div>';
+  html+='<div style="display:flex;flex-direction:column;gap:8px;">';
+  html+='<input class="modal-input" type="text" id="cfg-el-nombre" placeholder="Ej: PUERTA DE ACCESO" style="text-transform:uppercase;">';
+  html+='<input class="modal-input" type="number" id="cfg-el-cantidad" placeholder="Cantidad (ej: 1)" min="1" value="1">';
+  html+='<button onclick="addPlantillaEl()" style="background:var(--blue);color:white;border:none;border-radius:8px;padding:12px;font-size:13px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">+ Agregar a plantilla</button>';
+  html+='</div></div>';
+
+  document.getElementById('config-content').innerHTML=html;
+}
+
+function setConfigIdx(idx){
+  var tipos=['King Standard','Full Standard','King Connecting','Full Connecting','Family'];
+  _configTipo=tipos[idx]||tipos[0];
+  buildConfig();
+}
+function setConfigTipo(el){
+  var tipo=el.dataset?el.dataset.tipo:el;
+  _configTipo=tipo;
+  buildConfig();
+}
+
+function addPlantillaEl(){
+  var nombre=document.getElementById('cfg-el-nombre').value.trim().toUpperCase();
+  var cantidad=parseInt(document.getElementById('cfg-el-cantidad').value)||1;
+  if(!nombre){showToast('Escribe el nombre del elemento','error');return;}
+  // Check if already exists
+  var exists=D.plantillas.find(function(p){return p.tipo_habitacion===_configTipo&&p.nombre===nombre;});
+  if(exists){showToast('Ya existe ese elemento en la plantilla','error');return;}
+  sb.from('plantillas_elementos').insert([{tipo_habitacion:_configTipo,nombre:nombre,cantidad:cantidad}]).select().then(function(r){
+    if(r.error){showToast('Error: '+r.error.message,'error');return;}
+    if(r.data&&r.data.length>0)D.plantillas.push(r.data[0]);
+    document.getElementById('cfg-el-nombre').value='';
+    buildConfig();
+    showToast(nombre+' agregado a '+_configTipo,'success');
+  });
+}
+
+function deletePlantillaEl(id){
+  if(!confirm('¿Eliminar este elemento de la plantilla?'))return;
+  sb.from('plantillas_elementos').delete().eq('id',id).then(function(r){
+    if(r.error){showToast('Error','error');return;}
+    D.plantillas=D.plantillas.filter(function(p){return p.id!==id;});
+    buildConfig();
+    showToast('Elemento eliminado de la plantilla','success');
   });
 }
 

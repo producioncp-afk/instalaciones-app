@@ -3948,6 +3948,9 @@ function buildTareas(){
     });
   }
   el.innerHTML=html;
+  el.scrollTop=0;
+  var screen=document.getElementById('screen-tareas');
+  if(screen)screen.scrollTop=0;
 }
 
 
@@ -4469,6 +4472,8 @@ function buildHistorial(){
   });
   
   container.innerHTML=html;
+  var screen=document.getElementById('screen-historial');
+  if(screen)screen.scrollTop=0;
 }
 
 function saveProject(){

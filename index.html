@@ -1103,7 +1103,7 @@ function loadData(){
     sb.from('tipos_habitacion').select('*').order('id'),
     sb.from('elementos_habitacion').select('*').order('id'),
     sb.from('habitaciones').select('*').order('numero'),
-    sb.from('elementos_por_habitacion').select('*').order('id'),
+    
     sb.from('edificios').select('*').order('id'),
     sb.from('pisos').select('*').order('orden'),
     sb.from('elementos').select('*').order('id'),
@@ -1120,22 +1120,22 @@ function loadData(){
     D.tipos_hab=r[1].data||[];
     D.elementos_hab=r[2].data||[];
     D.habitaciones=r[3].data||[];
-    D.elementos_por_hab=r[5].data||[];
-    var allP=r[0].data||[],allE=r[5].data||[];
+    D.elementos_por_hab=r[4].data||[];
+    var allP=r[0].data||[],allE=r[4].data||[];
     if(!isAdmin()&&U.proyecto_id){
       D.proyectos=allP.filter(function(p){return p.id===U.proyecto_id;});
       D.edificios=allE.filter(function(e){return e.proyecto_id===U.proyecto_id;});
     }else{D.proyectos=allP;D.edificios=allE;}
-    D.pisos=r[6].data||[];D.elementos=r[7].data||[];
-    D.fotos=r[8].data||[];
-    D.seguimiento=r[9].data||[];
-    D.specs=r[10].data||[];
-    D.historial=r[11].data||[];
-    D.notifs=r[12].data||[];
-    D.usuarios=r[13].data||[];
-    D.contactos=r[12]?r[14].data||[]:[];
-    D.tareas=r[14].data||[];
-    D.sub_elementos=r[15].data||[];
+    D.pisos=r[5].data||[];D.elementos=r[6].data||[];
+    D.fotos=r[7].data||[];
+    D.seguimiento=r[8].data||[];
+    D.specs=r[9].data||[];
+    D.historial=r[10].data||[];
+    D.notifs=r[11].data||[];
+    D.usuarios=r[12].data||[];
+    D.contactos=r[12]?r[13].data||[]:[];
+    D.tareas=r[13].data||[];
+    D.sub_elementos=r[14].data||[];
     setOnline(true);
     updateNotifBadge();
     updateTareasBadge();
@@ -1704,7 +1704,16 @@ function openHabitacion(habId){
   var addBtn=document.getElementById('add-el-hab-btn');
   if(addBtn)addBtn.style.display=isAdmin()?'block':'none';
   showScreen('elementos-hab');
-  renderElsHabForHabitacion(habId);
+  // Show spinner while loading
+  document.getElementById('el-hab-list').innerHTML='<div class="spin-wrap"><div class="spin"></div></div>';
+  // Load elements for this specific habitacion
+  sb.from('elementos_por_habitacion').select('*').eq('habitacion_id',habId).order('id').then(function(r){
+    if(r.error){showToast('Error cargando elementos','error');return;}
+    // Update cache - remove old entries for this hab and add new ones
+    D.elementos_por_hab=D.elementos_por_hab.filter(function(e){return parseInt(e.habitacion_id)!==parseInt(habId);});
+    if(r.data)D.elementos_por_hab=D.elementos_por_hab.concat(r.data);
+    renderElsHabForHabitacion(habId);
+  });
 }
 
 function renderElsHabForHabitacion(habId){

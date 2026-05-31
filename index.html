@@ -1003,7 +1003,7 @@ fbMsg.onMessage(function(payload){
 var U=null,curProjId=null,curEdId=null,curPisoId=null;
 var navStack=[],pendingToggle=null;
 var selEmoji_='🏗️',selColor_='#2563eb';
-var D={proyectos:[],edificios:[],pisos:[],elementos:[],usuarios:[],historial:[],fotos:[],specs:[],seguimiento:[],notifs:[],tipos_hab:[],elementos_hab:[],habitaciones:[],elementos_por_hab:[],plantillas:[],tareas:[],sub_elementos:[]};
+var D={proyectos:[],edificios:[],pisos:[],elementos:[],usuarios:[],historial:[],fotos:[],specs:[],seguimiento:[],notifs:[],tipos_hab:[],elementos_hab:[],habitaciones:[],elementos_por_hab:[],plantillas:[],catalogo:[],tareas:[],sub_elementos:[]};
 var curElId=null;
 var appCharts={};
 
@@ -1132,6 +1132,7 @@ function loadData(){
     sb.from('proyectos').select('*').eq('activo',true).order('creado_en'),
     sb.from('tipos_habitacion').select('*').order('id'),
     sb.from('plantillas_elementos').select('*').order('tipo_habitacion,nombre'),
+    sb.from('catalogo_elementos').select('*').order('nombre'),
     sb.from('elementos_habitacion').select('*').order('id'),
     sb.from('habitaciones').select('*').order('numero'),
     
@@ -1150,23 +1151,24 @@ function loadData(){
   return Promise.all(qs).then(function(r){
     D.tipos_hab=r[1].data||[];
     D.plantillas=r[2].data||[];
-    D.elementos_hab=r[3].data||[];
-    D.habitaciones=r[4].data||[];
-    var allP=r[0].data||[],allE=r[5].data||[];
+    D.catalogo=r[3].data||[];
+    D.elementos_hab=r[5].data||[];
+    D.habitaciones=r[5].data||[];
+    var allP=r[0].data||[],allE=r[6].data||[];
     if(!isAdmin()&&U.proyecto_id){
       D.proyectos=allP.filter(function(p){return p.id===U.proyecto_id;});
       D.edificios=allE.filter(function(e){return e.proyecto_id===U.proyecto_id;});
     }else{D.proyectos=allP;D.edificios=allE;}
-    D.pisos=r[6].data||[];D.elementos=r[7].data||[];
-    D.fotos=r[8].data||[];
-    D.seguimiento=r[9].data||[];
-    D.specs=r[10].data||[];
-    D.historial=r[11].data||[];
-    D.notifs=r[12].data||[];
-    D.usuarios=r[13].data||[];
-    D.contactos=r[14]?r[14].data||[]:[];
-    D.tareas=r[14].data||[];
-    D.sub_elementos=r[15].data||[];
+    D.pisos=r[7].data||[];D.elementos=r[8].data||[];
+    D.fotos=r[9].data||[];
+    D.seguimiento=r[10].data||[];
+    D.specs=r[11].data||[];
+    D.historial=r[12].data||[];
+    D.notifs=r[13].data||[];
+    D.usuarios=r[14].data||[];
+    D.contactos=r[14]?r[15].data||[]:[];
+    D.tareas=r[15].data||[];
+    D.sub_elementos=r[16].data||[];
     setOnline(true);
     updateNotifBadge();
     updateTareasBadge();
@@ -2135,66 +2137,104 @@ var _configTipo='King Standard';
 
 function buildConfig(){
   var tipos=['King Standard','Full Standard','King Connecting','Full Connecting','Family'];
-  var colorMap={
-    'King Standard':'#1a56db','Full Standard':'#0d7a3d',
-    'King Connecting':'#6d28d9','Full Connecting':'#b45309','Family':'#c0392b'
-  };
-  var bgMap={
-    'King Standard':'#ebf0ff','Full Standard':'#e8f5ee',
-    'King Connecting':'#f3f0ff','Full Connecting':'#fef9e7','Family':'#fdf0ef'
-  };
+  var colorMap={'King Standard':'#1a56db','Full Standard':'#0d7a3d','King Connecting':'#6d28d9','Full Connecting':'#b45309','Family':'#c0392b'};
+  var bgMap={'King Standard':'#ebf0ff','Full Standard':'#e8f5ee','King Connecting':'#f3f0ff','Full Connecting':'#fef9e7','Family':'#fdf0ef'};
+  var textMap={'King Standard':'#0C447C','Full Standard':'#27500A','King Connecting':'#3C3489','Full Connecting':'#633806','Family':'#791F1F'};
   var abrevMap={'King Standard':'KS','Full Standard':'FS','King Connecting':'KC','Full Connecting':'FC','Family':'FM'};
 
   var html='';
+
   // Tipo tabs
-  html+='<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:12px;scrollbar-width:none;margin-bottom:16px;" id="cfg-tabs">';
+  html+='<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;margin-bottom:16px;scrollbar-width:none;">';
   tipos.forEach(function(t,ti){
     var active=t===_configTipo;
-    var col=colorMap[t]||'#1a56db';
-    var bg=bgMap[t]||'#ebf0ff';
-    var abrev=abrevMap[t]||t.slice(0,2);
-    html+='<div data-idx="'+ti+'" onclick="setConfigIdx('+ti+')" style="display:flex;align-items:center;gap:6px;flex-shrink:0;padding:8px 12px;border-radius:8px;border:1px solid '+(active?col:'var(--border)')+';background:'+(active?bg:'var(--white)')+';cursor:pointer;">';
+    var col=colorMap[t];
+    var bg=bgMap[t];
+    var textCol=textMap[t];
+    var abrev=abrevMap[t];
+    html+='<div data-idx="'+ti+'" onclick="setConfigIdx('+ti+')" style="display:flex;align-items:center;gap:6px;flex-shrink:0;padding:8px 12px;border-radius:8px;border:1px solid '+(active?col:'var(--border)')+';background:'+(active?bg:'var(--white)')+';cursor:pointer;transition:all 0.15s;">';
     html+='<div style="width:24px;height:24px;border-radius:5px;background:'+(active?col:'var(--bg)')+';display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:'+(active?'white':col)+';">'+abrev+'</div>';
-    html+='<span style="font-size:12px;font-weight:600;color:'+(active?col:'var(--text2)')+';">'+t+'</span>';
+    html+='<span style="font-size:12px;font-weight:600;color:'+(active?textCol:'var(--text2)')+';">'+t+'</span>';
     html+='</div>';
   });
   html+='</div>';
 
-html+='</div>';
-
-  // Elements for selected tipo
+  // Get plantillas for this tipo (checked elements)
   var plantillaTipo=D.plantillas.filter(function(p){return p.tipo_habitacion===_configTipo;});
+  var checkedNames=plantillaTipo.map(function(p){return p.nombre;});
+  var col=colorMap[_configTipo];
+  var selCount=checkedNames.length;
+  var totalCount=D.catalogo.length;
+
   html+='<div style="background:white;border-radius:var(--r);border:1px solid var(--border);overflow:hidden;margin-bottom:12px;">';
-  html+='<div style="padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">';
-  html+='<div style="font-size:13px;font-weight:600;color:var(--text);">'+plantillaTipo.length+' elementos en plantilla</div>';
+  html+='<div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">';
+  html+='<div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">'+_configTipo+'</div>';
+  html+='<div style="font-size:11px;color:var(--text3);">'+selCount+' de '+totalCount+' seleccionados</div>';
   html+='</div>';
 
-  if(!plantillaTipo.length){
-    html+='<div style="padding:24px;text-align:center;color:var(--text2);font-size:13px;">Sin elementos. Agrega el primero.</div>';
-  }else{
-    plantillaTipo.forEach(function(p){
-      html+='<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:0.5px solid var(--border);">';
-      html+='<div style="flex:1;">';
-      html+='<div style="font-size:13px;font-weight:500;color:var(--text);">'+p.nombre+'</div>';
-      html+='<div style="font-size:11px;color:var(--text3);">Cantidad: '+p.cantidad+'</div>';
-      html+='</div>';
-      html+='<button onclick="deletePlantillaEl('+p.id+')" style="width:28px;height:28px;border-radius:50%;background:var(--red-light);border:none;color:var(--red);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;">✕</button>';
-      html+='</div>';
-    });
+  // List all catalogo elements with checkbox
+  D.catalogo.forEach(function(el){
+    var checked=checkedNames.indexOf(el.nombre)!==-1;
+    var plantillaEl=plantillaTipo.find(function(p){return p.nombre===el.nombre;});
+    html+='<div data-cid="'+el.id+'" data-cnombre="'+el.nombre+'" onclick="togglePlantillaEl(parseInt(this.dataset.cid),this.dataset.cnombre)" style="display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:0.5px solid var(--border);cursor:pointer;">';
+    // Checkbox
+    html+='<div style="width:20px;height:20px;border-radius:5px;border:1.5px solid '+(checked?col:'var(--border)')+';background:'+(checked?col:'transparent')+';display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s;">';
+    if(checked)html+='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    html+='</div>';
+    html+='<div style="font-size:13px;font-weight:'+(checked?'500':'400')+';color:'+(checked?'var(--text)':'var(--text2)')+';">'+el.nombre+'</div>';
+    html+='</div>';
+  });
+
+  if(!D.catalogo.length){
+    html+='<div style="padding:24px;text-align:center;color:var(--text2);font-size:13px;">Sin elementos en el catálogo.</div>';
   }
   html+='</div>';
 
-  // Add element form
+  // Add to catalog form
   html+='<div style="background:white;border-radius:var(--r);border:1px solid var(--border);padding:14px;">';
-  html+='<div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;">Agregar elemento</div>';
-  html+='<div style="display:flex;flex-direction:column;gap:8px;">';
-  html+='<input class="modal-input" type="text" id="cfg-el-nombre" placeholder="Ej: PUERTA DE ACCESO" style="text-transform:uppercase;">';
-  html+='<input class="modal-input" type="number" id="cfg-el-cantidad" placeholder="Cantidad (ej: 1)" min="1" value="1">';
-  html+='<button onclick="addPlantillaEl()" style="background:var(--blue);color:white;border:none;border-radius:8px;padding:12px;font-size:13px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">+ Agregar a plantilla</button>';
+  html+='<div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;">Agregar elemento al catálogo</div>';
+  html+='<div style="display:flex;gap:8px;">';
+  html+='<input class="modal-input" type="text" id="cfg-el-nombre" placeholder="Ej: PUERTA CORREDERA" style="flex:1;text-transform:uppercase;">';
+  html+='<button onclick="addCatalogoEl()" style="background:var(--blue);color:white;border:none;border-radius:8px;padding:10px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap;">+ Agregar</button>';
   html+='</div></div>';
 
   document.getElementById('config-content').innerHTML=html;
 }
+
+function togglePlantillaEl(catalogoId, nombre){
+  var tipo=_configTipo;
+  var existing=D.plantillas.find(function(p){return p.tipo_habitacion===tipo&&p.nombre===nombre;});
+  if(existing){
+    // Uncheck - delete from plantillas
+    sb.from('plantillas_elementos').delete().eq('id',existing.id).then(function(r){
+      if(r.error){showToast('Error','error');return;}
+      D.plantillas=D.plantillas.filter(function(p){return p.id!==existing.id;});
+      buildConfig();
+    });
+  }else{
+    // Check - insert to plantillas
+    sb.from('plantillas_elementos').insert([{tipo_habitacion:tipo,nombre:nombre}]).select().then(function(r){
+      if(r.error){showToast('Error','error');return;}
+      if(r.data&&r.data.length>0)D.plantillas.push(r.data[0]);
+      buildConfig();
+    });
+  }
+}
+
+function addCatalogoEl(){
+  var nombre=document.getElementById('cfg-el-nombre').value.trim().toUpperCase();
+  if(!nombre){showToast('Escribe el nombre del elemento','error');return;}
+  var exists=D.catalogo.find(function(e){return e.nombre===nombre;});
+  if(exists){showToast('Ya existe en el catálogo','error');return;}
+  sb.from('catalogo_elementos').insert([{nombre:nombre}]).select().then(function(r){
+    if(r.error){showToast('Error: '+r.error.message,'error');return;}
+    if(r.data&&r.data.length>0)D.catalogo.push(r.data[0]);
+    document.getElementById('cfg-el-nombre').value='';
+    buildConfig();
+    showToast(nombre+' agregado al catálogo','success');
+  });
+}
+
 
 function setConfigIdx(idx){
   var tipos=['King Standard','Full Standard','King Connecting','Full Connecting','Family'];
@@ -2207,31 +2247,7 @@ function setConfigTipo(el){
   buildConfig();
 }
 
-function addPlantillaEl(){
-  var nombre=document.getElementById('cfg-el-nombre').value.trim().toUpperCase();
-  var cantidad=parseInt(document.getElementById('cfg-el-cantidad').value)||1;
-  if(!nombre){showToast('Escribe el nombre del elemento','error');return;}
-  // Check if already exists
-  var exists=D.plantillas.find(function(p){return p.tipo_habitacion===_configTipo&&p.nombre===nombre;});
-  if(exists){showToast('Ya existe ese elemento en la plantilla','error');return;}
-  sb.from('plantillas_elementos').insert([{tipo_habitacion:_configTipo,nombre:nombre,cantidad:cantidad}]).select().then(function(r){
-    if(r.error){showToast('Error: '+r.error.message,'error');return;}
-    if(r.data&&r.data.length>0)D.plantillas.push(r.data[0]);
-    document.getElementById('cfg-el-nombre').value='';
-    buildConfig();
-    showToast(nombre+' agregado a '+_configTipo,'success');
-  });
-}
 
-function deletePlantillaEl(id){
-  if(!confirm('¿Eliminar este elemento de la plantilla?'))return;
-  sb.from('plantillas_elementos').delete().eq('id',id).then(function(r){
-    if(r.error){showToast('Error','error');return;}
-    D.plantillas=D.plantillas.filter(function(p){return p.id!==id;});
-    buildConfig();
-    showToast('Elemento eliminado de la plantilla','success');
-  });
-}
 
 var _swipeStartX={},_swipeStartY={},_swipeOpen={};
 

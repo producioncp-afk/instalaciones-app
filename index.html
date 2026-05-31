@@ -398,6 +398,26 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
 .toast.success{background:var(--green);border-color:var(--green);}
 .toast.error{background:var(--red);border-color:var(--red);}
 
+/* PROFESSIONAL NOTIFICATIONS */
+#notif-container{position:fixed;top:calc(16px + var(--sat));right:16px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;max-width:320px;}
+.pnotif{background:var(--white);border-radius:10px;border:0.5px solid var(--border);padding:12px 14px;display:flex;align-items:flex-start;gap:10px;box-shadow:0 4px 16px rgba(0,0,0,0.12);pointer-events:all;animation:slideInRight 0.3s ease;transition:opacity 0.3s,transform 0.3s;}
+.pnotif.hiding{opacity:0;transform:translateX(20px);}
+@keyframes slideInRight{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
+.pnotif-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pnotif-icon.success{background:#EAF3DE;}
+.pnotif-icon.error{background:#FCEBEB;}
+.pnotif-icon.info{background:#ebf0ff;}
+.pnotif-icon.warning{background:#fef9e7;}
+.pnotif-body{flex:1;min-width:0;}
+.pnotif-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;}
+.pnotif-msg{font-size:12px;color:var(--text2);line-height:1.4;}
+.pnotif-close{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:0;line-height:1;flex-shrink:0;}
+.pnotif-bar{height:3px;border-radius:0 0 10px 10px;position:absolute;bottom:0;left:0;right:0;}
+.pnotif-bar.success{background:var(--green);}
+.pnotif-bar.error{background:var(--red);}
+.pnotif-bar.info{background:var(--blue);}
+.pnotif-bar.warning{background:var(--yellow);}
+
 /* EXCEL MODAL */
 #modal-excel .modal-info{background:var(--bg);border-radius:7px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--text2);line-height:1.5;}
 .proj-tabs{display:flex;border-bottom:1px solid var(--border);background:var(--white);margin-bottom:16px;}
@@ -922,6 +942,7 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
 </div>
 
 <div class="toast" id="toast-msg"></div>
+<div id="notif-container"></div>
 
 <script>
 
@@ -5070,9 +5091,43 @@ function formatDate(iso){
 
 var toastTimer;
 function showToast(msg,type){
+  // Keep simple toast as fallback for legacy calls
   var t=document.getElementById('toast-msg');
   t.textContent=msg;t.className='toast show'+(type?' '+type:'');
   clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.className='toast';},3000);
+  // Also show professional notification
+  showNotif(msg,type||'info');
+}
+
+function showNotif(title, type, msg){
+  var container=document.getElementById('notif-container');
+  if(!container)return;
+  var icons={
+    success:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+    error:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A32D2D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+    info:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a56db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+    warning:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
+  };
+  var el=document.createElement('div');
+  el.className='pnotif';
+  el.style.position='relative;overflow:hidden';
+  el.innerHTML=
+    '<div class="pnotif-icon '+type+'">'+(icons[type]||icons.info)+'</div>'+
+    '<div class="pnotif-body">'+
+      '<div class="pnotif-title">'+title+'</div>'+
+      (msg?'<div class="pnotif-msg">'+msg+'</div>':'')+
+    '</div>'+
+    '<button class="pnotif-close" onclick="this.parentElement.remove()">✕</button>'+
+    '<div class="pnotif-bar '+type+'"></div>';
+  container.appendChild(el);
+  // Auto remove after 4 seconds
+  setTimeout(function(){
+    el.classList.add('hiding');
+    setTimeout(function(){if(el.parentElement)el.remove();},300);
+  },4000);
+  // Max 3 notifications
+  var notifs=container.querySelectorAll('.pnotif');
+  if(notifs.length>3)notifs[0].remove();
 }
 
 function setOnline(on){

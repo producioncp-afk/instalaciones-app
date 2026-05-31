@@ -1674,7 +1674,7 @@ function renderHabitaciones(){
       var s2=calcStats(els);
       var bColor=s2.pct>=70?'#0d7a3d':s2.pct>=30?'#b45309':'#ef4444';
       var bBg=s2.pct>=70?'#EAF3DE':s2.pct>=30?'#FAEEDA':'#FCEBEB';
-      html+='<div style="background:white;border-radius:10px;border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:transform 0.1s;active:scale(0.99);" onclick="openHabitacion('+hab.id+')">';
+      html+='<div style="background:white;border-radius:10px;border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:transform 0.1s;active:scale(0.99);" onclick="openHabitacion('+parseInt(hab.id)+')">';
       html+='<div style="height:3px;background:linear-gradient(90deg,'+bColor+' '+s2.pct+'%,#e1e4e8 '+s2.pct+'%);"></div>';
       html+='<div style="padding:12px;">';
       html+='<div style="font-size:20px;font-weight:700;color:#1a1f2e;letter-spacing:-0.02em;margin-bottom:4px;">'+hab.numero+'</div>';
@@ -1695,7 +1695,7 @@ function renderHabitaciones(){
 }
 
 function openHabitacion(habId){
-  curHabId=habId;
+  curHabId=parseInt(habId);
   var hab=D.habitaciones.find(function(h){return h.id===habId;});
   var tipo=hab?D.tipos_hab.find(function(t){return t.id===hab.tipo_habitacion_id;}):null;
   navStack.push('habitaciones');
@@ -1707,7 +1707,7 @@ function openHabitacion(habId){
   // Show spinner while loading
   document.getElementById('el-hab-list').innerHTML='<div class="spin-wrap"><div class="spin"></div></div>';
   // Load elements for this specific habitacion
-  sb.from('elementos_por_habitacion').select('*').eq('habitacion_id',habId).order('id').then(function(r){
+  sb.from('elementos_por_habitacion').select('*').eq('habitacion_id',parseInt(habId)).order('id').then(function(r){
     if(r.error){showToast('Error cargando elementos','error');return;}
     // Update cache - remove old entries for this hab and add new ones
     D.elementos_por_hab=D.elementos_por_hab.filter(function(e){return parseInt(e.habitacion_id)!==parseInt(habId);});

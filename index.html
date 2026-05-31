@@ -2069,17 +2069,19 @@ function openAddPiso(edId, edNombre){
 }
 
 function saveNuevoPiso(){
-  var edId=parseInt(document.getElementById('nap-ed-id').value);
+  var edId=document.getElementById('nap-ed-id').value;
   var nombre=document.getElementById('nap-nombre').value.trim();
-  var orden=parseInt(document.getElementById('nap-orden').value)||((D.pisos.filter(function(p){return p.edificio_id==edId;}).length)+1);
   if(!nombre){showToast('Escribe el nombre del piso','error');return;}
   var btn=document.querySelector('#modal-nuevo-piso .modal-btn.primary');
   if(btn)btn.disabled=true;
-  sb.from('pisos').insert([{
-    edificio_id:String(edId),
-    nombre:nombre,
-    orden:orden
-  }]).select().then(function(r){
+  // Get fresh count from DB to avoid orden conflicts
+  sb.from('pisos').select('id').eq('edificio_id',edId).then(function(cr){
+    var orden=(cr.data?cr.data.length:D.pisos.filter(function(p){return p.edificio_id==edId;}).length)+1;
+    sb.from('pisos').insert([{
+      edificio_id:edId,
+      nombre:nombre,
+      orden:orden
+    }]).select().then(function(r){
     if(btn)btn.disabled=false;
     if(r.error){showToast('Error: '+r.error.message,'error');return;}
     if(r.data&&r.data.length>0)D.pisos.push(r.data[0]);
@@ -2087,6 +2089,7 @@ function saveNuevoPiso(){
     curEdId=edId;
     buildPisos(edId,false);
     showToast(nombre+' creado','success');
+    });
   });
 }
 

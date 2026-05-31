@@ -1814,11 +1814,13 @@ function switchTab(tab){
   else if(tab==='historial'){
     setTopbar(false,'Historial');
     showScreen('historial');
-    buildHistorial();
-    setTimeout(function(){
+    document.getElementById('hist-list').innerHTML='<div class="spin-wrap"><div class="spin"></div></div>';
+    sb.from('historial').select('*').order('creado_en',{ascending:false}).limit(200).then(function(r){
+      if(r.data)D.historial=r.data;
+      buildHistorial();
       var s=document.getElementById('screen-historial');
       if(s)s.scrollTop=0;
-    },50);
+    });
   }
   else if(tab==='tareas'){setTopbar(false,'Mis tareas');showScreen('tareas');buildTareas();}
 }

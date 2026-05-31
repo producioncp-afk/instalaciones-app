@@ -1366,7 +1366,8 @@ function toggleElHab(elId, currentVal){
   if(!canEdit())return;
   var newVal=currentVal===true?false:true;
   var update={instalado:newVal,actualizado_por:U.nombre,actualizado_en:new Date().toISOString()};
-  if(newVal)update.cantidad_instalada=D.elementos_hab.find(function(e){return e.id===elId;}).cantidad;
+  var elRef=D.elementos_por_hab.find(function(e){return e.id===elId;})||D.elementos_hab.find(function(e){return e.id===elId;});
+  if(newVal)update.cantidad_instalada=elRef?elRef.cantidad:1;
   else update.cantidad_instalada=0;
   // Check if this is a elementos_por_habitacion element
   var isPorHab = D.elementos_por_hab.find(function(e){return e.id===elId;});
@@ -1670,7 +1671,9 @@ function renderHabitaciones(){
     html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
     habs.forEach(function(hab){
       // Get elements for this hab type to show status
-      var els=D.elementos_hab.filter(function(e){return e.tipo_habitacion_id===curTipoHabId;});
+      // Use cached elementos_por_hab if available, else fall back to tipo elements
+      var cachedEls=D.elementos_por_hab.filter(function(e){return parseInt(e.habitacion_id)===parseInt(hab.id);});
+      var els=cachedEls.length>0?cachedEls:D.elementos_hab.filter(function(e){return parseInt(e.tipo_habitacion_id)===parseInt(curTipoHabId);});
       var s2=calcStats(els);
       var bColor=s2.pct>=70?'#0d7a3d':s2.pct>=30?'#b45309':'#ef4444';
       var bBg=s2.pct>=70?'#EAF3DE':s2.pct>=30?'#FAEEDA':'#FCEBEB';
@@ -1679,7 +1682,8 @@ function renderHabitaciones(){
       html+='<div style="padding:12px;">';
       html+='<div style="font-size:20px;font-weight:700;color:#1a1f2e;letter-spacing:-0.02em;margin-bottom:4px;">'+hab.numero+'</div>';
       html+='<div style="display:flex;align-items:center;justify-content:space-between;">';
-      html+='<div style="font-size:11px;color:#9aa3b2;">'+els.length+' elementos</div>';
+      var elCount=cachedEls.length>0?cachedEls.length:D.elementos_hab.filter(function(e){return parseInt(e.tipo_habitacion_id)===parseInt(curTipoHabId);}).length;
+      html+='<div style="font-size:11px;color:#9aa3b2;">'+elCount+' elementos</div>';
       html+='<div style="font-size:11px;font-weight:700;color:'+bColor+';">'+s2.pct+'%</div>';
       html+='</div></div></div>';
     });

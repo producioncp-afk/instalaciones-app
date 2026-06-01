@@ -1499,7 +1499,7 @@ function renderDetalleHab(elId){
   var hab=D.habitaciones.find(function(h){return h.id===curHabId;});
   var cls=el.instalado===true?'si':el.instalado===false?'no':'nd';
   var estadoLabel=el.instalado===true?'Instalado':el.instalado===false?'Pendiente':'Sin definir';
-  var elFotos=D.fotos.filter(function(f){return f.elemento_id===elId||f.hab_elemento_id===elId;});
+  var elFotos=D.fotos.filter(function(f){return f.path&&f.path.indexOf('habEl-'+elId+'-')===0;});
   var fotoCount=elFotos.length;
 
   var fotosHtml='';
@@ -1725,7 +1725,7 @@ function uploadHabFotoFile(file){
   sb.storage.from('fotos').upload(path,file,{contentType:file.type,upsert:false}).then(function(res){
     if(res.error){showToast('Error al subir','error');return;}
     var url=sb.storage.from('fotos').getPublicUrl(path).data.publicUrl;
-    sb.from('fotos').insert([{elemento_id:elId,url:url,path:path,subida_por:U.nombre}]).select().then(function(r){
+    sb.from('fotos').insert([{elemento_id:null,url:url,path:path,subida_por:U.nombre}]).select().then(function(r){
       if(r.error){showToast('Error al guardar','error');return;}
       if(r.data&&r.data.length>0)D.fotos.push(r.data[0]);
       renderDetalleHab(elId);

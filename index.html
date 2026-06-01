@@ -5356,6 +5356,22 @@ if('serviceWorker' in navigator){
     console.log('SW registrado');
   }).catch(function(e){console.log('SW error:',e);});
 }
+var _fotoChooserCallback=null;
+
+function openFotoChooser(callback){
+  _fotoChooserCallback=callback;
+  document.getElementById('fc-camera').value='';
+  document.getElementById('fc-gallery').value='';
+  openModal('foto-chooser');
+}
+
+function fotoChooserDone(e){
+  closeModal('foto-chooser');
+  var file=e.target.files[0];
+  if(!file||!_fotoChooserCallback)return;
+  _fotoChooserCallback(file);
+}
+
 
 
 </script>
@@ -5495,6 +5511,27 @@ if('serviceWorker' in navigator){
     <div class="modal-row">
       <button class="modal-btn secondary" onclick="closeModal('nuevo-piso')">Cancelar</button>
       <button class="modal-btn primary" onclick="saveNuevoPiso()">Crear piso</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- MODAL FOTO CHOOSER -->
+<div class="modal-overlay hidden" id="modal-foto-chooser" onclick="closeOv(event,'modal-foto-chooser')">
+  <div class="modal" onclick="event.stopPropagation()" style="padding-bottom:calc(16px + var(--sab));">
+    <div class="modal-title">Agregar foto</div>
+    <input type="file" id="fc-camera" accept="image/*" capture="environment" style="display:none" onchange="fotoChooserDone(event)">
+    <input type="file" id="fc-gallery" accept="image/*" style="display:none" onchange="fotoChooserDone(event)">
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <button onclick="document.getElementById('fc-camera').click()" style="display:flex;align-items:center;gap:12px;padding:16px;background:var(--bg);border:1px solid var(--border);border-radius:10px;font-size:15px;font-weight:600;color:var(--text);cursor:pointer;font-family:'Inter',sans-serif;width:100%;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Tomar foto con cámara
+      </button>
+      <button onclick="document.getElementById('fc-gallery').click()" style="display:flex;align-items:center;gap:12px;padding:16px;background:var(--bg);border:1px solid var(--border);border-radius:10px;font-size:15px;font-weight:600;color:var(--text);cursor:pointer;font-family:'Inter',sans-serif;width:100%;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Elegir de galería
+      </button>
+      <button onclick="closeModal('foto-chooser')" style="padding:14px;background:none;border:1px solid var(--border);border-radius:10px;font-size:14px;font-weight:600;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;">Cancelar</button>
     </div>
   </div>
 </div>

@@ -1466,6 +1466,7 @@ function toggleElHab(elId, currentVal){
 function openDetalleHab(elId){
   var el=D.elementos_por_hab.find(function(x){return x.id===elId;})||D.elementos_hab.find(function(x){return x.id===elId;});
   if(!el)return;
+  curHabElId=elId;
   var hab=D.habitaciones.find(function(h){return h.id===curHabId;});
   var tipo=hab?D.tipos_hab.find(function(t){return t.id===hab.tipo_habitacion_id;}):null;
   navStack.push('elementos-hab');
@@ -1674,7 +1675,7 @@ function deleteElHab(elId){
 
 function uploadHabFotoFile(file){
   if(!file)return;
-  var elId=parseInt(document.getElementById('detalle-hab-content').dataset.elid)||0;
+  var elId=curHabElId||0;
   if(!elId){showToast('Error: elemento no identificado','error');return;}
   showToast('Subiendo foto...','info');
   var path='habEl-'+elId+'-'+Date.now()+'.jpg';
@@ -1702,6 +1703,7 @@ function deleteFotoHab(fotoId,path,elId){
 }
 
 var curHabId = null;
+var curHabElId = null;
 
 function getHabitaciones(tipoId){
   return D.habitaciones.filter(function(h){return parseInt(h.tipo_habitacion_id)===parseInt(tipoId);});

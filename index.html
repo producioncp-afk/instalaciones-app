@@ -2753,7 +2753,7 @@ function buildPisos(edId,push){
         D.elementos_por_hab=D.elementos_por_hab.filter(function(e){return edHabIds.indexOf(parseInt(e.habitacion_id))===-1;});
         D.elementos_por_hab=D.elementos_por_hab.concat(r.data);
       }
-      _renderPisos();
+      doRender();
     });
 
   }

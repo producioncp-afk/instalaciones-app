@@ -2643,6 +2643,12 @@ function buildPisos(edId,push){
   });
   var edHabIds=edHabs.map(function(h){return h.id;});
 
+  // Pre-compute stats for doRender scope
+  var pisos=getPisos(edId);
+  var all=[];
+  pisos.forEach(function(p){all=all.concat(getEls(p.id));});
+  var s=calcStats(all);
+
   function doRender(){
   document.getElementById('piso-stats').innerHTML=
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">'+

@@ -2787,7 +2787,7 @@ function buildPisos(edId,push){
     btnRow+='<div style="width:0.5px;background:#e1e4e8;"></div>';
     btnRow+='<button onclick="openAddTipoHab('+pid+')" style="flex:1;padding:9px;background:none;border:none;font-size:12px;font-weight:600;color:#6d28d9;cursor:pointer;font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>+ Tipo</button>';
     if(pplano)btnRow+='<div style="width:0.5px;background:#e1e4e8;"></div><button onclick="openPlanoById('+pid+')" style="flex:1;padding:9px;background:none;border:none;font-size:12px;font-weight:600;color:var(--green);cursor:pointer;font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>Plano</button><div style="width:0.5px;background:#e1e4e8;"></div><button onclick="quitarPlano('+pid+')" style="padding:9px 10px;background:none;border:none;font-size:12px;font-weight:600;color:#A32D2D;cursor:pointer;font-family:Inter,sans-serif;">✕</button>';
-    if(isAdmin())btnRow+='<div style="width:0.5px;background:#e1e4e8;"></div><label style="flex:1;padding:9px;font-size:12px;font-weight:600;color:#9aa3b2;cursor:pointer;font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;"><input type="file" accept="image/*" style="display:none" onchange="uploadPlano(event,'+pid+')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>'+(pplano?'Cambiar':'Subir')+'</label>';
+    if(isAdmin())btnRow+='<div style="width:0.5px;background:#e1e4e8;"></div><label style="flex:1;padding:9px;font-size:12px;font-weight:600;color:#9aa3b2;cursor:pointer;font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;"><input type="file" accept="image/*" style="display:none" onchange="uploadPlano(event,'+pid+')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>'+(pplano?'Cambiar':'Plano')+'</label>';
     html+='<div style="display:flex;border-top:1px solid #f0f0f0;">'+btnRow+'</div>';
     html+='</div>';
   });
@@ -5534,6 +5534,41 @@ function openWAModalHab(elId){
   if(el.nota)msg+='*Nota:* '+el.nota+'\n';
   msg+='\n— '+U.nombre;
   window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+
+function uploadPlano(event, pisoId){
+  var file=event.target.files[0];
+  if(!file)return;
+  showToast('Subiendo plano...','info');
+  var path='plano-'+pisoId+'-'+Date.now()+'.jpg';
+  sb.storage.from('fotos').upload(path,file,{contentType:file.type,upsert:true}).then(function(res){
+    if(res.error){showToast('Error al subir plano','error');return;}
+    var url=sb.storage.from('fotos').getPublicUrl(path).data.publicUrl;
+    sb.from('pisos').update({plano_url:url}).eq('id',pisoId).then(function(r){
+      if(r.error){showToast('Error al guardar plano','error');return;}
+      var idx=D.pisos.findIndex(function(p){return p.id===pisoId;});
+      if(idx!==-1)D.pisos[idx].plano_url=url;
+      buildPisos(curEdId,false);
+      showToast('Plano actualizado','success');
+    });
+  });
+}
+
+function openPlanoById(pisoId){
+  var piso=D.pisos.find(function(p){return p.id===pisoId;});
+  if(!piso||!piso.plano_url)return;
+  openLightbox(piso.plano_url);
+}
+
+function quitarPlano(pisoId){
+  if(!confirm('¿Quitar el plano de este piso?'))return;
+  sb.from('pisos').update({plano_url:null}).eq('id',pisoId).then(function(r){
+    if(r.error){showToast('Error','error');return;}
+    var idx=D.pisos.findIndex(function(p){return p.id===pisoId;});
+    if(idx!==-1)D.pisos[idx].plano_url=null;
+    buildPisos(curEdId,false);
+    showToast('Plano eliminado','success');
+  });
 }
 
 var _fotoChooserCallback=null;

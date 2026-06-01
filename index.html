@@ -1707,7 +1707,7 @@ function saveDetalleHab(elId){
 
 function deleteElHab(elId){
   if(!isAdmin())return;
-  if(!confirm('¿Eliminar este elemento?'))return;
+  showConfirm('Eliminar elemento','¿Deseas eliminar este elemento? Esta acción no se puede deshacer.',function(){_doDeleteElHab(elId);});return;
   sb.from('elementos_habitacion').delete().eq('id',elId).then(function(r){
     if(r.error){showToast('Error','error');return;}
     D.elementos_hab=D.elementos_hab.filter(function(e){return e.id!==elId;});
@@ -1736,7 +1736,7 @@ function uploadHabFotoFile(file){
 
 function deleteFotoHab(fotoId,path,elId){
   if(!isAdmin())return;
-  if(!confirm('¿Eliminar esta foto?'))return;
+  showConfirm('Eliminar foto','¿Deseas eliminar esta foto?',function(){_doDeleteFoto();});return;
   sb.storage.from('fotos').remove([path]).catch(function(){});
   sb.from('fotos').delete().eq('id',fotoId).then(function(){
     D.fotos=D.fotos.filter(function(f){return f.id!==fotoId;});
@@ -2365,7 +2365,7 @@ function initSwipeRows(){
 
 function deleteElemento(elId){
   if(!isAdmin())return;
-  if(!confirm('¿Eliminar este elemento?'))return;
+  showConfirm('Eliminar elemento','¿Deseas eliminar este elemento? Esta acción no se puede deshacer.',function(){_doDeleteEl();});return;
   sb.from('elementos').delete().eq('id',elId).then(function(r){
     if(r.error){showToast('Error al eliminar','error');return;}
     D.elementos=D.elementos.filter(function(e){return e.id!==elId;});
@@ -2698,8 +2698,19 @@ function buildPisos(edId,push){
 
   // Pre-compute stats for doRender scope
   var pisos=getPisos(edId);
+  // Use elementos_por_hab for real progress
   var all=[];
-  pisos.forEach(function(p){all=all.concat(getEls(p.id));});
+  var allHabIds=[];
+  pisos.forEach(function(p){
+    var pTipos=D.tipos_hab.filter(function(t){return t.piso_id===p.id;});
+    var pHabs=D.habitaciones.filter(function(h){
+      return pTipos.some(function(t){return parseInt(t.id)===parseInt(h.tipo_habitacion_id);});
+    });
+    pHabs.forEach(function(h){allHabIds.push(h.id);});
+  });
+  var habEls=D.elementos_por_hab.filter(function(e){return allHabIds.indexOf(parseInt(e.habitacion_id))!==-1;});
+  all=habEls.length>0?habEls:[];
+  pisos.forEach(function(p){if(!habEls.length)all=all.concat(getEls(p.id));});
   var s=calcStats(all);
 
   function doRender(){
@@ -2726,7 +2737,16 @@ function buildPisos(edId,push){
   var html='';
   pisos.forEach(function(p){
     var pid=p.id,pnombre=p.nombre,pplano=p.plano_url||'';
-    var ps=calcStats(getEls(pid));
+    // Calculate stats from elementos_por_habitacion (real hab progress)
+    var pisHabs=D.habitaciones.filter(function(h){
+      return D.tipos_hab.some(function(t){return t.piso_id===pid&&parseInt(t.id)===parseInt(h.tipo_habitacion_id);});
+    });
+    var pisEls=[];
+    pisHabs.forEach(function(h){
+      var hEls=D.elementos_por_hab.filter(function(e){return parseInt(e.habitacion_id)===parseInt(h.id);});
+      pisEls=pisEls.concat(hEls);
+    });
+    var ps=pisEls.length>0?calcStats(pisEls):calcStats(getEls(pid));
     var _pbc2=ps.pct>=70?'#0d7a3d':ps.pct>=30?'#b45309':'#ef4444';
     var tipos=D.tipos_hab.filter(function(t){return t.piso_id===pid;});
 
@@ -2783,9 +2803,7 @@ function buildPisos(edId,push){
     html+='</div>';
 
     // Botones
-    var btnRow='<button onclick="buildEls('+pid+')" style="flex:1;padding:9px;background:none;border:none;font-size:12px;font-weight:600;color:var(--blue);cursor:pointer;font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Elementos</button>';
-    btnRow+='<div style="width:0.5px;background:#e1e4e8;"></div>';
-    btnRow+='<button onclick="openAddTipoHab('+pid+')" style="flex:1;padding:9px;background:none;border:none;font-size:12px;font-weight:600;color:#6d28d9;cursor:pointer;font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>+ Tipo</button>';
+    var btnRow='<button onclick="openAddTipoHab('+pid+')" style="flex:1;padding:9px;background:none;border:none;font-size:12px;font-weight:600;color:#6d28d9;cursor:pointer;font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>+ Tipo</button>';
     if(pplano)btnRow+='<div style="width:0.5px;background:#e1e4e8;"></div><button onclick="openPlanoById('+pid+')" style="flex:1;padding:9px;background:none;border:none;font-size:12px;font-weight:600;color:var(--green);cursor:pointer;font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>Plano</button><div style="width:0.5px;background:#e1e4e8;"></div><button onclick="quitarPlano('+pid+')" style="padding:9px 10px;background:none;border:none;font-size:12px;font-weight:600;color:#A32D2D;cursor:pointer;font-family:Inter,sans-serif;">✕</button>';
     if(isAdmin())btnRow+='<div style="width:0.5px;background:#e1e4e8;"></div><label style="flex:1;padding:9px;font-size:12px;font-weight:600;color:#9aa3b2;cursor:pointer;font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;"><input type="file" accept="image/*" style="display:none" onchange="uploadPlano(event,'+pid+')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>'+(pplano?'Cambiar':'Plano')+'</label>';
     html+='<div style="display:flex;border-top:1px solid #f0f0f0;">'+btnRow+'</div>';
@@ -3190,8 +3208,16 @@ function changeSubElCant(subId,elId,delta){
   });
 }
 
+function _doDeleteSubEl(subId,elId){
+  // real delete
+  sb.from('sub_elementos').delete().eq('id',subId).then(function(){
+    D.sub_elementos=D.sub_elementos.filter(function(s){return s.id!==subId;});
+    renderDetallePreserveNota(elId);
+    showToast('Eliminado','success');
+  });
+}
 function deleteSubEl(subId,elId){
-  if(!confirm('¿Eliminar este ítem?'))return;
+  showConfirm('Eliminar ítem','¿Deseas eliminar este ítem?',function(){_doDeleteSubEl(subId,elId);});return;
   sb.from('sub_elementos').delete().eq('id',subId).then(function(){
     D.sub_elementos=D.sub_elementos.filter(function(s){return s.id!==subId;});
     renderDetallePreserveNota(elId);
@@ -3230,7 +3256,7 @@ function addSpec(elId,projId){
 
 function deleteSpec(specId){
   if(!isAdmin())return;
-  if(!confirm('¿Eliminar esta especificación?'))return;
+  showConfirm('Eliminar especificación','¿Deseas eliminar esta especificación?',function(){_doDeleteSpec(specId);});return;
   sb.from('especificaciones').delete().eq('id',specId).then(function(r){
     if(r.error){showToast('Error al eliminar','error');return;}
     D.specs=D.specs.filter(function(s){return s.id!==specId;});
@@ -3647,7 +3673,7 @@ function uploadDetalleFoto(e){
 
 function deleteFotoDetalle(fotoId,path,elId){
   if(!isAdmin())return;
-  if(!confirm('¿Eliminar esta foto?'))return;
+  showConfirm('Eliminar foto','¿Deseas eliminar esta foto?',function(){_doDeleteFoto();});return;
   sb.storage.from('fotos').remove([path]);
   sb.from('fotos').delete().eq('id',fotoId).then(function(){
     D.fotos=D.fotos.filter(function(f){return f.id!==fotoId;});
@@ -3691,7 +3717,7 @@ function uploadGalleryFoto(e){
 
 function deleteFoto(fotoId,path,elId,cantidad){
   if(!isAdmin())return;
-  if(!confirm('¿Eliminar esta foto?'))return;
+  showConfirm('Eliminar foto','¿Deseas eliminar esta foto?',function(){_doDeleteFoto();});return;
   sb.storage.from('fotos').remove([path]);
   sb.from('fotos').delete().eq('id',fotoId).then(function(){
     D.fotos=D.fotos.filter(function(f){return f.id!==fotoId;});
@@ -4512,7 +4538,7 @@ function updateTareaEstado(tareaId,nuevoEstado){
 }
 
 function deleteTarea(tareaId){
-  if(!confirm('¿Eliminar esta tarea?'))return;
+  showConfirm('Eliminar tarea','¿Deseas eliminar esta tarea?',function(){_doDeleteTarea(tareaId);});return;
   sb.from('tareas').delete().eq('id',tareaId).then(function(){
     D.tareas=D.tareas.filter(function(t){return t.id!==tareaId;});
     buildTareas();
@@ -4950,11 +4976,22 @@ function toggleUserActive(userId,active){
   });
 }
 
+function _doDeleteUser(userId){
+  var u=D.usuarios.find(function(x){return x.id===userId;});
+  if(!u)return;
+  sb.from('usuarios').delete().eq('id',userId).then(function(r){
+    if(r.error){showToast('Error al eliminar','error');return;}
+    D.usuarios=D.usuarios.filter(function(x){return x.id!==userId;});
+    fetch('https://zlkmthwmcikcnvxtcmql.supabase.co/functions/v1/create-user',{method:'DELETE',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SK},body:JSON.stringify({auth_id:u.auth_id})}).catch(function(){});
+    buildUsuariosHome();
+    showToast(u.nombre+' eliminado','success');
+  });
+}
 function deleteUser(userId){
   var u=D.usuarios.find(function(x){return x.id===userId;});
   if(!u)return;
-  if(!confirm('¿Eliminar a '+u.nombre+' permanentemente? Esta acción no se puede deshacer.'))return;
-  // Delete from usuarios table
+  showConfirm('Eliminar usuario','¿Eliminar a '+u.nombre+' permanentemente? Esta acción no se puede deshacer.',function(){_doDeleteUser(userId);});return;
+  // Delete from usuarios table (called from confirm)
   sb.from('usuarios').delete().eq('id',userId).then(function(r){
     if(r.error){showToast('Error al eliminar','error');return;}
     D.usuarios=D.usuarios.filter(function(x){return x.id!==userId;});
@@ -5506,7 +5543,7 @@ function addSpecHab(elId){
 }
 
 function deleteSpecHab(specId,elId){
-  if(!confirm('¿Eliminar esta especificación?'))return;
+  showConfirm('Eliminar especificación','¿Deseas eliminar esta especificación?',function(){_doDeleteSpec(specId);});return;
   sb.from('especificaciones').delete().eq('id',specId).then(function(r){
     if(r.error){showToast('Error','error');return;}
     D.specs=D.specs.filter(function(s){return s.id!==specId;});
@@ -5561,7 +5598,7 @@ function openPlanoById(pisoId){
 }
 
 function quitarPlano(pisoId){
-  if(!confirm('¿Quitar el plano de este piso?'))return;
+  showConfirm('Quitar plano','¿Estás seguro de que deseas quitar el plano de este piso?',function(){_doQuitarPlano(pisoId);});return;
   sb.from('pisos').update({plano_url:null}).eq('id',pisoId).then(function(r){
     if(r.error){showToast('Error','error');return;}
     var idx=D.pisos.findIndex(function(p){return p.id===pisoId;});
@@ -5569,6 +5606,17 @@ function quitarPlano(pisoId){
     buildPisos(curEdId,false);
     showToast('Plano eliminado','success');
   });
+}
+
+function showConfirm(title, msg, onOk, onCancel, okLabel, okColor){
+  document.getElementById('confirm-title').textContent = title || '¿Confirmar?';
+  document.getElementById('confirm-msg').textContent = msg || '';
+  var btn = document.getElementById('confirm-ok-btn');
+  btn.textContent = okLabel || 'Confirmar';
+  btn.style.background = okColor || '#A32D2D';
+  window._confirmOk = onOk || null;
+  window._confirmCancel = onCancel || null;
+  openModal('confirm');
 }
 
 var _fotoChooserCallback=null;
@@ -5747,6 +5795,24 @@ function fotoChooserDone(e){
         Elegir de galería
       </button>
       <button onclick="closeModal('foto-chooser')" style="padding:14px;background:none;border:1px solid var(--border);border-radius:10px;font-size:14px;font-weight:600;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- MODAL CONFIRMACION -->
+<div class="modal-overlay hidden" id="modal-confirm" onclick="closeOv(event,'modal-confirm')">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:320px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+      <div style="width:36px;height:36px;border-radius:8px;background:#FCEBEB;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A32D2D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <div id="confirm-title" style="font-size:15px;font-weight:600;color:var(--text);">¿Confirmar acción?</div>
+    </div>
+    <div id="confirm-msg" style="font-size:13px;color:var(--text2);margin-bottom:18px;line-height:1.5;"></div>
+    <div class="modal-row">
+      <button class="modal-btn secondary" onclick="closeModal('confirm');if(window._confirmCancel)window._confirmCancel();">Cancelar</button>
+      <button class="modal-btn primary" id="confirm-ok-btn" onclick="closeModal('confirm');if(window._confirmOk)window._confirmOk();" style="background:#A32D2D;">Confirmar</button>
     </div>
   </div>
 </div>

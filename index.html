@@ -1481,7 +1481,7 @@ function renderDetalleHab(elId){
   var hab=D.habitaciones.find(function(h){return h.id===curHabId;});
   var cls=el.instalado===true?'si':el.instalado===false?'no':'nd';
   var estadoLabel=el.instalado===true?'Instalado':el.instalado===false?'Pendiente':'Sin definir';
-  var elFotos=D.fotos.filter(function(f){return f.hab_elemento_id===elId;});
+  var elFotos=D.fotos.filter(function(f){return f.elemento_id===elId||f.hab_elemento_id===elId;});
   var fotoCount=elFotos.length;
 
   var fotosHtml='';
@@ -1516,6 +1516,7 @@ function renderDetalleHab(elId){
 
   var content=document.getElementById('detalle-hab-content');
   if(!content)return;
+  content.dataset.elid=elId;
 
   content.innerHTML=
     '<div style="padding-bottom:calc(var(--nb) + var(--sab))">'+
@@ -1672,15 +1673,16 @@ function deleteElHab(elId){
 }
 
 function uploadHabFotoFile(file){
-  if(!file||!curHabId)return;
-  showToast('Subiendo foto...','');
+  if(!file)return;
   var elId=parseInt(document.getElementById('detalle-hab-content').dataset.elid)||0;
-  var path='hab-'+curHabId+'-'+Date.now()+'.jpg';
+  if(!elId){showToast('Error: elemento no identificado','error');return;}
+  showToast('Subiendo foto...','info');
+  var path='habEl-'+elId+'-'+Date.now()+'.jpg';
   sb.storage.from('fotos').upload(path,file,{contentType:file.type,upsert:false}).then(function(res){
     if(res.error){showToast('Error al subir','error');return;}
     var url=sb.storage.from('fotos').getPublicUrl(path).data.publicUrl;
-    sb.from('fotos').insert([{hab_elemento_id:elId,url:url,path:path,subida_por:U.nombre}]).select().then(function(r){
-      if(r.error){showToast('Error','error');return;}
+    sb.from('fotos').insert([{elemento_id:elId,url:url,path:path,subida_por:U.nombre}]).select().then(function(r){
+      if(r.error){showToast('Error al guardar','error');return;}
       if(r.data&&r.data.length>0)D.fotos.push(r.data[0]);
       renderDetalleHab(elId);
       showToast('Foto guardada','success');
@@ -1691,7 +1693,7 @@ function uploadHabFotoFile(file){
 function deleteFotoHab(fotoId,path,elId){
   if(!isAdmin())return;
   if(!confirm('¿Eliminar esta foto?'))return;
-  sb.storage.from('fotos').remove([path]);
+  sb.storage.from('fotos').remove([path]).catch(function(){});
   sb.from('fotos').delete().eq('id',fotoId).then(function(){
     D.fotos=D.fotos.filter(function(f){return f.id!==fotoId;});
     renderDetalleHab(elId);
@@ -1714,10 +1716,12 @@ function buildHabitaciones(tipoHabId, push){
   setTopbar(false,(tipo?tipo.tipo:'Habitaciones')+(piso?' · '+piso.nombre:''));
   document.getElementById('back-btn').classList.remove('hidden');
   showScreen('habitaciones');
-  // Clear and reload for this tipo to avoid stale data
+  // Show spinner while loading
+  var habContent=document.getElementById('habitaciones-content');
+  if(habContent)habContent.innerHTML='<div class="spin-wrap"><div class="spin"></div></div>';
+  // Clear stale data immediately
   var habs=D.habitaciones.filter(function(h){return parseInt(h.tipo_habitacion_id)===curTipoHabId;});
   var habIds=habs.map(function(h){return h.id;});
-  // Remove stale data for these habs immediately
   D.elementos_por_hab=D.elementos_por_hab.filter(function(e){return habIds.indexOf(parseInt(e.habitacion_id))===-1;});
   if(habIds.length>0){
     sb.from('elementos_por_habitacion').select('*').in('habitacion_id',habIds).then(function(r){
@@ -2642,6 +2646,10 @@ function buildPisos(edId,push){
     return edTipos.some(function(t){return parseInt(t.id)===parseInt(h.tipo_habitacion_id);});
   });
   var edHabIds=edHabs.map(function(h){return h.id;});
+
+  // Show spinner while loading
+  document.getElementById('piso-stats').innerHTML='<div style="grid-column:1/-1"><div class="spin-wrap"><div class="spin"></div></div></div>';
+  document.getElementById('piso-list').innerHTML='';
 
   // Pre-compute stats for doRender scope
   var pisos=getPisos(edId);

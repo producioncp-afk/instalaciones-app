@@ -1457,6 +1457,23 @@ function toggleElHab(elId, currentVal){
     if(r.error){showToast('Error','error');return;}
     var idx=D[dArray].findIndex(function(e){return e.id===elId;});
     if(idx!==-1)Object.assign(D[dArray][idx],update);
+    // Save historial
+    var elRef=D[dArray][idx];
+    var nombre=elRef?elRef.nombre:'Elemento';
+    var hab=D.habitaciones.find(function(h){return h.id===curHabId;});
+    var habNum=hab?hab.numero:'';
+    sb.from('historial').insert({
+      elemento_id:null,
+      usuario_nombre:U.nombre,
+      accion:newVal?'instalado':'pendiente',
+      valor_nuevo:newVal,
+      nota:'Habitación '+habNum+' — '+nombre
+    }).select().then(function(hr){
+      if(hr.data&&hr.data.length>0){
+        if(!D.historial)D.historial=[];
+        D.historial.unshift(hr.data[0]);
+      }
+    });
     if(curHabId)renderElsHabForHabitacion(curHabId);
     else renderElsHab();
     showToast(newVal?'Instalado':'Pendiente','success');
@@ -1498,7 +1515,12 @@ function renderDetalleHab(elId){
     fotosHtml+='<div class="det-add-foto" onclick="openFotoChooser(uploadHabFotoFile)"><span style="font-size:22px">📷</span><span>Agregar</span></div>';
   }
 
-  var histHab=D.historial?D.historial.filter(function(h){return h.hab_elemento_id===elId;}):[];
+  var elNombre=el?el.nombre:'';
+  var hab2=D.habitaciones.find(function(h){return h.id===curHabId;});
+  var habNum2=hab2?hab2.numero:'';
+  var histHab=D.historial?D.historial.filter(function(h){
+    return h.nota&&h.nota.indexOf('Habitación '+habNum2+' — '+elNombre)!==-1;
+  }):[];
   var histHtml='';
   if(!histHab.length){histHtml='<div style="padding:16px;color:var(--text2);font-size:13px">Sin cambios registrados.</div>';}
   else{histHab.forEach(function(h,hi){
@@ -1581,11 +1603,16 @@ function renderDetalleHab(elId){
 
     (canEdit()?'<button class="det-save-btn" onclick="saveDetalleHab('+el.id+')">Guardar cambios</button>':'')+
     (isAdmin()?'<button onclick="deleteElHab('+el.id+')" style="display:flex;align-items:center;justify-content:center;gap:6px;background:none;color:#A32D2D;border:1px solid #F7C1C1;border-radius:8px;padding:12px;font-size:14px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;width:calc(100% - 28px);margin:0 14px 10px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Eliminar elemento</button>':'')+
+    '<button class="det-wa-btn" onclick="openWAModalHab('+el.id+')"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>Enviar por WhatsApp</button>'+
 
     '<div class="det-section">'+
       '<div class="det-section-title">Fotos de evidencia</div>'+
       '<div class="det-foto-grid">'+fotosHtml+'</div>'+
     '</div>'+
+
+    buildSubElHabHtml(el)+
+
+    buildSpecsHabHtml(elId,curHabId)+
 
     '<div class="det-section" style="margin-bottom:16px">'+
       '<div class="det-section-title">Historial</div>'+
@@ -1609,6 +1636,19 @@ function toggleElHabDetalle(elId, currentVal){
     if(idx!==-1)Object.assign(D[dar][idx],update);
     var tog=document.getElementById('det-hab-toggle');
     if(tog)tog.className='toggle'+(newVal?' on':'');
+    // Save historial
+    var elRef2=D[dar][D[dar].findIndex(function(e){return e.id===elId;})];
+    var hab3=D.habitaciones.find(function(h){return h.id===curHabId;});
+    sb.from('historial').insert({
+      elemento_id:null,
+      usuario_nombre:U.nombre,
+      accion:newVal?'instalado':'pendiente',
+      valor_nuevo:newVal,
+      nota:'Habitación '+(hab3?hab3.numero:'')+' — '+(elRef2?elRef2.nombre:'')
+    }).select().then(function(hr){
+      if(hr.data&&hr.data.length>0){if(!D.historial)D.historial=[];D.historial.unshift(hr.data[0]);}
+    });
+    renderDetalleHab(elId);
     renderElsHabForHabitacion(curHabId);
     showToast(newVal?'Instalado':'Pendiente','success');
   });
@@ -1657,6 +1697,7 @@ function saveDetalleHab(elId){
     Object.assign(el,update);
     var idx2=D[darr2].findIndex(function(e){return e.id===elId;});
     if(idx2!==-1)Object.assign(D[darr2][idx2],update);
+    renderDetalleHab(elId);
     renderElsHabForHabitacion(curHabId);
     showToast('Guardado','success');
   });
@@ -5356,6 +5397,143 @@ if('serviceWorker' in navigator){
     console.log('SW registrado');
   }).catch(function(e){console.log('SW error:',e);});
 }
+function buildSubElHabHtml(el){
+  // Sub-elementos use the same D.sub_elementos table but with a hab_ prefix element_id
+  // For now use el.id as elemento_id mapping
+  var subs=D.sub_elementos.filter(function(s){return s.elemento_id===el.id;});
+  var html='<div class="det-section" id="sub-hab-el-section-'+el.id+'">';
+  html+='<div class="det-section-title">Ítems adicionales</div>';
+  if(!subs.length){
+    html+='<div style="padding:12px 14px;font-size:13px;color:var(--text2)">Sin ítems adicionales.</div>';
+  }else{
+    subs.forEach(function(s){
+      var pct=s.cantidad>0?Math.round((s.instalado/s.cantidad)*100):0;
+      html+='<div class="sub-el-row">';
+      html+='<div class="sub-el-name">'+s.nombre+'</div>';
+      html+='<div style="display:flex;align-items:center;gap:8px;">';
+      html+='<div style="font-size:11px;color:var(--text2)">'+s.instalado+'/'+s.cantidad+'</div>';
+      if(canEdit()){
+        html+='<button class="qty-btn" onclick="changeSubElCant('+s.id+','+el.id+',-1)">−</button>';
+        html+='<div class="qty-val" style="font-size:14px;min-width:24px;text-align:center;">'+s.instalado+'</div>';
+        html+='<button class="qty-btn" onclick="changeSubElCant('+s.id+','+el.id+',1)">+</button>';
+      }
+      html+='<div style="font-size:11px;font-weight:700;color:'+(pct===100?'var(--green)':'var(--text2)')+'">'+pct+'%</div>';
+      if(isAdmin())html+='<button onclick="deleteSubEl('+s.id+','+el.id+')" style="width:24px;height:24px;border-radius:50%;background:var(--red-light);border:none;color:var(--red);font-size:11px;cursor:pointer;">✕</button>';
+      html+='</div></div>';
+    });
+  }
+  if(isAdmin()){
+    html+='<div class="sub-el-add">';
+    html+='<input type="text" id="sub-el-hab-nombre-'+el.id+'" placeholder="Nombre (ej: Espejo)">';
+    html+='<input type="number" id="sub-el-hab-cant-'+el.id+'" placeholder="Cant." style="width:70px;flex:none;" min="1">';
+    html+='<button class="sub-el-add-btn" onclick="addSubElHab('+el.id+')">+ Agregar</button>';
+    html+='</div>';
+  }
+  html+='</div>';
+  return html;
+}
+
+function addSubElHab(elId){
+  var nomEl=document.getElementById('sub-el-hab-nombre-'+elId);
+  var cantEl=document.getElementById('sub-el-hab-cant-'+elId);
+  if(!nomEl||!cantEl)return;
+  var nom=nomEl.value.trim();
+  var cant=parseInt(cantEl.value)||0;
+  if(!nom||cant<1){showToast('Escribe nombre y cantidad','error');return;}
+  sb.from('sub_elementos').insert([{
+    elemento_id:elId,nombre:nom,cantidad:cant,instalado:0,creado_por:U.nombre
+  }]).select().then(function(r){
+    if(r.error){showToast('Error','error');return;}
+    if(r.data&&r.data.length>0)D.sub_elementos.push(r.data[0]);
+    nomEl.value='';cantEl.value='';
+    renderDetalleHab(elId);
+    showToast(nom+' agregado','success');
+  });
+}
+
+function buildSpecsHabHtml(elId, habId){
+  // Use same specs table with elemento_id = elId
+  var elSpecs=D.specs.filter(function(s){return s.elemento_id===elId;});
+  var specsHtml='';
+  if(!elSpecs.length){
+    specsHtml='<div class="spec-empty">Sin especificaciones todavía.</div>';
+  }else{
+    elSpecs.forEach(function(s){
+      specsHtml+='<div class="spec-row">';
+      specsHtml+='<div class="spec-campo">'+s.campo+'</div>';
+      specsHtml+='<div class="spec-valor">'+s.valor+'</div>';
+      if(isAdmin()){
+        specsHtml+='<button class="spec-del" onclick="deleteSpecHab('+s.id+','+elId+')">✕</button>';
+      }
+      specsHtml+='</div>';
+    });
+  }
+  var specAddHtml='';
+  if(isAdmin()){
+    specAddHtml=
+      '<div class="spec-hint">Ej: Color, Material, Acabado, Proveedor...</div>'+
+      '<div class="spec-add-row">'+
+        '<input class="spec-add-campo" id="spec-hab-campo-'+elId+'" placeholder="Campo">'+
+        '<input class="spec-add-campo" id="spec-hab-valor-'+elId+'" placeholder="Valor">'+
+        '<button class="spec-add-btn" onclick="addSpecHab('+elId+')">＋</button>'+
+      '</div>';
+  }
+  return '<div class="det-section">'+
+    '<div class="det-section-title">Especificaciones técnicas</div>'+
+    specsHtml+specAddHtml+
+    '</div>';
+}
+
+function addSpecHab(elId){
+  var campo=document.getElementById('spec-hab-campo-'+elId);
+  var valor=document.getElementById('spec-hab-valor-'+elId);
+  if(!campo||!valor)return;
+  var campoVal=campo.value.trim();
+  var valorVal=valor.value.trim();
+  if(!campoVal||!valorVal){showToast('Escribe el campo y el valor','error');return;}
+  var elSpecs=D.specs.filter(function(s){return s.elemento_id===elId;});
+  sb.from('especificaciones').insert([{
+    elemento_id:elId,proyecto_id:null,campo:campoVal,valor:valorVal,orden:elSpecs.length,creado_por:U.nombre
+  }]).select().then(function(r){
+    if(r.error){showToast('Error','error');return;}
+    if(r.data&&r.data.length>0)D.specs.push(r.data[0]);
+    campo.value='';valor.value='';
+    renderDetalleHab(elId);
+    showToast('Especificación agregada','success');
+  });
+}
+
+function deleteSpecHab(specId,elId){
+  if(!confirm('¿Eliminar esta especificación?'))return;
+  sb.from('especificaciones').delete().eq('id',specId).then(function(r){
+    if(r.error){showToast('Error','error');return;}
+    D.specs=D.specs.filter(function(s){return s.id!==specId;});
+    renderDetalleHab(elId);
+    showToast('Especificación eliminada','success');
+  });
+}
+
+function openWAModalHab(elId){
+  var el=D.elementos_por_hab.find(function(x){return x.id===elId;})||D.elementos_hab.find(function(x){return x.id===elId;});
+  if(!el)return;
+  var hab=D.habitaciones.find(function(h){return h.id===curHabId;});
+  var tipo=hab?D.tipos_hab.find(function(t){return t.id===hab.tipo_habitacion_id;}):null;
+  var piso=tipo?D.pisos.find(function(p){return p.id===tipo.piso_id;}):null;
+  var ed=piso?D.edificios.find(function(e){return e.id===piso.edificio_id;}):null;
+  var fecha=new Date().toLocaleDateString('es-DO',{day:'2-digit',month:'long',year:'numeric'});
+  var msg='*IBERO MUEBLES — Aviso*\n';
+  msg+='Fecha: '+fecha+'\n\n';
+  msg+='*Elemento:* '+el.nombre+'\n';
+  msg+='*Habitación:* '+(hab?hab.numero:'')+'\n';
+  if(tipo)msg+='*Tipo:* '+tipo.tipo+'\n';
+  if(piso)msg+='*Piso:* '+piso.nombre+'\n';
+  if(ed)msg+='*Edificio:* '+ed.nombre+'\n';
+  msg+='*Estado:* '+(el.instalado?'Instalado':'Pendiente')+'\n';
+  if(el.nota)msg+='*Nota:* '+el.nota+'\n';
+  msg+='\n— '+U.nombre;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+
 var _fotoChooserCallback=null;
 
 function openFotoChooser(callback){

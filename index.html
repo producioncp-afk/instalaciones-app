@@ -399,7 +399,7 @@ bottom:calc(var(--nb) + var(--sab) + 10px);left:50%;transform:translateX(-50%) t
 .toast.error{background:var(--red);border-color:var(--red);}
 
 /* PROFESSIONAL NOTIFICATIONS */
-#notif-container{position:fixed;top:calc(16px + var(--sat));right:16px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;max-width:320px;}
+#notif-container{position:fixed;top:calc(70px + var(--sat));right:16px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;max-width:320px;}
 .pnotif{background:var(--white);border-radius:10px;border:0.5px solid var(--border);padding:12px 14px;display:flex;align-items:flex-start;gap:10px;box-shadow:0 4px 16px rgba(0,0,0,0.12);pointer-events:all;animation:slideInRight 0.3s ease;transition:opacity 0.3s,transform 0.3s;}
 .pnotif.hiding{opacity:0;transform:translateX(20px);}
 @keyframes slideInRight{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
@@ -1166,8 +1166,8 @@ function loadData(){
     D.historial=r[12].data||[];
     D.notifs=r[13].data||[];
     D.usuarios=r[14].data||[];
-    D.contactos=r[14]?r[15].data||[]:[];
-    D.tareas=r[15].data||[];
+    D.contactos=[];
+    D.tareas=r[14].data||[];
     D.sub_elementos=r[16].data||[];
     setOnline(true);
     updateNotifBadge();
@@ -1751,10 +1751,9 @@ function renderHabitaciones(){
     html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
     habs.forEach(function(hab){
       // Get elements for this hab type to show status
-      // Use cached elementos_por_hab if available, else fall back to tipo elements
+      // Load from cache - will update when user opens habitacion
       var cachedEls=D.elementos_por_hab.filter(function(e){return parseInt(e.habitacion_id)===parseInt(hab.id);});
-      var els=cachedEls.length>0?cachedEls:D.elementos_hab.filter(function(e){return parseInt(e.tipo_habitacion_id)===parseInt(curTipoHabId);});
-      var s2=calcStats(els);
+      var s2=cachedEls.length>0?calcStats(cachedEls):{pct:0,inst:0,pend:0};
       var bColor=s2.pct>=70?'#0d7a3d':s2.pct>=30?'#b45309':'#ef4444';
       var bBg=s2.pct>=70?'#EAF3DE':s2.pct>=30?'#FAEEDA':'#FCEBEB';
       html+='<div style="background:white;border-radius:10px;border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:transform 0.1s;active:scale(0.99);" onclick="openHabitacion('+parseInt(hab.id)+')">';
@@ -1896,6 +1895,9 @@ function refreshCurrent(){
   else if(id==='screen-equipo')buildEquipoScreen();
   else if(id==='screen-reportes')buildReportesScreen();
   else if(id==='screen-usuarios-home')buildUsuariosHome();
+  else if(id==='screen-habitaciones')renderHabitaciones();
+  else if(id==='screen-elementos-hab')renderElsHabForHabitacion(curHabId);
+  else if(id==='screen-config')buildConfig();
 }
 
 function showScreen(id){
@@ -1946,10 +1948,16 @@ function goBack(){
   else if(prev==='elementos'){buildEls(curPisoId,false);navStack.pop();}
   else if(prev==='equipo'){buildEdificios(curProjId,false);setTimeout(function(){switchProjTab('equipo');},50);navStack.pop();}
   else if(prev==='equipo_screen'){setTopbar(false,'Equipo de obra');showScreen('equipo');buildEquipoScreen();navStack.pop();}
+  else if(prev==='config'){setTopbar(true);showScreen('home');buildHome();document.getElementById('back-btn').classList.add('hidden');}
   else if(prev==='pisos'&&document.getElementById('screen-habitaciones').classList.contains('active')){buildPisos(curEdId,false);}
   else if(prev==='habitaciones'){buildHabitaciones(curTipoHabId,false);}
   else if(prev==='elementos-hab'){renderElsHabForHabitacion(curHabId);showScreen('elementos-hab');}
-  else if(prev==='detalle-hab'){renderElsHabForHabitacion(curHabId);showScreen('elementos-hab');}
+  else if(prev==='detalle-hab'){
+    setTopbar(false,'Hab. '+(D.habitaciones.find(function(h){return h.id===curHabId;})||{numero:''}).numero);
+    document.getElementById('back-btn').classList.remove('hidden');
+    showScreen('elementos-hab');
+    renderElsHabForHabitacion(curHabId);
+  }
 }
 
 var _epPaisData = {
@@ -2540,6 +2548,9 @@ function renderEdMarcador(projId){
     html+='<div style="text-align:right;"><div style="font-size:26px;font-weight:700;color:#9aa3b2;letter-spacing:-0.02em;">'+s.total+'</div><div style="font-size:11px;color:#9aa3b2;">Total</div></div>';
     html+='</div></div></div>';
   });
+  if(isAdmin()){
+    html+='<div class="add-btn" onclick="openAddEdificio()" style="margin-top:4px;">+ Agregar edificio</div>';
+  }
   cont.innerHTML=html;
 }
 
@@ -2603,6 +2614,7 @@ function buildEdificios(projId,push){
 function buildPisos(edId,push){
   if(push===undefined)push=true;
   curEdId=edId;
+  curHabId=null;
   if(push)navStack.push('edificios');
   var ed=D.edificios.find(function(e){return e.id==edId;});
   var pisos=getPisos(edId),all=[];
@@ -2654,7 +2666,14 @@ function buildPisos(edId,push){
       html+='<div style="margin-top:10px;border-top:1px solid #f0f0f0;padding-top:8px;">';
       html+='<div style="font-size:10px;font-weight:600;color:#9aa3b2;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Tipos de habitación</div>';
       tipos.forEach(function(t){
-        var tEls=D.elementos_hab.filter(function(e){return e.tipo_habitacion_id===t.id;});
+        // Use elementos_por_hab for real progress (loaded on demand)
+        var tHabs=D.habitaciones.filter(function(h){return parseInt(h.tipo_habitacion_id)===parseInt(t.id);});
+        var tElsPorHab=[];
+        tHabs.forEach(function(h){
+          var hEls=D.elementos_por_hab.filter(function(e){return parseInt(e.habitacion_id)===parseInt(h.id);});
+          tElsPorHab=tElsPorHab.concat(hEls);
+        });
+        var tEls=tElsPorHab.length>0?tElsPorHab:D.elementos_hab.filter(function(e){return e.tipo_habitacion_id===t.id;});
         var tStats=calcStats(tEls);
         var tColor=tStats.pct>=70?'#3B6D11':tStats.pct>=30?'#854F0B':'#A32D2D';
         var tBg=tStats.pct>=70?'#EAF3DE':tStats.pct>=30?'#FAEEDA':'#FCEBEB';

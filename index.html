@@ -1714,13 +1714,14 @@ function buildHabitaciones(tipoHabId, push){
   setTopbar(false,(tipo?tipo.tipo:'Habitaciones')+(piso?' · '+piso.nombre:''));
   document.getElementById('back-btn').classList.remove('hidden');
   showScreen('habitaciones');
-  // Pre-load all elementos_por_hab for all habitaciones of this tipo
+  // Clear and reload for this tipo to avoid stale data
   var habs=D.habitaciones.filter(function(h){return parseInt(h.tipo_habitacion_id)===curTipoHabId;});
   var habIds=habs.map(function(h){return h.id;});
+  // Remove stale data for these habs immediately
+  D.elementos_por_hab=D.elementos_por_hab.filter(function(e){return habIds.indexOf(parseInt(e.habitacion_id))===-1;});
   if(habIds.length>0){
     sb.from('elementos_por_habitacion').select('*').in('habitacion_id',habIds).then(function(r){
       if(r.data&&r.data.length>0){
-        D.elementos_por_hab=D.elementos_por_hab.filter(function(e){return habIds.indexOf(parseInt(e.habitacion_id))===-1;});
         D.elementos_por_hab=D.elementos_por_hab.concat(r.data);
       }
       renderHabitaciones();
@@ -2422,7 +2423,6 @@ function buildHome(){
 }
 
 function navToEdificio(edId){
-  navStack.push('edificios');
   buildPisos(edId);
 }
 
@@ -2628,28 +2628,22 @@ function buildPisos(edId,push){
   if(push===undefined)push=true;
   curEdId=edId;
   curHabId=null;
-  // Pre-load all elementos_por_hab for all habitaciones in this edificio
+  if(push)navStack.push('edificios');
+  var ed=D.edificios.find(function(e){return e.id==edId;});
+  if(!ed)return;
+  setTopbar(false,ed.nombre);
+  document.getElementById('back-btn').classList.remove('hidden');
+  showScreen('pisos');
+
   var edPisos=D.pisos.filter(function(p){return p.edificio_id==edId;});
   var edPisoIds=edPisos.map(function(p){return p.id;});
   var edTipos=D.tipos_hab.filter(function(t){return edPisoIds.indexOf(parseInt(t.piso_id))!==-1;});
-  var edTipoIds=edTipos.map(function(t){return t.id;});
-  var edHabs=D.habitaciones.filter(function(h){return edTipoIds.indexOf(parseInt(h.tipo_habitacion_id))!==-1;});
+  var edHabs=D.habitaciones.filter(function(h){
+    return edTipos.some(function(t){return parseInt(t.id)===parseInt(h.tipo_habitacion_id);});
+  });
   var edHabIds=edHabs.map(function(h){return h.id;});
-  if(edHabIds.length>0){
-    sb.from('elementos_por_habitacion').select('id,habitacion_id,instalado,cantidad,cantidad_instalada,pintado,retocado').in('habitacion_id',edHabIds).then(function(r){
-      if(r.data&&r.data.length>0){
-        D.elementos_por_hab=D.elementos_por_hab.filter(function(e){return edHabIds.indexOf(parseInt(e.habitacion_id))===-1;});
-        D.elementos_por_hab=D.elementos_por_hab.concat(r.data);
-      }
-    });
-  }
-  if(push)navStack.push('edificios');
-  var ed=D.edificios.find(function(e){return e.id==edId;});
-  var pisos=getPisos(edId),all=[];
-  pisos.forEach(function(p){all=all.concat(getEls(p.id));});
-  var s=calcStats(all);
-  setTopbar(false,ed.nombre);
-  document.getElementById('back-btn').classList.remove('hidden');
+
+  function doRender(){
   document.getElementById('piso-stats').innerHTML=
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">'+
     '<div style="background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;">'+
@@ -2746,8 +2740,30 @@ function buildPisos(edId,push){
   }
   document.getElementById('piso-list').innerHTML=html;
   showScreen('pisos');
-}
+  }
+  if(edHabIds2.length>0){
+    sb.from('elementos_por_habitacion').select('id,habitacion_id,instalado,cantidad,cantidad_instalada,pintado,retocado').in('habitacion_id',edHabIds2).then(function(r){
+      if(r.data){
+        D.elementos_por_hab=D.elementos_por_hab.filter(function(e){return edHabIds2.indexOf(parseInt(e.habitacion_id))===-1;});
+        D.elementos_por_hab=D.elementos_por_hab.concat(r.data);
+      }
+      _renderPisos();
+    });
 
+  }
+
+  if(edHabIds.length>0){
+    sb.from('elementos_por_habitacion').select('id,habitacion_id,instalado,cantidad,cantidad_instalada,pintado,retocado').in('habitacion_id',edHabIds).then(function(r){
+      if(r.data){
+        D.elementos_por_hab=D.elementos_por_hab.filter(function(e){return edHabIds.indexOf(parseInt(e.habitacion_id))===-1;});
+        D.elementos_por_hab=D.elementos_por_hab.concat(r.data);
+      }
+      doRender();
+    });
+  }else{
+    doRender();
+  }
+}
 
 function buildEls(pisoId,push){
   if(push===undefined)push=true;

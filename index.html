@@ -1637,7 +1637,8 @@ function toggleElHabDetalle(elId, currentVal){
     var tog=document.getElementById('det-hab-toggle');
     if(tog)tog.className='toggle'+(newVal?' on':'');
     // Save historial
-    var elRef2=D[dar][D[dar].findIndex(function(e){return e.id===elId;})];
+    var elIdx2=D[dar].findIndex(function(e){return e.id===elId;});
+  var elRef2=elIdx2!==-1?D[dar][elIdx2]:null;
     var hab3=D.habitaciones.find(function(h){return h.id===curHabId;});
     sb.from('historial').insert({
       elemento_id:null,
@@ -1655,7 +1656,7 @@ function toggleElHabDetalle(elId, currentVal){
 }
 
 function changeHabElCant(elId, campo, delta){
-  var el=D.elementos_hab.find(function(x){return x.id===elId;});
+  var el=D.elementos_por_hab.find(function(x){return x.id===elId;})||D.elementos_hab.find(function(x){return x.id===elId;});
   if(!el)return;
   var prefixMap={'cantidad_instalada':'qhi-','cantidad_pintado':'qhp-','cantidad_retocado':'qhr-'};
   var prefix=prefixMap[campo]||'qh-';
@@ -1678,12 +1679,13 @@ function changeHabElCant(elId, campo, delta){
     if(r.error){showToast('Error','error');return;}
     var idx3=D[darr3].findIndex(function(e){return e.id===elId;});
     if(idx3!==-1)Object.assign(D[darr3][idx3],update);
+    renderDetalleHab(elId);
     showToast(newVal+' de '+el.cantidad,'success');
   });
 }
 
 function saveDetalleHab(elId){
-  var el=D.elementos_hab.find(function(x){return x.id===elId;});
+  var el=D.elementos_por_hab.find(function(x){return x.id===elId;})||D.elementos_hab.find(function(x){return x.id===elId;});
   if(!el)return;
   var nota=document.getElementById('det-hab-nota');
   var notaVal=nota?nota.value:el.nota;
@@ -1719,7 +1721,7 @@ function uploadHabFotoFile(file){
   var elId=curHabElId||0;
   if(!elId){showToast('Error: elemento no identificado','error');return;}
   showToast('Subiendo foto...','info');
-  var path='habEl-'+elId+'-'+Date.now()+'.jpg';
+  var path='habEl-'+elId+'-'+Date.now()+'-'+Math.random().toString(36).slice(2)+'.jpg';
   sb.storage.from('fotos').upload(path,file,{contentType:file.type,upsert:false}).then(function(res){
     if(res.error){showToast('Error al subir','error');return;}
     var url=sb.storage.from('fotos').getPublicUrl(path).data.publicUrl;
